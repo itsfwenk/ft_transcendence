@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- <link rel="icon" type="image/svg+xml" href="public/vite.svg" /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="src/styles.css" rel="stylesheet">
+    <title>Vite Pong Game</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  </head>
+  <body class="flex flex-col items-center justify-center h-screen bg-white-900">
+      <h1 class="text-3xl font-bold text-black bg-white-500 p-2 absolute top-0 left-0">Pong Game</h1>
+      <canvas
+          id="gameCanvas" width="800" height="400" 
+          class="mx-auto block border-8 border-gray-500 bg-white-700">
+      </canvas>
+      <button class="px-4 py-2 bg-green-500 text-white rounded mt-3 hover:bg-green-600" onclick="pauseGame()">Pause Game</button>
+      <script src="game.ts" type="module"></script>
+  </body>
+  </html>
+  

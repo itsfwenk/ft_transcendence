@@ -24,6 +24,34 @@ db.prepare(`
   )
 `).run();
 
+///
+// // API to add a user
+// fastify.post('/users', async (request, reply) => {
+//   const { name } = request.body;
+//   const stmt = db.prepare('INSERT INTO users (name) VALUES (?)');
+//   const info = stmt.run(name);
+//   reply.send({ id: info.lastInsertRowid, name });
+// });
+
+// // API to get all users
+// fastify.get('/users', async (request, reply) => {
+//   const users = db.prepare('SELECT * FROM users').all();
+//   reply.send(users);
+// });
+
+// // Start the server
+// const start = async () => {
+//   try {
+//     await fastify.listen({ port: 3000 });
+//     console.log(`🚀 Server running at http://localhost:3000`);
+//   } catch (err) {
+//     fastify.log.error(err);
+//     process.exit(1);
+//   }
+// };
+// start();
+///
+
 // // Serve static files from Vite's built output CommonJS
 // fastify.register(require('@fastify/static'), {
 //   root: path.join(__dirname, '../vite_pong/dist'),

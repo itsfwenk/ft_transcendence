@@ -1,0 +1,6 @@
+# Caddyfile
+localhost {
+  root * ./vite_pong/dist
+  file_server
+  reverse_proxy /api/* localhost:3000
+}

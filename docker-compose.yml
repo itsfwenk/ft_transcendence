@@ -1,0 +1,22 @@
+services:
+  fastify-image:
+    container_name: fastify-image
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./pong-fastify:/app
+    working_dir: /app
+    command: ["npm", "run", "dev"]
+
+  caddy-image:
+    container_name: caddy-image
+    image: caddy:latest
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./vite-pong/dist:/usr/share/caddy

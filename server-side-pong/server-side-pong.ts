@@ -14,7 +14,7 @@ fastify.get('/ws', { websocket: true }, (connection, req) => {
 
   connection.socket.send(JSON.stringify({ type: 'welcome', id: playerId }));
 
-  connection.socket.on('message', (message) => {
+  connection.socket.on('message', (message: string) => {
     const data = JSON.parse(message.toString());
 
     if (data.type === 'move') {

@@ -2,22 +2,30 @@
   "name": "fastify-api",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server",
-    "dev": "nodemon server"
+  "main": "backend/services/game/gameIndex.js",
+"scripts": {
+  "start": "node --loader ts-node/esm backend/services/game/gameIndex.ts",
+  "dev": "nodemon --exec node --loader ts-node/esm backend/services/game/gameIndex.ts",
+  "build": "tsc",
+  "dev-ts": "node --loader ts-node/esm backend/services/game/gameIndex.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/formbody": "^8.0.2",
     "@fastify/jwt": "^9.0.4",
     "@fastify/swagger": "^9.4.2",
     "@fastify/swagger-ui": "^5.2.2",
+    "bcrypt": "^5.1.1",
     "fastify": "^5.2.1",
+    "fastify-bcrypt": "^1.0.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "@types/node": "^22.13.9",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   }
 }

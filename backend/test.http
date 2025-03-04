@@ -1,0 +1,49 @@
+
+############################ USER ############################
+### Inscription
+POST http://localhost:4001/user/register
+Content-Type: application/json
+
+{
+	"username": "testuser",
+	"email": "test@example.com",
+	"password": "mypassword"
+}
+
+### Connexion
+POST http://localhost:4001/user/login
+Content-Type: application/json
+
+{
+	"email": "test@example.com",
+	"password": "mypassword"
+}
+
+### Accéder au profil (JWT requis)
+GET http://localhost:4001/user/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhcnRodXJAZ21haWwuY29tIiwiaWF0IjoxNzQxMDg1NzY2fQ._d8WOsrFOxpmAne0qCErT9gKu14i5vtt76srCC2--Ak
+
+############################ GAME ############################
+
+### Start game
+POST http://localhost:4002/game/start
+Content-Type: application/json
+
+{
+	"player1": "Alice",
+	"player2": "Bob"
+}
+
+
+### Get game
+GET http://localhost:4002/game/2
+
+
+### Update Score
+PUT http://localhost:4002/game/1/score
+Content-Type: application/json
+
+{"score1": 10, "score2": 8}
+
+### End Game
+POST http://localhost:4002/game/1/end

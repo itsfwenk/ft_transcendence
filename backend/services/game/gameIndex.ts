@@ -6,25 +6,27 @@ import formbody from '@fastify/formbody';
 
 const app: FastifyInstance = Fastify();
 
-app.register(gameRoutes, {prefix: '/game' });
-
 app.register(swagger, {
 	swagger: {
 		info: {
 		  title: 'User API',
-		  description: 'API documentation for User Service',
+		  description: 'API documentation for Game Service',
 		  version: '1.0.0'
 		},
 	}
-})
+});
 
 app.register(formbody);
 
 
 app.register(swaggerUI, {
-  routePrefix: '/docs'
+  routePrefix: '/docs',
+  staticCSP: true
 });
 
+//enregistrer les routes
+app.register(gameRoutes, { prefix: '/game' });
+
 app.listen({port: 4002 }, () => {
-	console.log('game service runnin on http:://localhost:4002');
+	console.log('game service runnin on http://localhost:4002');
 });

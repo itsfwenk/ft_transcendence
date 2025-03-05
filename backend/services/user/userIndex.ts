@@ -5,7 +5,6 @@ import swaggerUI from '@fastify/swagger-ui';
 import userRoutes from './userRoutes.js';
 import formbody from '@fastify/formbody';
 
-
 const app = Fastify();
 
 app.register(formbody);
@@ -25,11 +24,12 @@ app.register(swagger, {
 });
 
 app.register(swaggerUI, {
-  routePrefix: '/docs'
+  routePrefix: '/docs',
+  staticCSP: true
 });
 
-//Register brcypt
-app.register(require('fastify-bcrypt'), { saltWorkFactor: 10 });
+//Register bcrypt
+
 
 // Middleware pour vérifier l'authentification
 app.decorate("authenticate", async function (req: FastifyRequest, reply: FastifyReply) {
@@ -44,5 +44,5 @@ app.decorate("authenticate", async function (req: FastifyRequest, reply: Fastify
 app.register(userRoutes, { prefix: '/user' });
 
 app.listen({ port: 4001 }, () => {
-  console.log('🔐 User Service running on http://localhost:4001');
+  console.log('User Service running on http://localhost:4001');
 });

@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import bcrypt from 'fastify-bcrypt';
+import bcrypt from 'bcrypt';
 import jwt from '@fastify/jwt';
 import { saveUser, getUserByEmail, getUserById, User } from './userDb.js';
 
@@ -22,7 +22,7 @@ export async function registerUser(req:RegisterRequest, reply:FastifyReply) {
   }
 
   // Hasher le mot de passe
-  const hashedPassword = await req.server.bcrypt.hash(password);
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   // Ajouter l'utilisateur
   const newUser = saveUser(userName, email, hashedPassword);
@@ -42,7 +42,7 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
   const { email, password } = req.body;
   const user = getUserByEmail(email);
 
-  if (!user || !(await req.server.bcrypt.compare(password, user.password))) {
+  if (!user || !(await bcrypt.compare(password, user.password))) {
     return reply.status(401).send({ error: 'Invalid credentials' });
   }
 

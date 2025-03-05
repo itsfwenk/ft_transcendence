@@ -1,12 +1,12 @@
-
-import { registerUser, loginUser, getUserProfile } from './userController.js';
+import { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
+import { registerUser, loginUser, getUserProfile, getUserByIdController } from './userController.js';
 
 
 const User = {
 	type: 'object',
 	properties: {
 	  id: { type: 'string' },
-	  username: { type: 'string' },
+	  userName: { type: 'string' },
 	  email: { type: 'string' },
 	},
 }
@@ -16,9 +16,9 @@ export default async function userRoutes(fastify: any) {
     schema: {
       body: {
         type: 'object',
-        required: ['username', 'email', 'password'],
+        required: ['userName', 'email', 'password'],
         properties: {
-          username: { type: 'string' },
+          userName: { type: 'string' },
           email: { type: 'string', format: 'email' },
           password: { type: 'string', minLength: 6 }
         }
@@ -65,13 +65,13 @@ export default async function userRoutes(fastify: any) {
           type: 'object',
           properties: {
             id: { type: 'number' },
-            username: { type: 'string' },
+            userName: { type: 'string' },
             email: { type: 'string' }
           }
         }
       }
     }
   }, getUserProfile);
+
+  fastify.get("/:userId", getUserByIdController);
 }
-
-

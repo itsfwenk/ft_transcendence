@@ -14,7 +14,7 @@ interface RegisterRequest extends FastifyRequest {
 
 // Inscription
 export async function registerUser(req:RegisterRequest, reply:FastifyReply) {
-  const { userName, email, password } = req.body;
+	const { userName, email, password } = req.body;
 
   // Vérifier si l'utilisateur existe déjà
   if (getUserByEmail(email)) {
@@ -62,4 +62,14 @@ export async function getUserProfile(req:ProfileRequest, reply:FastifyReply) {
 	if (!user) return reply.status(404).send({ error: 'User not found' });
 
 	reply.send({ UserId: user.userId, username: user.userName, email: user.email, password: user.password });
+}
+
+export async function getUserByIdController(req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) {
+    const { userId } = req.params;
+    const user = getUserById(parseInt(userId));
+
+    if (!user) {
+        return reply.status(404).send({ error: "User not found" });
+    }
+    reply.send(user);
 }

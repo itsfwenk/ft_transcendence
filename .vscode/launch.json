@@ -1,17 +1,36 @@
 {
-	// Use IntelliSense to learn about possible attributes.
-	// Hover to view descriptions of existing attributes.
-	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 	"version": "0.2.0",
 	"configurations": [
-		{
-			"type": "node",
-			"request": "launch",
-			"name": "Launch Program",
-			"skipFiles": [
-				"<node_internals>/**"
-			],
-			"program": "${workspaceFolder}/backend/services/game/gameIndex.js"
-		}
+	  {
+		"type": "node",
+		"request": "launch",
+		"name": "Debug API Gateway",
+		"skipFiles": ["<node_internals>/**"],
+		"program": "${workspaceFolder}/backend/gateway/gatewayIndex.ts",
+		"runtimeArgs": ["--loader", "ts-node/esm"],
+    	"sourceMaps": true,
+    	"autoAttachChildProcesses": true
+	  },
+	  {
+		"type": "node",
+		"request": "launch",
+		"name": "Debug User Service",
+		"skipFiles": ["<node_internals>/**"],
+		"program": "${workspaceFolder}/backend/services/user/userIndex.ts",
+		"runtimeArgs": ["--loader", "ts-node/esm"],
+		"sourceMaps": true,
+    	"autoAttachChildProcesses": true
+	  },
+	  {
+		"type": "node",
+		"request": "launch",
+		"name": "Debug Game Service",
+		"skipFiles": ["<node_internals>/**"],
+		"program": "${workspaceFolder}/backend/services/game/gameIndex.ts",
+		"runtimeArgs": ["--loader", "ts-node/esm"],
+		"sourceMaps": true,
+    	"autoAttachChildProcesses": true
+	  }
 	]
-}
+  }
+  

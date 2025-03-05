@@ -5,7 +5,7 @@ POST http://localhost:4001/user/register
 Content-Type: application/json
 
 {
-	"username": "testuser",
+	"userName": "testuser",
 	"email": "test@example.com",
 	"password": "mypassword"
 }
@@ -23,6 +23,11 @@ Content-Type: application/json
 GET http://localhost:4001/user/profile
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhcnRodXJAZ21haWwuY29tIiwiaWF0IjoxNzQxMDg1NzY2fQ._d8WOsrFOxpmAne0qCErT9gKu14i5vtt76srCC2--Ak
 
+### 🔍 Voir tous les utilisateurs
+GET http://localhost:4001/user/users
+
+
+
 ############################ GAME ############################
 
 ### Start game
@@ -30,8 +35,8 @@ POST http://localhost:4002/game/start
 Content-Type: application/json
 
 {
-	"player1": "Alice",
-	"player2": "Bob"
+	"player1_id": 1,
+	"player2_id": 2
 }
 
 

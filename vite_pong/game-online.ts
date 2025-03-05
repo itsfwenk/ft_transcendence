@@ -1,4 +1,4 @@
-function initOnlineGame(){
+export function initOnlineGame(){
     const socket = new WebSocket("wss://localhost:5000");
     let canvas: HTMLCanvasElement = document.getElementById('gameCanvas') as HTMLCanvasElement;
     let ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
@@ -6,8 +6,10 @@ function initOnlineGame(){
      throw new Error('Failed to get 2D context');
     }
 
+	// // Paddle settings
+	// const paddleWidth = 10, paddleHeight = 80, paddleSpeed = 5;
 	// Paddle settings
-	const paddleWidth = 10, paddleHeight = 80, paddleSpeed = 5;
+	const paddleWidth = 10, paddleHeight = 80;
 
     interface GameState {
         leftPaddle: { x: number; y: number; dy: number };
@@ -67,7 +69,7 @@ function initOnlineGame(){
 			// Draw ball
 			ctx.beginPath();
 			ctx.arc(gameState.ball.x, gameState.ball.y, gameState.ball.radius, 0, Math.PI * 2);
-			ctx.fillStyle = "black";
+			ctx.fillStyle = "red";
 			ctx.fill();
 			ctx.closePath();
 		

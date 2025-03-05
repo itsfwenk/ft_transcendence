@@ -1,10 +1,10 @@
-function pauseGame() {
+export function pauseGame() {
   alert("Game paused. Click OK to resume.");
 }
 
-(window as any).pauseGame = pauseGame;
+// (window as any).pauseGame = pauseGame;
 
-function initGame(){
+export function initGame(){
   let canvas: HTMLCanvasElement = document.getElementById('gameCanvas') as HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
   if (!ctx) {
@@ -32,21 +32,21 @@ function initGame(){
   let player2Score = 0;
 
   // Left paddle (Player 1)
-  let leftPaddle = {
+  let leftPaddle: Paddle = {
     x: 0,
     y: canvas.height / 2 - paddleHeight / 2,
     dy: 0
   };
 
   // Right paddle (Player 2 or AI)
-  let rightPaddle = {
+  let rightPaddle: Paddle = {
     x: canvas.width - 10,
     y: canvas.height / 2 - paddleHeight / 2,
     dy: 0
   };
 
   // Ball settings
-  let ball = {
+  let ball: Ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
     radius: 7,

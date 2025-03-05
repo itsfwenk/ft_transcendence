@@ -1,10 +1,10 @@
-import Fastify, { FastifyInstance } from 'fastify';
+import Fastify from 'fastify';
 import gameRoutes from './gameRoutes.js';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import formbody from '@fastify/formbody';
 
-const app: FastifyInstance = Fastify();
+const app = Fastify();
 
 app.register(swagger, {
 	swagger: {

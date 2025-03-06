@@ -32,7 +32,7 @@ db.exec(`
 	);
 `);
 
-  
+
 
 export function saveGame(player1_id: number, player2_id: number): Game {
 	const stmt = db.prepare(`

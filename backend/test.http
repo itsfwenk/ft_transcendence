@@ -5,9 +5,9 @@ POST http://localhost:4001/user/register
 Content-Type: application/json
 
 {
-	"userName": "testuser",
-	"email": "test@example.com",
-	"password": "mypassword"
+	"userName": "yohan",
+	"email": "yo@example.com",
+	"password": "123456"
 }
 
 ### Connexion
@@ -15,8 +15,8 @@ POST http://localhost:4001/user/login
 Content-Type: application/json
 
 {
-	"email": "test@example.com",
-	"password": "mypassword"
+	"email": "yo@example.com",
+	"password": "123456"
 }
 
 ### Accéder au profil (JWT requis)

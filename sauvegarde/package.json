@@ -8,7 +8,7 @@
     "dev": "nodemon --exec node --loader ts-node/esm backend/gateway/gatewayIndex.ts",
     "build": "tsc",
     "dev-ts": "node --loader ts-node/esm backend/gateway/gatewayIndex.ts",
-    "start-all": "concurrently -k \"node --loader ts-node/esm backend/services/user/userIndex.ts\" \"node --loader ts-node/esm backend/services/game/gameIndex.ts\" \"node --loader ts-node/esm backend/gateway/gatewayIndex.ts\""
+    "start-all": "concurrently -k \"node --loader ts-node/esm /services/user/userIndex.ts\" \"node --loader ts-node/esm backend/services/game/gameIndex.ts\" \"node --loader ts-node/esm backend/gateway/gatewayIndex.ts\""
   },
   "keywords": [],
   "author": "",

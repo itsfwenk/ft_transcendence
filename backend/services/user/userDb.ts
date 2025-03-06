@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 
 //Connexion à la base de données SQLite
-const db = new Database('./backend/db/users.db');
+const db = new Database('./db/users.db');
 
 //Creation de la table users si elle n'existe pas
 db.exec(`

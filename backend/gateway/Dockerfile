@@ -2,12 +2,14 @@ FROM node:23-alpine
 
 WORKDIR /app
 
-COPY ../package*.json ./
-COPY ../tsconfig.json ./
-COPY gatewayIndex.ts ./
+COPY backend/package*.json ./
+COPY backend/tsconfig.json ./
 
-RUN npm install
+COPY backend/gateway ./
+
+RUN npm run build
 
 EXPOSE 4000
 
-CMD ["node", "gatewayIndex.ts"]
+#CMD ["sh"]
+CMD ["node", "dist/gatewayIndex.js"]

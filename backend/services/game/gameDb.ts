@@ -13,7 +13,7 @@ interface Game {
 //const games: Game[] = [];
 
 //connexion a la database game
-const db = new Database('./backend/db/games.db');
+const db = new Database('./db/games.db');
  
   
 

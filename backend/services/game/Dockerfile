@@ -2,15 +2,16 @@ FROM node:23-alpine
 
 WORKDIR /app
 
-COPY ../../package*.json ./
-COPY ../../tsconfig.json ./
-COPY gameIndex.ts ./
-COPY gameRoutes.ts ./
-COPY gameController.ts ./
-COPY gameDb.ts ./
+COPY backend/package*.json ./
+COPY backend/tsconfig.json ./
 
 RUN npm install
 
+COPY backend/services/game ./services/game
+
+RUN npm run build --prefix ./services/game
+
 EXPOSE 4002
 
-CMD ["node", "gameIndex.ts"]
+#CMD ["sh"]
+CMD ["node", "services/game/dist/gameIndex.js"]

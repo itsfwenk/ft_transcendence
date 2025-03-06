@@ -1,5 +1,16 @@
-FROM debian:bullseye-slim
+FROM node:23-alpine
 
-RUN apt-get update && apt-get upgrade -y
+WORKDIR /app
 
-RUN apt-get install -y wget php7.4 php-fpm php-mysql mariadb-client
+COPY ../package*.json ./
+COPY ../tsconfig.json ./
+COPY userController.ts ./
+COPY userDb.ts ./
+COPY userIndex.ts ./
+COPY userRoutes.ts ./
+
+RUN npm install
+
+EXPOSE 4001
+
+CMD ["node", "userIndex.ts"]

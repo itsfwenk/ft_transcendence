@@ -4,12 +4,13 @@
 	  {
 		"type": "node",
 		"request": "launch",
-		"name": "Debug API Gateway",
+		"name": "Debug Game Service",
 		"skipFiles": ["<node_internals>/**"],
-		"program": "${workspaceFolder}/backend/gateway/gatewayIndex.ts",
+		"program": "${workspaceFolder}/backend/services/game/gameIndex.ts",
 		"runtimeArgs": ["--loader", "ts-node/esm"],
-    	"sourceMaps": true,
-    	"autoAttachChildProcesses": true
+		"sourceMaps": true,
+		"autoAttachChildProcesses": true,
+		"console": "integratedTerminal"
 	  },
 	  {
 		"type": "node",
@@ -19,17 +20,30 @@
 		"program": "${workspaceFolder}/backend/services/user/userIndex.ts",
 		"runtimeArgs": ["--loader", "ts-node/esm"],
 		"sourceMaps": true,
-    	"autoAttachChildProcesses": true
+		"autoAttachChildProcesses": true,
+		"console": "integratedTerminal"
 	  },
 	  {
 		"type": "node",
 		"request": "launch",
-		"name": "Debug Game Service",
+		"name": "Debug API Gateway",
 		"skipFiles": ["<node_internals>/**"],
-		"program": "${workspaceFolder}/backend/services/game/gameIndex.ts",
+		"program": "${workspaceFolder}/backend/gateway/gatewayIndex.ts",
 		"runtimeArgs": ["--loader", "ts-node/esm"],
 		"sourceMaps": true,
-    	"autoAttachChildProcesses": true
+		"autoAttachChildProcesses": true,
+		"console": "integratedTerminal"
+	  }
+	],
+	"compounds": [
+	  {
+		"name": "Start Everything",
+		"configurations": [
+		  "Debug Game Service",
+		  "Debug User Service",
+		  "Debug API Gateway"
+		],
+		"stopAll": true
 	  }
 	]
   }

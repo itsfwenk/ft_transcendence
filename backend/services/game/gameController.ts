@@ -29,13 +29,9 @@ interface EndGameRequest extends FastifyRequest {
 
 //demarrer une partie
 export async function startGame(req: FastifyRequest<{ Body: { player1_id: number; player2_id: number } }>, reply: FastifyReply) {
-	console.log("📥 Requête reçue pour créer une partie :", req.body);
 	const { player1_id, player2_id } = req.body;
 	const player1 = await getUserById(player1_id);
 	const player2 = await getUserById(player2_id);
-
-	console.log("🔍 Vérification des IDs :", { player1_id, player2_id });
-	console.log("🔍 Vérification des Players :", {player1, player2})
 
 	if (!player1 || !player2) {
 		return reply.status(400).send({error: "One or both players do not exist"})
@@ -78,9 +74,7 @@ export async function endGame(req:FastifyRequest<{ Params: { gameId: string } }>
 
 async function getUserById(userId: number) {
 	try {
-		console.log(`🔍 Requête envoyée à User Service: http://localhost:4001/user/${userId}`);
 	  const response = await axios.get(`http://localhost:4001/user/${userId}`);
-	  console.log(`✅ Réponse reçue de User Service:`, response.data);
 	  return response.data;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {

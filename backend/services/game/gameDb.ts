@@ -1,10 +1,5 @@
 import Database from 'better-sqlite3';
 
-
-
-
-
-
 interface Game {
 	gameId: number;
 	player1_id: number;
@@ -19,18 +14,13 @@ interface Game {
 
 //connexion a la database game
 const db = new Database('./backend/db/games.db');
-const userDb = new Database('./backend/db/users.db'); // ✅ Vérifier qu'on ouvre bien `users.db`
-
-console.log("📂 Base de données chargée:", {
-	gamesDB: db.name,
-	usersDB: userDb.name
-  });
-
+ 
+  
 
 //Creation de la table
 db.exec(`
-	PRAGMA foreign_keys = ON;
-  
+	PRAGMA foreign_keys = OFF;  -- ✅ Désactiver les FK pour éviter les erreurs
+
 	CREATE TABLE IF NOT EXISTS games (
 	  gameId INTEGER PRIMARY KEY AUTOINCREMENT,
 	  player1_id INTEGER NOT NULL,
@@ -38,12 +28,10 @@ db.exec(`
 	  score1 INTEGER DEFAULT 0,
 	  score2 INTEGER DEFAULT 0,
 	  status TEXT CHECK(status IN ('ongoing', 'finished')) DEFAULT 'ongoing',
-	  winner_id INTEGER NULL,
-	  FOREIGN KEY (player1_id) REFERENCES users(userId) ON DELETE CASCADE,
-	  FOREIGN KEY (player2_id) REFERENCES users(userId) ON DELETE CASCADE,
-	  FOREIGN KEY (winner_id) REFERENCES users(userId) ON DELETE SET NULL
+	  winner_id INTEGER NULL
 	);
- `);
+`);
+
   
 
 export function saveGame(player1_id: number, player2_id: number): Game {
@@ -68,7 +56,6 @@ export function updateGameScore(gameId: number, score1: number, score2: number) 
 		WHERE gameId = ?
 	`);
 	const result = stmt.run(score1, score2, gameId);
-	console.log("resultat de l'update", result)
 	if (result.changes > 0) {
 		const updatedStmt = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
 		return updatedStmt.get(gameId);
@@ -86,7 +73,7 @@ export function endGameInDb(gameId: number): Game | null {
 
 	const stmt = db.prepare (`
 		UPDATE games
-		SET status = 'finished', winner = ?
+		SET status = 'finished', winner_id = ?
 		WHERE gameId = ?
 	`);
 	stmt.run(winner_id, gameId);

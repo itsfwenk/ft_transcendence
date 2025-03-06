@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  user:
+    build: ./backend/services/user
+    ports:
+      - "4001:4001"
+    depends_on:
+      - db
+    volumes:
+      - ./backend/services/user:/app
+    restart: always
+
+  game:
+    build: ./backend/services/game
+    ports:
+      - "4002:4002"
+    depends_on:
+      - db
+    volumes:
+      - ./backend/services/game:/app
+    restart: always
+
+  gateway:
+    build: ./backend/gateway
+    ports:
+      - "4000:4000"
+    depends_on:
+      - user
+      - game
+    volumes:
+      - ./backend/gateway:/app
+    restart: always
+
+  db:
+    image: nouchka/sqlite3
+    volumes:
+      - ./backend/db:/data

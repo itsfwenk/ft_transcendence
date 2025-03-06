@@ -2,7 +2,6 @@ import Fastify from 'fastify';
 import gameRoutes from './gameRoutes.js';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
-import formbody from '@fastify/formbody';
 
 const app = Fastify();
 
@@ -15,8 +14,6 @@ app.register(swagger, {
 		},
 	}
 });
-
-app.register(formbody);
 
 
 app.register(swaggerUI, {

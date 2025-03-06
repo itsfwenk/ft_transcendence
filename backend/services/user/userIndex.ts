@@ -3,11 +3,8 @@ import jwt from '@fastify/jwt';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import userRoutes from './userRoutes.js';
-import formbody from '@fastify/formbody';
 
 const app = Fastify();
-
-app.register(formbody);
 
 // Configurer JWT
 app.register(jwt, { secret: 'supersecretkey' });

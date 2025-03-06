@@ -41,6 +41,5 @@ export function getUserById(userId: number): User | undefined {
 	//return users.find(users => users.userId === userId);
 	const stmt = db.prepare(`SELECT * FROM users WHERE userId = ?`);
 	const user = stmt.get(userId);
-	console.log("res requete", user)
 	return user as User | undefined;
 }

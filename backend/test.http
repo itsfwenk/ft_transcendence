@@ -45,10 +45,10 @@ GET http://localhost:4002/game/2
 
 
 ### Update Score
-PUT http://localhost:4002/game/1/score
+PUT http://localhost:4002/game/2/score
 Content-Type: application/json
 
-{"score1": 10, "score2": 8}
+{"score1": 2, "score2": 3}
 
 ### End Game
-POST http://localhost:4002/game/1/end
+POST http://localhost:4002/game/2/end

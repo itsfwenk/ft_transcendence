@@ -1,5 +1,12 @@
 export function initOnlineGame(){
-    const socket = new WebSocket("wss://localhost:5000");
+    const socket = new WebSocket("ws://localhost:3000/ws");
+	// // When the connection opens
+	// socket.onopen = () => {
+	// 	console.log('Connected to the Pong server');
+	// // Optionally, send an initial message or request game state
+	// // socket.send(JSON.stringify({ type: 'init' }));
+  	// };
+
     let canvas: HTMLCanvasElement = document.getElementById('gameCanvas') as HTMLCanvasElement;
     let ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
     if (!ctx) {

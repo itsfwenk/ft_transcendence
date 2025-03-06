@@ -9,6 +9,11 @@ fastify.register(fastifyWebsocket);
 const players = new Map();
 
 fastify.get('/ws', { websocket: true }, (connection, req) => {
+  // console.log('connection:', connection);
+  // if (typeof connection.socket.send !== 'function') {
+  //   console.error('connection.socket.send is not a function:', connection.socket);
+  //   return;
+  // }
   const playerId = Math.random().toString(36).substring(2, 9); // Generate a unique player ID
   players.set(playerId, connection);
 

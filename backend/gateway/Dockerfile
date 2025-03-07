@@ -1,15 +1,19 @@
-FROM node:23-alpine
+FROM node:20-bullseye-slim
 
 WORKDIR /app
 
-COPY backend/package*.json ./
-COPY backend/tsconfig.json ./
+COPY gateway/package*.json ./
+COPY gateway/tsconfig.json ./
 
-COPY backend/gateway ./
+RUN rm -rf node_modules package-lock.json
+
+RUN npm install
+
+COPY /gateway ./
 
 RUN npm run build
 
 EXPOSE 4000
 
 #CMD ["sh"]
-CMD ["node", "dist/gatewayIndex.js"]
+CMD ["node", "dist/srcs/gatewayIndex.js"]

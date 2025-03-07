@@ -1,36 +1,32 @@
 services:
   user:
     build: 
-      context: ./
-      dockerfile: backend/services/user/Dockerfile
+      context: ./backend
+      dockerfile: services/user/Dockerfile
     ports:
       - "4001:4001"
-    depends_on:
-      - db
     volumes:
-      - ./backend/db/users.db:/app/users.db
+      - ./db:/app/db
     restart: always
     networks:
       - app-network
 
   game:
     build:
-      context: ./
-      dockerfile: backend/services/game/Dockerfile
+      context: ./backend
+      dockerfile: services/game/Dockerfile
     ports:
       - "4002:4002"
-    depends_on:
-      - db
     volumes:
-      - ./backend/db/games.db:/app/games.db
+      - ./db:/app/db
     restart: always
     networks:
       - app-network
 
   gateway:
     build:
-      context: ./
-      dockerfile: backend/gateway/Dockerfile
+      context: ./backend
+      dockerfile: gateway/Dockerfile
     ports:
       - "4000:4000"
     depends_on:
@@ -40,16 +36,6 @@ services:
     networks:
       - app-network
 
-  db:
-    image: nouchka/sqlite3
-    volumes:
-      - db-data:/var/lib/sqlite3/data
-    networks:
-      - app-network
-
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  db-data:

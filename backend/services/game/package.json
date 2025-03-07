@@ -1,0 +1,25 @@
+{
+  "name": "game",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node --loader ts-node/esm gateway/gameIndex.ts",
+    "rebuild": "electron-rebuild -f -w better-sqlite3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@fastify/swagger": "^9.4.2",
+    "@fastify/swagger-ui": "^5.2.2",
+    "@types/better-sqlite3": "^7.6.12",
+    "axios": "^1.8.2",
+    "better-sqlite3": "^11.8.1",
+    "electron": "^35.0.0",
+    "fastify": "^5.2.1",
+    "typescript": "^5.8.2"
+  }
+}

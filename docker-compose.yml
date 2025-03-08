@@ -6,7 +6,7 @@ services:
     ports:
       - "4001:4001"
     volumes:
-      - ./db:/app/db
+      - ./backend/db:/app/db
     restart: always
     networks:
       - app-network
@@ -18,7 +18,7 @@ services:
     ports:
       - "4002:4002"
     volumes:
-      - ./db:/app/db
+      - ./backend/db:/app/db
     restart: always
     networks:
       - app-network

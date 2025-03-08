@@ -40,6 +40,6 @@ app.decorate("authenticate", async function (req: FastifyRequest, reply: Fastify
 // Enregistrer les routes utilisateur
 app.register(userRoutes, { prefix: '/user' });
 
-app.listen({ port: 4001 }, () => {
+app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	console.log('User Service running on http://localhost:4001');
 });

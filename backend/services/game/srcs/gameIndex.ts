@@ -24,6 +24,6 @@ app.register(swaggerUI, {
 //enregistrer les routes
 app.register(gameRoutes, { prefix: '/game' });
 
-app.listen({port: 4002 }, () => {
+app.listen({port: 4002 , host: '0.0.0.0'}, () => {
 	console.log('game service runnin on http://localhost:4002');
 });

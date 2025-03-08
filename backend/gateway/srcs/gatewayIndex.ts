@@ -27,6 +27,6 @@ app.register(swaggerUI, {
 app.register(userProxy);
 app.register(gameProxy);
 
-app.listen({port:4000 }, () => {
+app.listen({port: 4000 , host: '0.0.0.0'}, () => {
 	console.log('API Gateway running on http://localhost:4000');
 });

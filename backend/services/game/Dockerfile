@@ -27,7 +27,7 @@ COPY services/game ./
 
 RUN npm run build
 
-EXPOSE 4001
+EXPOSE 4002
 
 #CMD ["sh"]
 CMD ["node", "dist/srcs/gameIndex.js"]

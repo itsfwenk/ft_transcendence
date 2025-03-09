@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-RUN mkdir -p /app/data
 
 COPY services/user/package*.json ./
 COPY services/user/tsconfig.json ./
@@ -15,6 +14,7 @@ ENV npm_config_build_from_source=true
 ENV npm_config_prebuild_install=false
 
 RUN rm -rf node_modules package-lock.json && \
+    npm cache clean --force && \
     npm install --build-from-source && \
     npm rebuild better-sqlite3 --build-from-source --update-binary
 

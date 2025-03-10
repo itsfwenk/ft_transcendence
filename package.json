@@ -8,7 +8,9 @@
     "dev": "nodemon --exec node --loader ts-node/esm backend/gateway/gatewayIndex.ts",
     "build": "tsc",
     "dev-ts": "node --loader ts-node/esm backend/gateway/gatewayIndex.ts",
-    "start-all": "concurrently -k \"node --loader ts-node/esm backend/services/user/userIndex.ts\" \"node --loader ts-node/esm backend/services/game/gameIndex.ts\" \"node --loader ts-node/esm backend/gateway/gatewayIndex.ts\""
+    "start-all": "concurrently -k \"node --loader ts-node/esm backend/services/user/userIndex.ts\" \"node --loader ts-node/esm backend/services/game/gameIndex.ts\" \"node --loader ts-node/esm backend/gateway/gatewayIndex.ts\"",
+    "rm-db": "rm backend/db/games.db backend/db/users.db backend/db/matchmaking.db",
+    "re": "npm run rm-db; npm run start-all"
   },
   "keywords": [],
   "author": "",

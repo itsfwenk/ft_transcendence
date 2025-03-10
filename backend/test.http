@@ -21,7 +21,7 @@ Content-Type: application/json
 
 ### Accéder au profil (JWT requis)
 GET http://localhost:4001/user/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhcnRodXJAZ21haWwuY29tIiwiaWF0IjoxNzQxMDg1NzY2fQ._d8WOsrFOxpmAne0qCErT9gKu14i5vtt76srCC2--Ak
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc0MTI3MDQyMH0.-BOy3HcAD8BDZNjWtmzYeZDKgO3d9Q5UtMVWQ_zznDQ
 
 ### 🔍 Voir tous les utilisateurs
 GET http://localhost:4001/user/users
@@ -41,14 +41,14 @@ Content-Type: application/json
 
 
 ### Get game
-GET http://localhost:4002/game/2
+GET http://localhost:4002/game/1
 
 
 ### Update Score
-PUT http://localhost:4002/game/2/score
+PUT http://localhost:4002/game/1/score
 Content-Type: application/json
 
 {"score1": 2, "score2": 3}
 
 ### End Game
-POST http://localhost:4002/game/2/end
+POST http://localhost:4002/game/1/end

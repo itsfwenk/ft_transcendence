@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcrypt';
 import jwt from '@fastify/jwt';
-import { saveUser, getUserByEmail, getUserById, User } from './userDb.js';
+import { saveUser, getUserByEmail, getUserById, isValidEmail, User } from './userDb.js';
 
 // Interface pour les requêtes de création d'utilisateur
 interface RegisterRequest extends FastifyRequest {
@@ -16,17 +16,31 @@ interface RegisterRequest extends FastifyRequest {
 export async function registerUser(req:RegisterRequest, reply:FastifyReply) {
 	const { userName, email, password } = req.body;
 
-  // Vérifier si l'utilisateur existe déjà
-  if (getUserByEmail(email)) {
-    return reply.status(400).send({ error: 'Email already in use' });
-  }
+	if (!isValidEmail(email)) {
+		return reply.status(400).send({ error: 'INvalid email format' });
+	}
 
-  // Hasher le mot de passe
-  const hashedPassword = await bcrypt.hash(password, 10);
+	try {
+		// Vérifier si l'utilisateur existe déjà
+		if (getUserByEmail(email)) {
+			return reply.status(400).send({ error: 'Email already use' });
+		}
+	
+		if (!password || password.length < 6) {
+			return reply.status(400).send({ error: 'Password must be at least 6 characters long'});
+		}
+	
+		// Hasher le mot de passe
+		const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Ajouter l'utilisateur
-  const newUser = saveUser(userName, email, hashedPassword);
-  reply.send({ success: true, user: { userId: newUser.userId, userName, email } });
+		// Ajouter l'utilisateur
+		const newUser = saveUser(userName, email, hashedPassword);
+		reply.send({ success: true, user: { userId: newUser.userId, userName, email } });
+
+	} catch (error) {
+		console.error(error);
+		return reply.status(500).send({ error: 'Internal server error' });
+	}
 }
 
 // Interface pour la requête de connexion
@@ -39,15 +53,31 @@ interface LoginRequest extends FastifyRequest {
 
 // Connexion
 export async function loginUser(req:LoginRequest, reply:FastifyReply) {
-  const { email, password } = req.body;
-  const user = getUserByEmail(email);
+	const { email, password } = req.body;
+  
+	try {
+		const user = getUserByEmail(email);
 
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    return reply.status(401).send({ error: 'Invalid credentials' });
-  }
-
-  const token = req.server.jwt.sign({ userId: user.userId });
-  reply.send({ token });
+		console.log('-> User:', user);
+		console.log('MDP recu:', password);
+		console.log('MDP:', user?.passwordHsh);
+	
+		if (user) {
+			const passwordMatch = await bcrypt.compare(password, user.passwordHsh);
+			console.log("res compare :", passwordMatch);
+			if (passwordMatch === false) {
+				return reply.status(401).send({ error: 'Invalid password' });
+			}
+			const token = req.server.jwt.sign(
+				{ userId: user.userId },
+				{ expiresIn: '24h' }
+			);
+			reply.send({ token });
+		}
+	} catch (error) {
+		console.error(error);
+		reply.status(500).send({ error: 'Internal server error' });
+	}
 }
 
 
@@ -61,7 +91,7 @@ export async function getUserProfile(req:ProfileRequest, reply:FastifyReply) {
 	const user = getUserById(req.user.userId);
 	if (!user) return reply.status(404).send({ error: 'User not found' });
 
-	reply.send({ UserId: user.userId, username: user.userName, email: user.email, password: user.password });
+	reply.send({ UserId: user.userId, username: user.userName, email: user.email});
 }
 
 export async function getUserByIdController(req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) {

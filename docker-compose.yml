@@ -23,6 +23,16 @@ services:
     networks:
       - app-network
 
+  matchmaking:
+    build:
+      context: ./backend
+      dockerfile: services/matchmaking/Dockerfile
+    ports:
+    - "4003:4003"
+    restart: always
+    networks:
+    - app-network
+
   gateway:
     build:
       context: ./backend

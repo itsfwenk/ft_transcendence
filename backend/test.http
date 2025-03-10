@@ -52,3 +52,13 @@ Content-Type: application/json
 
 ### End Game
 POST http://localhost:4002/game/2/end
+
+############################ MATCHMAKING ############################
+
+### join queue
+POST http://localhost:4003/matchmaking/join
+Content-Type: application/json
+
+{
+	"player1_id": 1
+}

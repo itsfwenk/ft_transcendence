@@ -11,7 +11,7 @@ db.exec(`
 	  userId INTEGER PRIMARY KEY AUTOINCREMENT,
 	  userName TEXT NOT NULL,
 	  email TEXT UNIQUE NOT NULL,
-	  password TEXT NOT NULL
+	  passwordHsh TEXT NOT NULL
 	)
 `);
 
@@ -36,7 +36,7 @@ const users: User[] = [];
 
 export function saveUser(userName: string, email: string, password: string) {
 	const stmt = db.prepare(`
-		INSERT INTO users (userName, email, password)
+		INSERT INTO users (userName, email, passwordHsh)
 		VALUES (?, ?, ?)
 	`);
 	const result = stmt.run(userName, email, password);

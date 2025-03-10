@@ -32,7 +32,7 @@ export async function registerUser(req:RegisterRequest, reply:FastifyReply) {
 	
 		// Hasher le mot de passe
 		const hashedPassword = await bcrypt.hash(password, 10);
-	
+
 		// Ajouter l'utilisateur
 		const newUser = saveUser(userName, email, hashedPassword);
 		reply.send({ success: true, user: { userId: newUser.userId, userName, email } });
@@ -58,13 +58,13 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 	try {
 		const user = getUserByEmail(email);
 
-		console.log('User:', user);
+		console.log('-> User:', user);
 		console.log('MDP recu:', password);
 		console.log('MDP:', user?.passwordHsh);
 	
 		if (user) {
 			const passwordMatch = await bcrypt.compare(password, user.passwordHsh);
-			console.log("res compare :", passwordMatch); // ERREURRRRRRR Vendredi !!!!!!!
+			console.log("res compare :", passwordMatch);
 			if (passwordMatch === false) {
 				return reply.status(401).send({ error: 'Invalid password' });
 			}

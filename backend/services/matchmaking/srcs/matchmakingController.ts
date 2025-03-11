@@ -22,6 +22,7 @@ const queue: number[] = [];
 export async function joinQueue(playerId: number) {
 	console.log(playerId);
 	queue.push(playerId);
+	console.log(queue);
 	attemptMatch();
 }
 

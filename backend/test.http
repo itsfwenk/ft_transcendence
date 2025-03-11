@@ -24,7 +24,7 @@ GET http://localhost:4001/user/profile
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc0MTY5Nzk3OCwiZXhwIjoxNzQxNzg0Mzc4fQ.Q4m9z2-daQXII2kQCG5D_YzkPfZ2p2QdS0GTkUpl8Hw
 
 ### 🔍 Voir un utilisateur
-GET http://localhost:4001/user/1
+GET http://localhost:4001/user/1dfebe57-69a5-4d43-9caf-911f21ebcbb4
 
 ### Update info user
 PUT http://localhost:4001/user/profile
@@ -39,7 +39,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhd
 ### Delete un user
 DELETE http://localhost:4001/user/profile
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc0MTcwMzU4NywiZXhwIjoxNzQxNzg5OTg3fQ.6vCZ8h66yq_X9zRHpBuhVkbEZjpkh9yHvhbGi6pKX7s
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNzhiMDI4MC04YjVmLTRhZWYtODM5Ny05YTk5OTkwNDE2ZmQiLCJpYXQiOjE3NDE3MDU5NDQsImV4cCI6MTc0MTc5MjM0NH0.acAaJ7rrfhPgc-79VqlQLBNR3COfQqw2o8PIYePKQ3s
 
 {
 

@@ -82,7 +82,7 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 
 //interface pour '/profile'
 interface ProfileRequest extends FastifyRequest {
-	user: { userId: number };
+	user: { userId: string };
 }
 
 // Profil utilisateur (protégé avec JWT)
@@ -96,7 +96,7 @@ export async function getUserProfile(req: ProfileRequest, reply: FastifyReply) {
 
 export async function getUserByIdController(req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) {
     const { userId } = req.params;
-    const user = getUserById(parseInt(userId));
+    const user = getUserById(userId);
 
     if (!user) {
         return reply.status(404).send({ error: "User not found" });
@@ -110,7 +110,7 @@ interface updateProfileRequest extends FastifyRequest {
 		email: string;
 		password: string;
 	}>
-	user: { userId: number };
+	user: { userId: string };
 }
 
 export async function updateProfile(req: updateProfileRequest, reply: FastifyReply) {

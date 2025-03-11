@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import crypto from 'crypto';
 import base32 from 'hi-base32';
+import { v4 as uuidv4 } from 'uuid';
 
 //Connexion à la base de données SQLite
 const db = new Database('/app/db/users.db');
@@ -8,7 +9,7 @@ const db = new Database('/app/db/users.db');
 //Creation de la table users si elle n'existe pas
 db.exec(`
 	CREATE TABLE IF NOT EXISTS users (
-	  userId INTEGER PRIMARY KEY AUTOINCREMENT,
+	  userId TEXT PRIMARY KEY,
 	  userName TEXT NOT NULL,
 	  email TEXT UNIQUE NOT NULL,
 	  passwordHsh TEXT NOT NULL
@@ -26,7 +27,7 @@ db.exec(`
 `);
 
 export interface User {
-	userId: number;
+	userId: string;
 	userName: string;
 	email: string;
 	passwordHsh: string;
@@ -35,12 +36,15 @@ export interface User {
 const users: User[] = [];
 
 export function saveUser(userName: string, email: string, password: string) {
+	const userId = uuidv4();
+
 	const stmt = db.prepare(`
-		INSERT INTO users (userName, email, passwordHsh)
-		VALUES (?, ?, ?)
+		INSERT INTO users (userId, userName, email, passwordHsh)
+		VALUES (?, ?, ?, ?)
 	`);
-	const result = stmt.run(userName, email, password);
-	return { userId: result.lastInsertRowid, userName, email };
+	const result = stmt.run(userId, userName, email, password);
+
+	return { userId, userName, email };
 }
 
 export function getUserByEmail(email: string): User | undefined {
@@ -53,7 +57,7 @@ export function getUserByEmail(email: string): User | undefined {
 	}
 }
 
-export function getUserById(userId: number): User | undefined {
+export function getUserById(userId: string): User | undefined {
 	const stmt = db.prepare(`SELECT * FROM users WHERE userId = ?`);
 	const user = stmt.get(userId);
 	return user as User | undefined;
@@ -69,7 +73,7 @@ export function generateSessionId(): string {
 	return base32.encode(bytes).replace(/=/g, "");
 }
 
-export function updateUser(userId: number, data: Partial<User>): User | undefined {
+export function updateUser(userId: string, data: Partial<User>): User | undefined {
 	const entries = Object.entries(data).filter(([_, value]) => value !== undefined);
 
 	if (entries.length === 0) {
@@ -94,8 +98,8 @@ export function updateUser(userId: number, data: Partial<User>): User | undefine
 	}
 }
 
-export function deleteUser(userId: number): boolean {
+export function deleteUser(userId: string): boolean {
 	const stmt = db.prepare('DELETE FROM users WHERE userId = ?');
-	const result = stmt.run(userId.toString());
+	const result = stmt.run(userId);
 	return result.changes > 0;
 }

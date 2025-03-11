@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import base32 from 'hi-base32';
 
 //Connexion à la base de données SQLite
-const db = new Database('./backend/db/users.db');
+const db = new Database('/app/db/users.db');
 
 //Creation de la table users si elle n'existe pas
 db.exec(`
@@ -54,7 +54,6 @@ export function getUserByEmail(email: string): User | undefined {
 }
 
 export function getUserById(userId: number): User | undefined {
-	//return users.find(users => users.userId === userId);
 	const stmt = db.prepare(`SELECT * FROM users WHERE userId = ?`);
 	const user = stmt.get(userId);
 	return user as User | undefined;
@@ -68,4 +67,29 @@ export function isValidEmail(email: string): boolean {
 export function generateSessionId(): string {
 	const bytes = crypto.randomBytes(15);
 	return base32.encode(bytes).replace(/=/g, "");
+}
+
+export function updateUser(userId: number, data: Partial<User>): User | undefined {
+	const entries = Object.entries(data).filter(([_, value]) => value !== undefined);
+
+	if (entries.length === 0) {
+		return getUserById(userId);
+	}
+
+	const fields = entries.map(([key, _]) => `${key} = ?`).join(', ');
+	const values = entries.map(([_, value]) => value);
+
+	const stmt = db.prepare(`
+		UPDATE users
+		SET ${fields}
+		WHERE userId = ?
+	`);
+
+	try {
+		stmt.run(...values, userId);
+		return getUserById(userId);
+	} catch (error) {
+		console.error('Error updating user:', error);
+		return undefined;
+	}
 }

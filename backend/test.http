@@ -5,8 +5,8 @@ POST http://localhost:4001/user/register
 Content-Type: application/json
 
 {
-	"userName": "testuser",
-	"email": "test@example.com",
+	"userName": "test",
+	"email": "test@email.com",
 	"password": "mypassword"
 }
 
@@ -15,18 +15,26 @@ POST http://localhost:4001/user/login
 Content-Type: application/json
 
 {
-	"email": "test@example.com",
+	"email": "test@email.com",
 	"password": "mypassword"
 }
 
 ### Accéder au profil (JWT requis)
 GET http://localhost:4001/user/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhcnRodXJAZ21haWwuY29tIiwiaWF0IjoxNzQxMDg1NzY2fQ._d8WOsrFOxpmAne0qCErT9gKu14i5vtt76srCC2--Ak
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0MTY5MDQyMywiZXhwIjoxNzQxNzc2ODIzfQ.PrHccJ0jc709U0ng16s63gniS3QYpJdA-t2mH_agTUs
 
-### 🔍 Voir tous les utilisateurs
-GET http://localhost:4001/user/users
+### 🔍 Voir un utilisateur
+GET http://localhost:4001/user/1
 
+### Update info user
+PUT http://localhost:4001/user/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0MTY5MDQyMywiZXhwIjoxNzQxNzc2ODIzfQ.PrHccJ0jc709U0ng16s63gniS3QYpJdA-t2mH_agTUs
 
+{
+  "userName": "Okan",
+  "email": "okan@email.com"
+}
 
 ############################ GAME ############################
 

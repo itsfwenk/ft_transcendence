@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcrypt';
 import jwt from '@fastify/jwt';
-import { saveUser, getUserByEmail, getUserById, isValidEmail, User } from './userDb.js';
+import { saveUser, getUserByEmail, getUserById, isValidEmail, updateUser, User } from './userDb.js';
 
 // Interface pour les requêtes de création d'utilisateur
 interface RegisterRequest extends FastifyRequest {
@@ -17,7 +17,7 @@ export async function registerUser(req:RegisterRequest, reply:FastifyReply) {
 	const { userName, email, password } = req.body;
 
 	if (!isValidEmail(email)) {
-		return reply.status(400).send({ error: 'INvalid email format' });
+		return reply.status(400).send({ error: 'Invalid email format' });
 	}
 
 	try {
@@ -57,14 +57,9 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
   
 	try {
 		const user = getUserByEmail(email);
-
-		console.log('-> User:', user);
-		console.log('MDP recu:', password);
-		console.log('MDP:', user?.passwordHsh);
 	
 		if (user) {
 			const passwordMatch = await bcrypt.compare(password, user.passwordHsh);
-			console.log("res compare :", passwordMatch);
 			if (passwordMatch === false) {
 				return reply.status(401).send({ error: 'Invalid password' });
 			}
@@ -72,7 +67,11 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 				{ userId: user.userId },
 				{ expiresIn: '24h' }
 			);
-			reply.send({ token });
+			reply.send({ token, user: { userId: user.userId, userName: user.userName } });
+		}
+		else
+		{
+			return reply.status(401).send({ error: 'Invalid email or password' });
 		}
 	} catch (error) {
 		console.error(error);
@@ -87,9 +86,10 @@ interface ProfileRequest extends FastifyRequest {
 }
 
 // Profil utilisateur (protégé avec JWT)
-export async function getUserProfile(req:ProfileRequest, reply:FastifyReply) {
+export async function getUserProfile(req: ProfileRequest, reply: FastifyReply) {
 	const user = getUserById(req.user.userId);
-	if (!user) return reply.status(404).send({ error: 'User not found' });
+	if (!user)
+		return reply.status(404).send({ error: 'User not found' });
 
 	reply.send({ UserId: user.userId, username: user.userName, email: user.email});
 }
@@ -102,4 +102,64 @@ export async function getUserByIdController(req: FastifyRequest<{ Params: { user
         return reply.status(404).send({ error: "User not found" });
     }
     reply.send(user);
+}
+
+interface updateProfileRequest extends FastifyRequest {
+	body: Partial<{
+		userName: string;
+		email: string;
+		password: string;
+	}>
+	user: { userId: number };
+}
+
+export async function updateProfile(req: updateProfileRequest, reply: FastifyReply) {
+	const userId = req.user.userId;
+	const updates: any = {};
+
+	if (req.body.userName !== undefined) {
+		if (req.body.userName.trim() === '') {
+			return reply.status(400).send({ error: 'Username cannot be empty' });
+		}
+		updates.userName = req.body.userName;
+	}
+
+	if (req.body.email !== undefined) {
+		if ((!isValidEmail(req.body.email))) {
+			return (reply.status(400).send({ error: 'Invalid email format' }));
+		}
+	}
+
+	if (req.body.email !== undefined) {
+		const existingUser = getUserByEmail(req.body.email);
+		if (existingUser && existingUser.userId !== userId)
+			return reply.status(400).send({ error: 'Email already use' });
+		updates.email = req.body.email;
+	}
+
+	if (req.body.password !== undefined) {
+		if (req.body.password.length < 6) {
+			return reply.status(400).send({ error : 'Password must be at least 6 character long' });
+		}
+		updates.password = req.body.password;
+	}
+
+	try {
+		const updtUser = updateUser(userId, updates);
+
+		if (!updtUser) {
+			return reply.status(500).send({ error: 'Failed to update' });
+		}
+
+		reply.send({
+			success: true,
+			user: {
+				userId: updtUser.userId,
+				userName: updtUser.userName,
+				email: updtUser.email
+			}
+		});
+	} catch (error) {
+		reply.status(500).send({ error: 'Insternal server error' });
+	}
 }

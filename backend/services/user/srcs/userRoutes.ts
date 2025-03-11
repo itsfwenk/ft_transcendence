@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
-import { registerUser, loginUser, getUserProfile, getUserByIdController } from './userController.js';
+import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile } from './userController.js';
 
 
 const User = {
@@ -74,4 +74,41 @@ export default async function userRoutes(fastify: any) {
   }, getUserProfile);
 
   fastify.get("/:userId", getUserByIdController);
+
+  fastify.put('/profile', {
+	preHandler: [fastify.authenticate],
+	schema: {
+	  headers: {
+		type: 'object',
+		properties: {
+		  Authorization: { type: 'string', description: 'Bearer <token>' }
+		},
+		required: ['Authorization']
+	  },
+	  body: {
+		type: 'object',
+		properties: {
+		  userName: { type: 'string' },
+		  email: { type: 'string', format: 'email' },
+		  password: { type: 'string', minLength: 6 }
+		}
+	  },
+	  response: {
+		200: {
+		  type: 'object',
+		  properties: {
+			success: { type: 'boolean' },
+			user: {
+			  type: 'object',
+			  properties: {
+				userId: { type: 'number' },
+				userName: { type: 'string' },
+				email: { type: 'string' }
+			  }
+			}
+		  }
+		}
+	  }
+	}
+  }, updateProfile);
 }

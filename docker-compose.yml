@@ -5,6 +5,7 @@ services:
       dockerfile: services/user/Dockerfile
     ports:
       - "4001:4001"
+      - "9231:9231"
     volumes:
       - ./backend/db:/app/db
     restart: always
@@ -17,6 +18,7 @@ services:
       dockerfile: services/game/Dockerfile
     ports:
       - "4002:4002"
+      - "9232:9232"
     volumes:
       - ./backend/db:/app/db
     restart: always
@@ -29,6 +31,7 @@ services:
       dockerfile: services/matchmaking/Dockerfile
     ports:
     - "4003:4003"
+    - "9229:9229"
     restart: always
     networks:
     - app-network
@@ -39,6 +42,7 @@ services:
       dockerfile: gateway/Dockerfile
     ports:
       - "4000:4000"
+      - "9230:9230"
     depends_on:
       - user
       - game

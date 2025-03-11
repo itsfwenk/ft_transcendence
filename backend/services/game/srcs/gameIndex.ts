@@ -8,7 +8,7 @@ const app = Fastify();
 app.register(swagger, {
 	swagger: {
 		info: {
-		  title: 'User API',
+		  title: 'Game API',
 		  description: 'API documentation for Game Service',
 		  version: '1.0.0'
 		},

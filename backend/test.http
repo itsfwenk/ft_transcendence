@@ -60,5 +60,5 @@ POST http://localhost:4003/matchmaking/join
 Content-Type: application/json
 
 {
-	"player1_id": 1
+	"playerId": 1
 }

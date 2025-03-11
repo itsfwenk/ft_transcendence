@@ -9,7 +9,7 @@ const app = Fastify();
 app.register(swagger, {
   swagger: {
     info: {
-      title: 'User API',
+      title: 'Matchmaking API',
       description: 'API documentation for User Service',
       version: '1.0.0'
     }

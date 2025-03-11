@@ -20,6 +20,7 @@ const queue: number[] = [];
 
 //join 1v1 queue
 export async function joinQueue(playerId: number) {
+	console.log(playerId);
 	queue.push(playerId);
 	attemptMatch();
 }

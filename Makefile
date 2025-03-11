@@ -21,7 +21,7 @@ install-deps:
 	@echo "Installation des dépendances pour game..."
 	cd backend/services/game && npm install
 	@echo "Installation des dépendances pour matchmaking..."
-	cd backend/services/game && npm install
+	cd backend/services/matchmaking && npm install
 	@echo "Installation des dépendances pour gateway..."
 	cd backend/gateway && npm install
 

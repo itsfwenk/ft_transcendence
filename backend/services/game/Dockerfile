@@ -27,7 +27,8 @@ COPY services/game ./
 
 RUN npm run build
 
-EXPOSE 4002
+EXPOSE 4002 9232
 
 #CMD ["sh"]
 CMD ["node", "dist/srcs/gameIndex.js"]
+#CMD ["node", "--inspect=0.0.0.0:9232", "dist/srcs/gameIndex.js"]

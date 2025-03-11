@@ -27,3 +27,6 @@ re: clean up
 
 prune: clean
 	@docker system prune -a --volumes -f
+
+rm-db:
+	rm ./backend/db/games.db ./backend/db/users.db

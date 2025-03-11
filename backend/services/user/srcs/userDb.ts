@@ -93,3 +93,9 @@ export function updateUser(userId: number, data: Partial<User>): User | undefine
 		return undefined;
 	}
 }
+
+export function deleteUser(userId: number): boolean {
+	const stmt = db.prepare('DELETE FROM users WHERE userId = ?');
+	const result = stmt.run(userId.toString());
+	return result.changes > 0;
+}

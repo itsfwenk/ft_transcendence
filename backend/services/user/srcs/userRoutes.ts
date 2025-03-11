@@ -1,5 +1,6 @@
-import { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
-import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile } from './userController.js';
+import fastify, { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
+import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount } from './userController.js';
+import jwt from '@fastify/jwt'
 
 
 const User = {
@@ -111,4 +112,11 @@ export default async function userRoutes(fastify: any) {
 	  }
 	}
   }, updateProfile);
+  
+  fastify.delete('/profile', {
+	  preHandler: [fastify.authenticate],
+	  handler: deleteAccount
+  });
+
+
 }

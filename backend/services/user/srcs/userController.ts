@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcrypt';
 import jwt from '@fastify/jwt';
-import { saveUser, getUserByEmail, getUserById, isValidEmail, updateUser, User } from './userDb.js';
+import { saveUser, getUserByEmail, getUserById, isValidEmail, updateUser, deleteUser, User } from './userDb.js';
 
 // Interface pour les requêtes de création d'utilisateur
 interface RegisterRequest extends FastifyRequest {
@@ -161,5 +161,20 @@ export async function updateProfile(req: updateProfileRequest, reply: FastifyRep
 		});
 	} catch (error) {
 		reply.status(500).send({ error: 'Insternal server error' });
+	}
+}
+
+export async function deleteAccount(req: ProfileRequest, reply: FastifyReply) {
+	const userId = req.user.userId;
+
+	try {
+		const success = deleteUser(userId);
+		if (success) {
+			reply.send({ success: true, user: `${userId}`, message: 'Account deleted successfully'});
+		} else {
+			reply.status(404).send({ error: 'User not found' });
+		}
+	} catch (error) {
+		reply.status(500).send({ error: 'Internal server error' });
 	}
 }

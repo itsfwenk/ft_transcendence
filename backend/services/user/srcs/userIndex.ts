@@ -3,15 +3,14 @@ import jwt from '@fastify/jwt';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import userRoutes from './userRoutes.js';
-// import formbody from '@fastify/formbody';
-
+import dotenv from 'dotenv'
 
 const app = Fastify();
 
-// app.register(formbody);
+dotenv.config();
 
 // Configurer JWT
-app.register(jwt, { secret: 'supersecretkey' });
+app.register(jwt, { secret: process.env.JWT_SECRET || 'fallback_secret' });
 
 // Configurer Swagger
 app.register(swagger, {
@@ -28,9 +27,6 @@ app.register(swaggerUI, {
   routePrefix: '/docs',
   staticCSP: true
 });
-
-//Register bcrypt
-
 
 // Middleware pour vérifier l'authentification
 app.decorate("authenticate", async function (req: FastifyRequest, reply: FastifyReply) {

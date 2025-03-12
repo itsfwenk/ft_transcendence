@@ -32,3 +32,4 @@ app.register(matchmakingRoutes, { prefix: '/matchmaking' });
 app.listen({port: 4003 , host: '0.0.0.0'}, () => {
 	console.log('Matchmaking Service running on http://localhost:4003');
 });
+

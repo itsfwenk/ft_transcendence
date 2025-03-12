@@ -74,8 +74,10 @@ export async function endGame(req:FastifyRequest<{ Params: { gameId: string } }>
 
 async function getUserById(userId: number) {
 	try {
-	  const response = await axios.get(`http://localhost:4001/user/${userId}`);
-	  return response.data;
+		console.log(userId);
+		const baseUrl = process.env.USER_SERVICE_BASE_URL || 'http://user:4001';
+		const response = await axios.get(`${baseUrl}/user/${userId}`);
+		return response.data;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
 			console.error(`❌ Erreur Axios lors de la récupération de l'utilisateur ${userId}:`, error.response?.data || error.message);

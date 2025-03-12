@@ -6,7 +6,7 @@ Content-Type: application/json
 
 {
 	"userName": "test",
-	"email": "test@email.com",
+	"email": "tes@email.com",
 	"password": "mypassword"
 }
 
@@ -24,7 +24,7 @@ GET http://localhost:4001/user/profile
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc0MTY5Nzk3OCwiZXhwIjoxNzQxNzg0Mzc4fQ.Q4m9z2-daQXII2kQCG5D_YzkPfZ2p2QdS0GTkUpl8Hw
 
 ### 🔍 Voir un utilisateur
-GET http://localhost:4001/user/1dfebe57-69a5-4d43-9caf-911f21ebcbb4
+GET http://localhost:4001/user/c0653c47-b385-4af6-af01-d14f5a1b9931
 
 ### Update info user
 PUT http://localhost:4001/user/profile
@@ -41,9 +41,41 @@ DELETE http://localhost:4001/user/profile
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNzhiMDI4MC04YjVmLTRhZWYtODM5Ny05YTk5OTkwNDE2ZmQiLCJpYXQiOjE3NDE3MDU5NDQsImV4cCI6MTc0MTc5MjM0NH0.acAaJ7rrfhPgc-79VqlQLBNR3COfQqw2o8PIYePKQ3s
 
-{
+{}
 
+### Logout un User
+POST http://localhost:4001/user/logout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjMDY1M2M0Ny1iMzg1LTRhZjYtYWYwMS1kMTRmNWExYjk5MzEiLCJpYXQiOjE3NDE3OTU4MjksImV4cCI6MTc0MTg4MjIyOX0.RvU_A7LDnFBR6EChGaPLvwLbHqhQyGz8PikHVbmqsHo
+
+{
+	"userId": "c0653c47-b385-4af6-af01-d14f5a1b9931"
+} // A voir probleme de permission
+
+### Update un role
+PUT http://localhost:4001/user/role
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjMDY1M2M0Ny1iMzg1LTRhZjYtYWYwMS1kMTRmNWExYjk5MzEiLCJpYXQiOjE3NDE3OTU2MDUsImV4cCI6MTc0MTg4MjAwNX0.5674qx4zcgAFZBfQVrQciVm9zzcE5Eh7ZR9573UG6vQ
+
+{
+	"userId": "c0653c47-b385-4af6-af01-d14f5a1b9931",
+	"role": "admin"
+} // A voir probleme de permission
+
+### Update un status
+PUT http://localhost:4001/user/status
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjMDY1M2M0Ny1iMzg1LTRhZjYtYWYwMS1kMTRmNWExYjk5MzEiLCJpYXQiOjE3NDE3OTU4MjksImV4cCI6MTc0MTg4MjIyOX0.RvU_A7LDnFBR6EChGaPLvwLbHqhQyGz8PikHVbmqsHo
+
+{
+	"status": "online"
 }
+
+### Voir tous les users Online
+GET http://localhost:4001/user/online
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjMDY1M2M0Ny1iMzg1LTRhZjYtYWYwMS1kMTRmNWExYjk5MzEiLCJpYXQiOjE3NDE3OTU2MDUsImV4cCI6MTc0MTg4MjAwNX0.5674qx4zcgAFZBfQVrQciVm9zzcE5Eh7ZR9573UG6vQ
+
 ############################ GAME ############################
 
 ### Start game

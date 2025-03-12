@@ -9,18 +9,20 @@ const db = new Database('/app/db/users.db');
 //Creation de la table users si elle n'existe pas
 db.exec(`
 	CREATE TABLE IF NOT EXISTS users (
-	  userId TEXT PRIMARY KEY,
-	  userName TEXT NOT NULL,
-	  email TEXT UNIQUE NOT NULL,
-	  passwordHsh TEXT NOT NULL
+		userId TEXT PRIMARY KEY,
+		userName TEXT NOT NULL,
+		email TEXT UNIQUE NOT NULL,
+		passwordHsh TEXT NOT NULL,
+		role TEXT NOT NULL,
+		status TEXT NOT NULL
 	)
-`);
+`)
 
 db.exec(`
 	CREATE TABLE IF NOT EXISTS token (
-	token STRING NOT NULL UNIQUE,
+	token TEXT NOT NULL UNIQUE,
 	expiresAt INTEGER NOT NULL,
-	userId INTEGER NOT NULL,
+	userId TEXT NOT NULL,
 	
 	FOREIGN KEY (userId) REFERENCES users(userId)
 	)
@@ -31,6 +33,8 @@ export interface User {
 	userName: string;
 	email: string;
 	passwordHsh: string;
+	role: string;
+	status: string;
 }
 
 const users: User[] = [];
@@ -39,12 +43,12 @@ export function saveUser(userName: string, email: string, password: string) {
 	const userId = uuidv4();
 
 	const stmt = db.prepare(`
-		INSERT INTO users (userId, userName, email, passwordHsh)
-		VALUES (?, ?, ?, ?)
+		INSERT INTO users (userId, userName, email, passwordHsh, role, status)
+		VALUES (?, ?, ?, ?, 'user', 'offline')
 	`);
 	const result = stmt.run(userId, userName, email, password);
 
-	return { userId, userName, email };
+	return { userId, userName, email, role: 'user', status: 'offline' };
 }
 
 export function getUserByEmail(email: string): User | undefined {
@@ -102,4 +106,26 @@ export function deleteUser(userId: string): boolean {
 	const stmt = db.prepare('DELETE FROM users WHERE userId = ?');
 	const result = stmt.run(userId);
 	return result.changes > 0;
+}
+
+export function updateUserRole(userId: string, role: string): boolean {
+	const stmt = db.prepare(`UPDATE users SET role = ? WHERE userId = ?`);
+	const result = stmt.run(role, userId);
+	return result.changes > 0;
+}
+
+export function updateUserStatus(userId: string, status: string): boolean {
+	const stmt = db.prepare(`UPDATE users SET status = ? WHERE userId = ?`);
+	const result = stmt.run(status, userId);
+	return result.changes > 0;
+}
+
+export function getUsersByRole(role: string): User[] {
+	const stmt = db.prepare(`SELECT * FROM users WHERE role = ?`);
+	return stmt.all(role) as User[];
+}
+
+export function getUserWithStatus(status: string): User[] {
+	const stmt = db.prepare(`SELECT * FROM users WHERE status = ?`);
+	return stmt.all(status) as User[];
 }

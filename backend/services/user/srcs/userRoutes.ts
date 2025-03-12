@@ -1,5 +1,5 @@
 import fastify, { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
-import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount } from './userController.js';
+import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount, updateRole, updateStatus, getOnlineUsers, logoutUser } from './userController.js';
 import jwt from '@fastify/jwt'
 
 
@@ -29,7 +29,7 @@ export default async function userRoutes(fastify: any) {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
-            user: { User }
+            user: { User } // test mettre juste User
           }
         }
       }
@@ -118,5 +118,45 @@ export default async function userRoutes(fastify: any) {
 	  handler: deleteAccount
   });
 
+  fastify.post('/logout', {
+	preHandler: [fastify.authenticate],
+	handler: logoutUser
+  })
+
+  fastify.put('/role', {
+	preHandler: [fastify.authenticate],
+	schema: {
+		body: {
+			type: 'object',
+			required: ['userId', 'role'],
+			properties: {
+				userId: { type: 'string' },
+				role: { type: 'string', enum: ['user', 'admin'] }
+			}
+		}
+	},
+	handler: updateRole
+  })
+
+  fastify.put('/status', {
+	preHandler: [fastify.authenticate],
+	schema: {
+		body: {
+			type: 'object',
+			required: ['status'],
+			properties: {
+				status: { type: 'string', enum: ['online', 'offline'] }
+			}
+		}
+	},
+	handler: updateStatus
+  });
+
+  fastify.get('/online', {
+	preHandler: [fastify.authenticate],
+	handler: getOnlineUsers
+  });
+
+  
 
 }

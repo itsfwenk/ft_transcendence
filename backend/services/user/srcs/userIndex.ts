@@ -10,7 +10,7 @@ const app = Fastify();
 dotenv.config();
 
 // Configurer JWT
-app.register(jwt, { secret: process.env.JWT_SECRET || 'fallback_secret' });
+app.register(jwt, { secret: 'supersecretkey' });
 
 // Configurer Swagger
 app.register(swagger, {
@@ -28,7 +28,7 @@ app.register(swaggerUI, {
   staticCSP: true
 });
 
-// Middleware pour vérifier l'authentification
+// Middleware pour jwt
 app.decorate("authenticate", async function (req: FastifyRequest, reply: FastifyReply) {
   try {
     await req.jwtVerify();
@@ -36,6 +36,22 @@ app.decorate("authenticate", async function (req: FastifyRequest, reply: Fastify
     reply.status(401).send({ error: "Unauthorized" });
   }
 });
+
+interface IsAdminRequest extends FastifyRequest {
+	user: { role: string };
+}
+
+// Middleware pour verif admin et jwt
+app.decorate("isAdmin", async function (req: IsAdminRequest, reply: FastifyReply) {
+	try {
+	  await req.jwtVerify();
+	  if (req.user.role !== 'admin') {
+		reply.status(403).send({ error: "Permission denied" });
+	  }
+	} catch (err) {
+	  reply.status(401).send({ error: "Unauthorized" });
+	}
+  });
 
 // Enregistrer les routes utilisateur
 app.register(userRoutes, { prefix: '/user' });

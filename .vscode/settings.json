@@ -1,0 +1,10 @@
+{
+	"sqltools.connections": [
+		{
+			"previewLimit": 50,
+			"driver": "SQLite",
+			"database": "${workspaceFolder:ft_transcendence}/backend/db/users.db",
+			"name": "test"
+		}
+	]
+}

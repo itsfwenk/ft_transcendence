@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcrypt';
 import jwt from '@fastify/jwt';
-import { saveUser, getUserByEmail, getUserById, isValidEmail, updateUser, deleteUser, User } from './userDb.js';
+import { saveUser, getUserByEmail, getUserById, isValidEmail, updateUser, deleteUser, updateUserRole, updateUserStatus, getUsersByRole, getUserWithStatus, User } from './userDb.js';
 
 // Interface pour les requêtes de création d'utilisateur
 interface RegisterRequest extends FastifyRequest {
@@ -59,18 +59,28 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 		const user = getUserByEmail(email);
 	
 		if (user) {
+
 			const passwordMatch = await bcrypt.compare(password, user.passwordHsh);
 			if (passwordMatch === false) {
 				return reply.status(401).send({ error: 'Invalid password' });
 			}
+
+			updateUserStatus(user.userId, 'online');
+
 			const token = req.server.jwt.sign(
 				{ userId: user.userId },
 				{ expiresIn: '24h' }
 			);
-			reply.send({ token, user: { userId: user.userId, userName: user.userName } });
-		}
-		else
-		{
+
+			reply.send({ token,
+				user: { 
+					userId: user.userId,
+					userName: user.userName,
+					role: user.role,
+					status: user.status,
+				 }
+				});
+		} else {
 			return reply.status(401).send({ error: 'Invalid email or password' });
 		}
 	} catch (error) {
@@ -176,5 +186,96 @@ export async function deleteAccount(req: ProfileRequest, reply: FastifyReply) {
 		}
 	} catch (error) {
 		reply.status(500).send({ error: 'Internal server error' });
+	}
+}
+
+interface LogoutUserRequest extends FastifyRequest {
+	user: { userId: string};
+}
+
+export async function logoutUser(req: LogoutUserRequest, reply: FastifyReply) {
+	// delete cookies plus tard (a voir)
+	try {
+		updateUserStatus(req.user.userId, 'offline');
+		reply.send({ success: true, message: `UserId: ${req.user.userId} loggout` });
+	} catch (error) {
+		console.error(error);
+		return reply.status(500).send({ error: 'Internal server error' });
+	}
+}
+
+interface UpdateRoleRequest extends FastifyRequest {
+	body: {
+		userId: string;
+		role: string;
+	};
+	user: { userId: string; role: string };
+}
+
+export async function updateRole(req: UpdateRoleRequest, reply: FastifyReply) {
+	if (req.user.role !== 'admin') {
+		return reply.status(403).send({ error: 'Permissio denied' });
+	}
+
+	const { userId, role } = req.body;
+
+	if (!['user', 'admin'].includes(role)) {
+		return reply.status(400).send({ error: 'Invalid role' });
+	}
+
+	try {
+		const success = updateUserRole(userId, role);
+		if (success) {
+			return reply.send({ success: true, message: 'Role updated successfully' });
+		} else {
+			return reply.status(404).send({ error: 'User not found' });
+		}
+	} catch (error) {
+		console.error(error);
+		return reply.status(500).send({ error: 'Internal server error' });
+	}
+}
+
+interface UpdateStatusRequest extends FastifyRequest {
+	body: {
+		status: string;
+	}
+	user: { userId: string };
+}
+
+export async function updateStatus(req: UpdateStatusRequest, reply: FastifyReply) {
+	const { status } = req.body;
+	const userId = req.user.userId;
+
+	if (!['online', 'offline'].includes(status)) {
+		return reply.status(400).send({ error: 'Invalid status' });
+	}
+
+	try {
+		const success = updateUserStatus(userId, status);
+		if (success) {
+			return reply.send({ success: true, message: `Status updated in ${status}.`});
+		} else {
+			return reply.status(404).send({ error: 'User not found' });
+		}
+	} catch (error) {
+		console.error(error);
+		return reply.status(500).send({ error: 'Internal server error' });
+	}
+}
+
+export async function getOnlineUsers(req: FastifyRequest, reply: FastifyReply) {
+	try {
+		const onlineUsers = getUserWithStatus('online');
+		return reply.send({
+			users: onlineUsers.map(user => ({
+				userId: user.userId,
+				userName: user.userName,
+				status: user.status,
+			}))
+		});
+	} catch (error) {
+		console.error(error);
+		return reply.status(500).send({ error: 'Internal server error' });
 	}
 }

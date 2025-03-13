@@ -196,6 +196,7 @@ interface LogoutUserRequest extends FastifyRequest {
 export async function logoutUser(req: LogoutUserRequest, reply: FastifyReply) {
 	// delete cookies plus tard (a voir)
 	try {
+		console.log(req.user.userId);
 		updateUserStatus(req.user.userId, 'offline');
 		reply.send({ success: true, message: `UserId: ${req.user.userId} loggout` });
 	} catch (error) {
@@ -213,9 +214,9 @@ interface UpdateRoleRequest extends FastifyRequest {
 }
 
 export async function updateRole(req: UpdateRoleRequest, reply: FastifyReply) {
-	if (req.user.role !== 'admin') {
-		return reply.status(403).send({ error: 'Permissio denied' });
-	}
+	// if (req.user.role !== 'admin') {
+	// 	return reply.status(403).send({ error: 'Permission denied' });
+	// } Pour plus tard si utilisation de admin
 
 	const { userId, role } = req.body;
 

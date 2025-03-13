@@ -15,7 +15,7 @@ POST http://localhost:4001/user/login
 Content-Type: application/json
 
 {
-	"email": "test@email.com",
+	"email": "tes@email.com",
 	"password": "mypassword"
 }
 
@@ -46,21 +46,21 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNzhiM
 ### Logout un User
 POST http://localhost:4001/user/logout
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjMDY1M2M0Ny1iMzg1LTRhZjYtYWYwMS1kMTRmNWExYjk5MzEiLCJpYXQiOjE3NDE3OTU4MjksImV4cCI6MTc0MTg4MjIyOX0.RvU_A7LDnFBR6EChGaPLvwLbHqhQyGz8PikHVbmqsHo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjZDk4ZTI3NS1lY2U5LTQwYWYtYTU0My03ZjYzM2NmNGE3MWIiLCJpYXQiOjE3NDE4NTY4OTgsImV4cCI6MTc0MTk0MzI5OH0.Mx9kbY-yF8Wr87I-7-NpycV_VPYwAUnt5R5ulRCZo5Q
 
 {
 	"userId": "c0653c47-b385-4af6-af01-d14f5a1b9931"
-} // A voir probleme de permission
+}
 
 ### Update un role
 PUT http://localhost:4001/user/role
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjMDY1M2M0Ny1iMzg1LTRhZjYtYWYwMS1kMTRmNWExYjk5MzEiLCJpYXQiOjE3NDE3OTU2MDUsImV4cCI6MTc0MTg4MjAwNX0.5674qx4zcgAFZBfQVrQciVm9zzcE5Eh7ZR9573UG6vQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjZDk4ZTI3NS1lY2U5LTQwYWYtYTU0My03ZjYzM2NmNGE3MWIiLCJpYXQiOjE3NDE4NTY4OTgsImV4cCI6MTc0MTk0MzI5OH0.Mx9kbY-yF8Wr87I-7-NpycV_VPYwAUnt5R5ulRCZo5Q
 
 {
-	"userId": "c0653c47-b385-4af6-af01-d14f5a1b9931",
+	"userId": "cd98e275-ece9-40af-a543-7f633cf4a71b",
 	"role": "admin"
-} // A voir probleme de permission
+}
 
 ### Update un status
 PUT http://localhost:4001/user/status

@@ -62,3 +62,19 @@ Content-Type: application/json
 {
 	"playerId": 1
 }
+
+### start tournament queue + create tournament
+POST http://localhost:4003/matchmaking/tournament/start
+Content-Type: application/json
+
+{
+	"playerId": 4
+}
+
+### launch match
+POST http://localhost:4003/matchmaking/tournament/match/start/
+Content-Type: application/json
+
+{
+	"playerId": 4
+}

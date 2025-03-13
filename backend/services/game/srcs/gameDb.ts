@@ -8,6 +8,7 @@ interface Game {
 	score2: number;
 	status: 'ongoing' | 'finished';
 	winner_id?: number | null;
+	matchId?: string | null;
 }
 
 //const games: Game[] = [];
@@ -27,19 +28,20 @@ db.exec(`
 	  score1 INTEGER DEFAULT 0,
 	  score2 INTEGER DEFAULT 0,
 	  status TEXT CHECK(status IN ('ongoing', 'finished')) DEFAULT 'ongoing',
-	  winner_id INTEGER NULL
+	  winner_id INTEGER NULL,
+	  matchId TEXT NULL
 	);
 `);
 
   
 
-export function saveGame(player1_id: number, player2_id: number): Game {
+export function saveGame(player1_id: number, player2_id: number, matchId?: string): Game {
 	const stmt = db.prepare(`
-		INSERT INTO games (player1_id, player2_id)
-		VALUES (?, ?)
+		INSERT INTO games (player1_id, player2_id, matchId)
+		VALUES (?, ?, ?)
 	`);
-	const result = stmt.run(player1_id, player2_id);
-	return { gameId: result.lastInsertRowid, player1_id, player2_id, score1: 0, score2: 0, status: 'ongoing' } as Game;
+	const result = stmt.run(player1_id, player2_id, matchId || null);
+	return { gameId: result.lastInsertRowid, player1_id, player2_id, score1: 0, score2: 0, status: 'ongoing', matchId: matchId || null  } as Game;
 }
 
 export function getGamebyId(gameId: number): Game {

@@ -28,23 +28,27 @@ interface EndGameRequest extends FastifyRequest {
 */
 
 //demarrer une partie
-export async function startGame(req: FastifyRequest<{ Body: { player1_id: number; player2_id: number } }>, reply: FastifyReply) {
-	const { player1_id, player2_id } = req.body;
+export async function startGame(req: FastifyRequest<{ Body: { player1_id: number; player2_id: number; matchId?: string } }>, reply: FastifyReply) {
+	const { player1_id, player2_id, matchId } = req.body;
 	const player1 = await getUserById(player1_id);
 	const player2 = await getUserById(player2_id);
 
 	if (!player1 || !player2) {
 		return reply.status(400).send({error: "One or both players do not exist"})
 	}
-	const newGame = saveGame(player1_id, player2_id);
-	reply.send({ success: true, game: newGame });
+    let newGame;
+    if (matchId) {
+        newGame = saveGame(player1_id, player2_id, matchId);
+    } else {
+        newGame = saveGame(player1_id, player2_id);
+    }	reply.send({ success: true, game: newGame });
 }
 
 // recuperer une partie
 export async function getGame(req: FastifyRequest<{ Params: { gameId: string } }>, reply: FastifyReply) {
 	const game = getGamebyId(parseInt(req.params.gameId));
 	if (!game) return reply.status(404).send({ error: 'Game not found' });
-  
+
 	reply.send(game);
 }
 
@@ -70,6 +74,20 @@ export async function endGame(req:FastifyRequest<{ Params: { gameId: string } }>
 	const updatedGame = endGameInDb(parseInt(gameId));
 	if (!updatedGame) return reply.status(404).send({error: "Game not found"});
 	reply.send({success: true, updatedGame});
+	//mise a jour du service matchmaking
+	if (updatedGame.matchId) {
+		try {
+			const baseUrl = process.env.MATCHMAKING_SERVICE_BASE_URL || 'http://matchmaking:4003';
+			const response = await axios.post('${MATCHMAKING_SERVICE_BASE_URL}/matchmaking/match/update', {
+				matchId: updatedGame.matchId,
+				score1: updatedGame.score1,
+				score2: updatedGame.score2,
+				winner_id: updatedGame.winner_id
+			});
+		} catch (error) {
+			console.error('Erreur lors de la mise à jour du matchmaking:', error);
+		}
+	}
 }
 
 async function getUserById(userId: number) {

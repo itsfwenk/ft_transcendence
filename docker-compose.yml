@@ -34,6 +34,8 @@ services:
     ports:
     - "${MATCHMAKING_SERVICE_PORT}:4003"
     - "9229:9229"
+    volumes:
+      - ./backend/db:/app/db
     restart: always
     networks:
     - app-network

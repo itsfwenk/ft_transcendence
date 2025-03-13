@@ -33,8 +33,11 @@ export async function startGame(req: FastifyRequest<{ Body: { player1_id: number
 	const player1 = await getUserById(player1_id);
 	const player2 = await getUserById(player2_id);
 
-	if (!player1 || !player2) {
-		return reply.status(400).send({error: "One or both players do not exist"})
+	if (!player1) {
+		return reply.status(400).send({error: "player 1 do not exist"})
+	}
+	if (!player2) {
+		return reply.status(400).send({error: "player 2 do not exist"})
 	}
 	const newGame = saveGame(player1_id, player2_id);
 	reply.send({ success: true, game: newGame });
@@ -74,7 +77,7 @@ export async function endGame(req:FastifyRequest<{ Params: { gameId: string } }>
 
 async function getUserById(userId: number) {
 	try {
-	  const response = await axios.get(`http://localhost:4001/user/${userId}`);
+	  const response = await axios.get(`http://user:4001/user/${userId}`);
 	  return response.data;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {

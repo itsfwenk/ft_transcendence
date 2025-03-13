@@ -1,11 +1,29 @@
 import Database from 'better-sqlite3';
 
+if (!process.env.CANVAS_WIDTH
+		|| !process.env.CANVAS_HEIGHT
+		|| !process.env.PADDLE_WIDTH
+		|| !process.env.PADDLE_HEIGHT
+		|| !process.env.BALL_RADIUS) {
+	console.log("Missing environment variables");
+  }
+
+const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
+const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
+const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
+const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
+const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
+const paddleBasePosition = canvasHeight / 2 - paddleHeight / 2;
+
 interface Game {
 	gameId: number;
 	player1_id: number;
 	player2_id: number;
 	score1: number;
 	score2: number;
+	leftPaddle: { x: number; y: number; dy: number };
+	rightPaddle: { x: number; y: number; dy: number };
+	ball: { x: number; y: number; radius: number; dx: number; dy: number};
 	status: 'ongoing' | 'finished';
 	winner_id?: number | null;
 }
@@ -26,6 +44,9 @@ db.exec(`
 	  player2_id INTEGER NOT NULL,
 	  score1 INTEGER DEFAULT 0,
 	  score2 INTEGER DEFAULT 0,
+	  leftPaddle TEXT NOT NULL DEFAULT '{"x": 0, "y": ${paddleBasePosition}, "dy": 0}',
+	  rightPaddle TEXT NOT NULL DEFAULT '{"x": ${canvasWidth - 10}, "y": ${paddleBasePosition}, "dy": 0}',
+	  ball TEXT NOT NULL DEFAULT '{"x": ${canvasWidth / 2}, "y": ${canvasHeight / 2}, "radius": ${ballRadius}, "dx": ${Math.random() > 0.5 ? 3 : -3}, "dy": ${Math.random() > 0.5 ? 3 : -3}}',
 	  status TEXT CHECK(status IN ('ongoing', 'finished')) DEFAULT 'ongoing',
 	  winner_id INTEGER NULL
 	);

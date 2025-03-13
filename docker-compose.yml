@@ -15,6 +15,7 @@ services:
     build:
       context: ./backend
       dockerfile: services/game/Dockerfile
+    env_file: ./.env
     ports:
       - "4002:4002"
     volumes:

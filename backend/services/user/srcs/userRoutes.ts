@@ -29,7 +29,7 @@ export default async function userRoutes(fastify: any) {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
-            user: { User } // test mettre juste User
+            user: { User } // test mettre juste -> User | enlever les { ... }
           }
         }
       }

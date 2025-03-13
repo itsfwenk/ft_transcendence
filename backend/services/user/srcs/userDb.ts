@@ -16,15 +16,19 @@ db.exec(`
 		role TEXT NOT NULL,
 		status TEXT NOT NULL
 	)
-`)
+`);
 
 db.exec(`
-	CREATE TABLE IF NOT EXISTS token (
-	token TEXT NOT NULL UNIQUE,
-	expiresAt INTEGER NOT NULL,
+	CREATE TABLE IF NOT EXISTS linked_accounts (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	userId TEXT NOT NULL,
-	
-	FOREIGN KEY (userId) REFERENCES users(userId)
+	provider TEXT NOT NULL,
+	providerId TEXT NOT NULL,
+	accessToken TEXT,
+	refreshToken TEXT,
+	tokenExpiry INTEGER,
+	FOREIGN KEY (userId) REFERENCES users(userId),
+	UNIQUE(provider, providerId) 
 	)
 `);
 

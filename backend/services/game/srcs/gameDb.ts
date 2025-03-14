@@ -15,15 +15,29 @@ const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
 const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
 const paddleBasePosition = canvasHeight / 2 - paddleHeight / 2;
 
-interface Game {
+export interface Ball {
+	x: number;
+	y: number;
+	radius: number;
+	dx: number;
+	dy: number
+}
+
+export interface Paddle {
+	x: number;
+	y: number;
+	dy: number
+}
+
+export interface Game {
 	gameId: number;
 	player1_id: number;
 	player2_id: number;
 	score1: number;
 	score2: number;
-	leftPaddle: { x: number; y: number; dy: number };
-	rightPaddle: { x: number; y: number; dy: number };
-	ball: { x: number; y: number; radius: number; dx: number; dy: number};
+	leftPaddle: Paddle;
+	rightPaddle: Paddle;
+	ball: Ball;
 	status: 'ongoing' | 'finished';
 	winner_id?: number | null;
 }
@@ -60,7 +74,9 @@ export function saveGame(player1_id: number, player2_id: number): Game {
 		VALUES (?, ?)
 	`);
 	const result = stmt.run(player1_id, player2_id);
-	return { gameId: result.lastInsertRowid, player1_id, player2_id, score1: 0, score2: 0, status: 'ongoing' } as Game;
+	// return { gameId: result.lastInsertRowid, player1_id, player2_id, score1: 0, score2: 0, status: 'ongoing' } as Game;
+	const stmt2 = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
+	return stmt2.get(result.lastInsertRowid) as Game;
 }
 
 export function getGamebyId(gameId: number): Game {
@@ -99,3 +115,30 @@ export function endGameInDb(gameId: number): Game | null {
 	stmt.run(winner_id, gameId);
 	return db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | null;
 }
+
+
+async function updateBallPositionInDb(gameId: number, ball: Ball) {
+	try {
+		const updatedBallJSON = JSON.stringify(ball);
+		const stmt = db.prepare(`
+			UPDATE games
+			SET ball = ?
+			WHERE gameId = ?
+		`);
+		stmt.run(updatedBallJSON, gameId);
+	} catch (err) {
+	  console.error('Error updating game in the database:', err);
+	}
+}
+
+// export async function updateBallPositionsInDb() {
+// 	const games = await db.prepare('SELECT * FROM games WHERE status = "ongoing"').all();
+// 	await db.all()
+// 	// for (const row of stmt.iterate()) {
+// 	// 	const game = row as Game;
+// 	// 	if (game.status === 'ongoing') {
+// 	// 		game.ball.x += game.ball.dx;
+// 	// 		game.ball.y += game.ball.dy;
+// 	// 	}
+// 	// }
+// }

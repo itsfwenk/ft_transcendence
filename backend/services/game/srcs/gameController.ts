@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { endGameInDb, getGamebyId, saveGame, updateGameScore } from './gameDb.js'
+import { Ball, Paddle, Game } from './gameDb.js'
 import axios from 'axios';
 
 /*
@@ -88,5 +89,24 @@ async function getUserById(userId: number) {
 			console.error(`❌ Une erreur inconnue est survenue`);
 		}
 	  return null;
+	}
+}
+
+export async function updateBallPosition(gameId: number) {
+	try {
+		const game = getGamebyId(gameId);
+		if (!game) {
+			console.error(`Game ${gameId} not found`);
+			return;
+		}
+		const ball: Ball = game.ball;
+		ball.x += ball.dx;
+		ball.y += ball.dy;
+		if (ball.y <= 0 || ball.y >= parseInt(process.env.CANVAS_HEIGHT as string, 10)) {
+			ball.dy *= -1;
+		}
+	}
+	catch (error) {
+		console.error("Error updating ball:", error);
 	}
 }

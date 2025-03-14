@@ -4,6 +4,7 @@ import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import userRoutes from './userRoutes.js';
 import dotenv from 'dotenv'
+import googleAuthRoutes from './googleAuthRoutes.js';
 
 const app = Fastify();
 
@@ -53,8 +54,9 @@ app.decorate("isAdmin", async function (req: IsAdminRequest, reply: FastifyReply
 	}
   });
 
-// Enregistrer les routes utilisateur
+// Enregistrer les routes utilisateur et google
 app.register(userRoutes, { prefix: '/user' });
+app.register(googleAuthRoutes, { prefix: '/user' });
 
 app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	console.log('User Service running on http://localhost:4001');

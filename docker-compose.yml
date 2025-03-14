@@ -52,7 +52,6 @@ services:
       - user
       - game
       - matchmaking
-    restart: always
     networks:
       - app-network
     env_file: .env

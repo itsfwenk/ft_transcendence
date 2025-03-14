@@ -55,7 +55,7 @@ POST http://localhost:4002/game/2/end
 
 ############################ MATCHMAKING ############################
 
-### join queue
+### join queue1v1
 POST http://localhost:4003/matchmaking/join
 Content-Type: application/json
 
@@ -63,18 +63,30 @@ Content-Type: application/json
 	"playerId": 1
 }
 
+
+
+### join queueTournament
+POST http://localhost:4003/matchmaking/tournament/join
+Content-Type: application/json
+
+{
+	"playerId": 4
+}
+
+
+
+
 ### start tournament queue + create tournament
 POST http://localhost:4003/matchmaking/tournament/start
 Content-Type: application/json
 
 {
-	"playerId": 4
+	"playerId": 2
 }
 
 ### launch match
-POST http://localhost:4003/matchmaking/tournament/match/start/
-Content-Type: application/json
+POST http://localhost:4003/matchmaking/tournament/match/start/0d247bfa-3b08-4398-9cbd-167376c4ee9b
 
-{
-	"playerId": 4
-}
+
+### udpate match
+POST http://localhost:4003/matchmaking/tournament/match/update/0d247bfa-3b08-4398-9cbd-167376c4ee9b

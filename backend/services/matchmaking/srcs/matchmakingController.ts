@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import axios from 'axios';
-import {createTournament} from './matchmakingDb';
+import {createTournament, Tournament} from './matchmakingDb';
 
 // Interface pour les requêtes de création 
 interface queueRequest extends FastifyRequest {
@@ -17,37 +17,39 @@ interface queueItem {
 	status?: 'matched' | 'waiting';
 }
 
-const queue: number[] = [];
+const queue1v1: number[] = [];
+const queueTournament: number[] = [];
 
 
 //join 1v1 queue
-export async function joinQueue(playerId: number) {
-	queue.push(playerId);
-	console.log(queue);
+export async function joinQueue1v1(playerId: number) {
+	queue1v1.push(playerId);
+	console.log(queue1v1);
 	attemptMatch();
 }
 
-//join tournament queue
+//join tournament 1
 export async function joinTournamentQueue(playerId: number) {
-	queue.push(playerId);
-	console.log(queue);
-	attemptTournament();
+	queueTournament.push(playerId);
+	console.log(queueTournament);
 }
 
-export async function createGameSession(player1_id:number, player2_id:number, matchId?:string) {
+export async function createGameSession(player1_id:number, player2_id:number, matchId?:string): Promise<string | undefined> {
 	try {
 		const baseUrl = process.env.GAME_SERVICE_BASE_URL || 'http://game:4002';
 		let response;
 		if (matchId) {
+			console.log(matchId);
 			response = await axios.post(`${baseUrl}/game/start`, {player1_id, player2_id, matchId});
 		} else {
 			response = await axios.post(`${baseUrl}/game/start`, {player1_id, player2_id});
 		}
 		//const response = await axios.post(`${baseUrl}/game/start`, {player1_id, player2_id});
 		console.log('Partie creee:', response.data);
-		return response.data.gameId;
+		return response.data.game.gameId;
 	} catch (error) {
 		console.error('Erreur lors du lancement de la partie:', error);
+		throw error;
 	}
 }
 
@@ -67,9 +69,9 @@ export async function createGameSession(player1_id:number, player2_id:number, ma
 
 // removePlayer 
 function attemptMatch() {
-	if (queue.length >= 2) {
-		const player1 = queue.shift();
-		const player2 = queue.shift();
+	if (queue1v1.length >= 2) {
+		const player1 = queue1v1.shift();
+		const player2 = queue1v1.shift();
 		if (player1 && player2) {
 			console.log('creating a matching between')
 			createGameSession(player1, player2)
@@ -77,16 +79,24 @@ function attemptMatch() {
 	}
 }
 
-function attemptTournament() {
-	if (queue.length >= 4) {
-		const player1 = queue.shift();
-		const player2 = queue.shift();
-		const player3 = queue.shift();
-		const player4 = queue.shift();
+export async function attemptTournament(): Promise<Tournament | undefined> {
+	console.log(queueTournament);
+	if (queueTournament.length >= 4) {
+		const player1 = queueTournament.shift();
+		const player2 = queueTournament.shift();
+		const player3 = queueTournament.shift();
+		const player4 = queueTournament.shift();
 		if (player1 && player2 && player3 && player4) {
             let players: number[] = [player1, player2, player3, player4];
 			console.log('creating a tournament between')
-			createTournament(players);
+			const tournament = createTournament(players);
+			if (!tournament) {
+				throw Error ("No tournament created");
+			}
+			console.log("Tournoi cree:", tournament);
+			return (tournament);
 		}
+	} else {
+		throw Error ("Pas assez de joueurs dans la Tournament Queue");
 	}
 }

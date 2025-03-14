@@ -78,11 +78,12 @@ export async function endGame(req:FastifyRequest<{ Params: { gameId: string } }>
 	if (updatedGame.matchId) {
 		try {
 			const baseUrl = process.env.MATCHMAKING_SERVICE_BASE_URL || 'http://matchmaking:4003';
-			const response = await axios.post('${MATCHMAKING_SERVICE_BASE_URL}/matchmaking/match/update', {
+			const response = await axios.post(`${baseUrl}/matchmaking/match/update/${updatedGame.matchId}`, {
 				matchId: updatedGame.matchId,
 				score1: updatedGame.score1,
 				score2: updatedGame.score2,
-				winner_id: updatedGame.winner_id
+				winner_id: updatedGame.winner_id,
+				status: 'completed'
 			});
 		} catch (error) {
 			console.error('Erreur lors de la mise à jour du matchmaking:', error);

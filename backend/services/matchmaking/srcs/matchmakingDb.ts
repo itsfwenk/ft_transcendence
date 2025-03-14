@@ -13,7 +13,7 @@ export interface Match {
 	player2Score: number;
 	winner_Id?: number;
 	status: 'scheduled' | 'in_progress' | 'completed';
-	gameSessionId?: string;
+	matchTime: Date;
 }
   
 export interface Tournament {
@@ -40,12 +40,12 @@ db.exec(`
 		id TEXT PRIMARY KEY,
 		tournamentId TEXT, -- Clé étrangère vers Tournament.id
 		round INTEGER,
-		player1Id INTEGER,
-		player2Id INTEGER,
+		player1_Id INTEGER,
+		player2_Id INTEGER,
 		player1Score INTEGER,
 		player2Score INTEGER,
 		winnerId INTEGER NULL,
-		status TEXT,  -- scheduled, in_progress, completed
+		status TEXT,  -- scheduled, in_progress, completed,
 		matchTime DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (tournamentId) REFERENCES Tournament(id)
 	);
@@ -72,7 +72,8 @@ export function createTournament(players: number[]): Tournament {
 		player2_Id: players[1],
 		player1Score: 0,
 		player2Score: 0,
-		status: 'scheduled'
+		status: 'scheduled',
+		matchTime: new Date()
 	};
 	const match2: Match = {
 		id: uuidv4(),
@@ -81,12 +82,13 @@ export function createTournament(players: number[]): Tournament {
 		player2_Id: players[3],
 		player1Score: 0,
 		player2Score: 0,
-		status: 'scheduled'
+		status: 'scheduled',
+		matchTime: new Date()
 	};
 
 	const insertMatchStmt = db.prepare(`
-		INSERT INTO TournamentMatch(id, tournamentId, round, player1Id, player2Id, player1Score, player2Score, winnerId, status, matchTime)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
+		INSERT INTO TournamentMatch(id, tournamentId, round, player1_Id, player2_Id, player1Score, player2Score, winnerId, status, matchTime)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 	`);
 	
 	insertMatchStmt.run(match1.id, tournamentId, match1.round, match1.player1_Id, match1.player2_Id, 0, 0, null, 'scheduled');
@@ -114,12 +116,13 @@ interface TournamentRow {
 interface MatchRow {
     id: string;
     round: number;
-    player1Id: number;
-    player2Id: number;
+    player1_Id: number;
+    player2_Id: number;
     player1Score: number;
     player2Score: number;
     winnerId: number;
     status: 'scheduled' | 'in_progress' | 'completed';
+	matchTime: string;
 }
 
 export function getTournamentById(tournamentId: string): Tournament | null {
@@ -133,25 +136,50 @@ export function getTournamentById(tournamentId: string): Tournament | null {
         matches: matches.map((m: MatchRow) => ({
             id: m.id,
             round: m.round,
-            player1_Id: m.player1Id,
-            player2_Id: m.player2Id,
+            player1_Id: m.player1_Id,
+            player2_Id: m.player2_Id,
             player1Score: m.player1Score,
             player2Score: m.player2Score,
             winner_Id: m.winnerId,
             status: m.status,
+			matchTime: new Date(m.matchTime)
         })),
         createdAt: new Date(row.createdAt),
         updatedAt: new Date(row.updatedAt),
     };
 }
 
-export function updateMatch(matchId: string, score1: number, score2: number, winnerId: number): void {
+export function updateMatch(matchId: string, score1: number, score2: number, winnerId: number): any {
 	const stmt = db.prepare(`
-	  UPDATE TournamentMatch
-	  SET player1Score = ?, player2Score = ?, winnerId = ?, status = 'completed', matchTime = CURRENT_TIMESTAMP
-	  WHERE id = ?
-	`);
-	stmt.run(score1, score2, winnerId, matchId);
+		UPDATE TournamentMatch
+		SET player1Score = ?, player2Score = ?, winnerId = ?, status = 'completed', matchTime = CURRENT_TIMESTAMP
+		WHERE id = ?
+		RETURNING *
+	  `);
+	const updatedMatch = stmt.get(
+		score1, 
+		score2, 
+		winnerId, 
+		matchId
+	);
+  	return updatedMatch;
+}
+
+export function updateMatchv2(match: Match): any {
+	const stmt = db.prepare(`
+		UPDATE TournamentMatch
+		SET player1Score = ?, player2Score = ?, winnerId = ?, status = ?, matchTime = CURRENT_TIMESTAMP
+		WHERE id = ?
+		RETURNING *
+	  `);
+	const updatedMatch = stmt.get(
+		match.player1Score, 
+		match.player2Score, 
+		match.winner_Id || null, 
+		match.status,
+		match.id,
+	);
+  	return updatedMatch;
 }
 
 export function scheduleFinal(tournamentId: string): void {
@@ -163,6 +191,10 @@ export function scheduleFinal(tournamentId: string): void {
 	if (semiMatches.length !== 2 || semiMatches.some(m => !m.winner_Id)) {
 		throw new Error("Les matchs des demi-finales ne sont pas terminés.");
 	}
+	const finalMatch = tournament.matches.find(m => m.round === 2);
+	if (finalMatch) {
+		throw new Error("La finale est déjà prévue.");
+	}
 	const winner1_Id = semiMatches[0].winner_Id;
     const winner2_Id = semiMatches[1].winner_Id;
 
@@ -173,7 +205,7 @@ export function scheduleFinal(tournamentId: string): void {
 	const finalMatchId = uuidv4();
   
 	const insertMatchStmt = db.prepare(`
-		INSERT INTO TournamentMatch (id, tournamentId, round, player1Id, player2Id, player1Score, player2Score, status, matchTime)
+		INSERT INTO TournamentMatch (id, tournamentId, round, player1_Id, player2_Id, player1Score, player2Score, status, matchTime)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 	`);
 	insertMatchStmt.run(finalMatchId, tournamentId, 2, winner1_Id, winner2_Id, 0, 0, 'scheduled');
@@ -187,6 +219,32 @@ export function scheduleFinal(tournamentId: string): void {
 }
 
 export function getMatchbyId(matchId: string): Match {
-	const match = db.prepare(`SELECT * FROM TournamentMatch WHERE matchId = ?`);
-	return match.get(matchId) as Match;
+	const stmt = db.prepare(`SELECT * FROM TournamentMatch WHERE id = ?`);
+	console.log(matchId);
+	const result = stmt.get(matchId);
+	if (!result) {
+		console.error(`Aucun match trouve pour l'ID ${matchId}`);
+		throw new Error("Aucun match avec cet id.");
+	}
+	return result as Match;
+}
+
+export function finishTournament(tournamentId: string):void {
+	const tournament = getTournamentById(tournamentId);
+	if (!tournament) {
+		throw Error ("Aucun tournoi avec ce Tournament Id");
+	}
+	const finalMatch = tournament.matches.find(m => m.round === 2);
+	if (!finalMatch) {
+		throw new Error("La finale n'est pas encore prete.");
+	} 
+	if (finalMatch.status !== 'completed') {
+		throw new Error("La finale n'est pas encore terminee.");
+	}
+	const updateTournamentStmt = db.prepare(`
+		UPDATE Tournament
+		SET status = 'completed', updatedAt = CURRENT_TIMESTAMP
+		WHERE id = ?
+	`);
+	updateTournamentStmt.run(tournamentId);
 }

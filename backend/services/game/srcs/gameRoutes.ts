@@ -1,8 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
 import { startGame, getGame, updateScore, endGame } from './gameController.js'
 
-
-// Définir un schéma pour `/update-score`
+//definir un schema pour 'start game'
 const startGameSchema: FastifySchema = {
 	body: {
 	  type: 'object',
@@ -14,7 +13,7 @@ const startGameSchema: FastifySchema = {
 	}
 };
 
-//definir un schema pour 'start game'
+// Définir un schéma pour `/update-score`
 const updateScoreSchema: FastifySchema = {
 	body: {
 	  type: 'object',

@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { endGameInDb, getGamebyId, saveGame, updateGameScore } from './gameDb.js'
+import { Ball, Paddle, Game } from './gameDb.js'
 import axios from 'axios';
 
 /*
@@ -33,8 +34,11 @@ export async function startGame(req: FastifyRequest<{ Body: { player1_id: number
 	const player1 = await getUserById(player1_id);
 	const player2 = await getUserById(player2_id);
 
-	if (!player1 || !player2) {
-		return reply.status(400).send({error: "One or both players do not exist"})
+	if (!player1) {
+		return reply.status(400).send({error: "player 1 do not exist"})
+	}
+	if (!player2) {
+		return reply.status(400).send({error: "player 2 do not exist"})
 	}
     let newGame;
     if (matchId) {
@@ -82,8 +86,7 @@ export async function endGame(req:FastifyRequest<{ Params: { gameId: string } }>
 				matchId: updatedGame.matchId,
 				score1: updatedGame.score1,
 				score2: updatedGame.score2,
-				winner_id: updatedGame.winner_id,
-				status: 'completed'
+				winner_id: updatedGame.winner_id
 			});
 		} catch (error) {
 			console.error('Erreur lors de la mise à jour du matchmaking:', error);
@@ -106,5 +109,24 @@ async function getUserById(userId: number) {
 			console.error(`❌ Une erreur inconnue est survenue`);
 		}
 	  return null;
+	}
+}
+
+export async function updateBallPosition(gameId: number) {
+	try {
+		const game = getGamebyId(gameId);
+		if (!game) {
+			console.error(`Game ${gameId} not found`);
+			return;
+		}
+		const ball: Ball = game.ball;
+		ball.x += ball.dx;
+		ball.y += ball.dy;
+		if (ball.y <= 0 || ball.y >= parseInt(process.env.CANVAS_HEIGHT as string, 10)) {
+			ball.dy *= -1;
+		}
+	}
+	catch (error) {
+		console.error("Error updating ball:", error);
 	}
 }

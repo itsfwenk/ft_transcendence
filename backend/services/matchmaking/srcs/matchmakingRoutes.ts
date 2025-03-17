@@ -1,7 +1,6 @@
-import { FastifyInstance, FastifyRequest, FastifyReply, FastifyPluginOptions, FastifySchema } from 'fastify';
-import { attemptTournament, joinQueue1v1, joinTournamentQueue } from './matchmakingController.js';
-import { updateMatch, getMatchbyId, getTournamentById, scheduleFinal, finishTournament} from './matchmakingDb.js'
-import { launchMatch } from './matchmaking.js';
+import { FastifyRequest, FastifyReply, FastifySchema } from 'fastify';
+import { attemptTournament, launchMatch, joinQueue1v1, joinTournamentQueue } from './matchmakingController.js';
+import {  updateMatch, getMatchbyId, getTournamentById, scheduleFinal, finishTournament} from './matchmakingDb.js'
 
 const playerIdSchema: FastifySchema = {
 	body: {
@@ -33,7 +32,6 @@ const matchIdSchema: FastifySchema = {
 	},
 };
 
-
 const UpdateMatchSchema: FastifySchema = {
 	params: {
 		type: 'object',
@@ -52,8 +50,6 @@ const UpdateMatchSchema: FastifySchema = {
 		required: ['score1', 'score2', 'winner_id']
 	},
 };
-
-
 
 export default async function matchmakingRoutes(fastify: any) {
 	fastify.post('/join', { schema: playerIdSchema }, async (request:FastifyRequest, reply:FastifyReply) => {

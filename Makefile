@@ -15,11 +15,20 @@ start:
 build:
 	docker compose -f docker-compose.yml build
 
+install-deps:
+	@echo "Installation des dépendances pour user..."
+	cd backend/services/user && npm install
+	@echo "Installation des dépendances pour game..."
+	cd backend/services/game && npm install
+	@echo "Installation des dépendances pour matchmaking..."
+	cd backend/services/matchmaking && npm install
+	@echo "Installation des dépendances pour gateway..."
+	cd backend/gateway && npm install
+
 clean:
 	@docker stop $$(docker ps -qa) || true
 	@docker rm $$(docker ps -qa) || true
 	@docker rmi -f $$(docker images -qa) || true
-	@docker volume rm $$(docker volume ls -q) || true
 	@docker network prune -f || true
 	@docker system prune -a --volumes -f
 

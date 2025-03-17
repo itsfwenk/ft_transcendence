@@ -15,7 +15,8 @@ COPY /gateway ./
 
 RUN npm run build
 
-EXPOSE 4000
+EXPOSE 4000 9230
 
 #CMD ["sh"]
 CMD ["node", "dist/srcs/gatewayIndex.js"]
+#CMD ["node", "--inspect=0.0.0.0:9230", "dist/srcs/gatewayIndex.js"]

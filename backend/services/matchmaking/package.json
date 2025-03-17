@@ -1,11 +1,11 @@
 {
-  "name": "user",
+  "name": "matchmaking",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "node --loader ts-node/esm gateway/userIndex.ts",
+    "start": "node --loader ts-node/esm gateway/matchmakingIndex.ts",
     "rebuild": "electron-rebuild -f -w better-sqlite3"
   },
   "keywords": [],
@@ -13,19 +13,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@fastify/jwt": "^9.0.4",
-    "@fastify/oauth2": "^8.1.2",
     "@fastify/swagger": "^9.4.2",
     "@fastify/swagger-ui": "^5.2.2",
-    "@types/bcrypt": "^5.0.2",
     "@types/better-sqlite3": "^7.6.12",
     "axios": "^1.8.3",
-    "bcrypt": "^5.1.1",
     "better-sqlite3": "^11.8.1",
-    "dotenv": "^16.4.7",
-    "electron": "^35.0.0",
     "fastify": "^5.2.1",
-    "hi-base32": "^0.5.1",
     "typescript": "^5.8.2",
     "uuid": "^11.1.0"
   }

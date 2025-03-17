@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y curl net-tools
+RUN apt-get update && apt-get install -y sqlite3 curl net-tools
 
 WORKDIR /app
 
@@ -27,7 +27,8 @@ COPY services/user ./
 
 RUN npm run build
 
-EXPOSE 4001
+EXPOSE 4001 9231
 
 #CMD ["sh"]
 CMD ["node", "dist/srcs/userIndex.js"]
+#CMD ["node", "--inspect=0.0.0.0:9231", "dist/srcs/userIndex.js"]

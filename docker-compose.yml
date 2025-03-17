@@ -4,37 +4,57 @@ services:
       context: ./backend
       dockerfile: services/user/Dockerfile
     ports:
-      - "4001:4001"
+      - "${USER_SERVICE_PORT}:4001"
+      - "9231:9231"
     volumes:
       - ./backend/db:/app/db
     restart: always
     networks:
       - app-network
+    env_file: .env
 
   game:
     build:
       context: ./backend
       dockerfile: services/game/Dockerfile
     ports:
-      - "4002:4002"
+      - "${GAME_SERVICE_PORT}:4002"
+      - "9232:9232"
     volumes:
       - ./backend/db:/app/db
     restart: always
     networks:
       - app-network
+    env_file: .env
+
+  matchmaking:
+    build:
+      context: ./backend
+      dockerfile: services/matchmaking/Dockerfile
+    ports:
+    - "${MATCHMAKING_SERVICE_PORT}:4003"
+    - "9229:9229"
+    volumes:
+      - ./backend/db:/app/db
+    restart: always
+    networks:
+    - app-network
+    env_file: .env
 
   gateway:
     build:
       context: ./backend
       dockerfile: gateway/Dockerfile
     ports:
-      - "4000:4000"
+      - "${GATEWAY_SERVICE_PORT}:4000"
+      - "9230:9230"
     depends_on:
       - user
       - game
-    restart: always
+      - matchmaking
     networks:
       - app-network
+    env_file: .env
 
 networks:
   app-network:

@@ -65,7 +65,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjZDk4Z
 ### Update un status
 PUT http://localhost:4001/user/status
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMWZjYzQ5ZS00N2FlLTQ1OTctOGVjNi01ZGU3OWJlM2JlNjAiLCJpYXQiOjE3NDIyMjY1MjgsImV4cCI6MTc0MjMxMjkyOH0.JA0eowRa5gpv2MOeRvS6-k4oped_MGl75BojRz2XaUY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlZjk0MGJlMi1kODc2LTQ1NGUtOWJkYi01NWM3ZWJkYTI4M2UiLCJpYXQiOjE3NDIyMjc2MjMsImV4cCI6MTc0MjMxNDAyM30.B3gNnjInIftLL-0Ac6L0wwmksyKS9iaMQel-1dyXWWw
 
 {
 	"status": "online"
@@ -85,7 +85,7 @@ GET http://localhost:4001/user/auth/google
 
 ### Vérifier l'état d'authentification OAuth (avec un token JWT valide)
 GET http://localhost:4001/user/auth/status
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMWZjYzQ5ZS00N2FlLTQ1OTctOGVjNi01ZGU3OWJlM2JlNjAiLCJpYXQiOjE3NDIyMjY1MjgsImV4cCI6MTc0MjMxMjkyOH0.JA0eowRa5gpv2MOeRvS6-k4oped_MGl75BojRz2XaUY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlZjEyYzA2MS0yNGQzLTQ4ZDYtYTQxMi05NDc1ZWRmMmFiYzUiLCJpYXQiOjE3NDIyMjc2OTUsImV4cCI6MTc0MjMxNDA5NX0.GEGh9mqHjyDUckMzcNNYPkzi27UIgNFQA1kb7a1pJhA
 
 ### Lier un compte Google à un compte utilisateur existant (nécessite un token JWT valide)
 GET http://localhost:4001/user/link/google

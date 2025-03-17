@@ -3,21 +3,46 @@ import bcrypt from 'bcrypt';
 import { getUserByEmail, saveUser, getUserById } from './userDb.js';
 import { linkAccount, getLinkedAccount, unlinkAccount } from './accountDb.js';
 
-interface GoogleAUthRequest extends FastifyRequest {
-	user?: { userId: string };
+interface AuthenticatedRequest extends FastifyRequest {
+	user: { userId: string };
 }
 
-export async function handlerGoogleCallback(req: FastifyRequest, reply: FastifyReply) {
-	try {
-		const token = await this.getAccessTokenFromAuthorizationCodeFlow(req);
+interface GoogleOAuthContext {
+	googleOAuth2: {
+	  getAccessTokenFromAuthorizationCodeFlow: (req: FastifyRequest) => Promise<any>;
+	}
+}
 
+export async function handlerGoogleCallback(this: GoogleOAuthContext, req: FastifyRequest, reply: FastifyReply) {
+	try {
+		console.log("-> Obtention du token...");
+		const token = await this.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(req);
+		
+		const accessToken = token.token && token.token.access_token;
+		
+		if (!accessToken) {
+		  console.error("Impossible de trouver l'access_token dans la réponse");
+		  return reply.redirect('/login-error?reason=missing_access_token');
+		}
+		
 		const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{
 			headers: {
-				Authorization: `Bearer ${token.access_token}`
+				Authorization: `Bearer ${accessToken}`
 			}
 		});
 
+		if (!userInfoResponse.ok) {
+			console.error("Erreur API Google");
+			return reply.redirect('/login-error?reason=api_error');
+		}
+
 		const googleUser = await userInfoResponse.json();
+		console.log("Infos utilisateur obtenues:", googleUser);
+
+		if (!googleUser.email) {
+			console.error("Email manquant dans les données utilisateur Google");
+			return reply.redirect('/login-error?reason=missing_email');
+		}
 
 		let user = getUserByEmail(googleUser.email);
 		let isNewUser = false;
@@ -26,29 +51,33 @@ export async function handlerGoogleCallback(req: FastifyRequest, reply: FastifyR
 			// Pour remplir la var PasswordHsh dans ma TABLE si le client ne se conecte que avec google
 			const dummyPassword = await bcrypt.hash("google-oauth-" + Date.now(), 10);
 
+			console.log("Donnees Goole:", googleUser);
+			console.log("Tentative de creation user avec:", googleUser.name, googleUser.email);
 			user = saveUser(
-				googleUser.name,
+				googleUser.name || `user_${Date.now()}`,
 				googleUser.email,
-				dummyPassword
-			);
-				isNewUser = true;
+				dummyPassword);
+			isNewUser = true;
 		}
+		console.log("resultat saveUser:", user);
 
-		await linkAccount(
-			user.userId,
-			'google',
-			googleUser.id,
-			token.access_token,
-			token.refresh_token || null,
-			token.expires_at || null
-		);
-
-		const jwt = req.server.jwt.sign(
-			{ userId: user.userId },
-			{ expiresIn: '24h' }
-		);
-
-		reply.redirect(`/login-sucess?token=${jwt}&new=${isNewUser}`);
+		if (user) {
+			await linkAccount(
+				user.userId,
+				'google',
+				googleUser.id,
+				token.access_token,
+				token.refresh_token || null,
+				token.expires_at || null
+			);
+			const jwt = req.server.jwt.sign(
+				{ userId: user.userId },
+				{ expiresIn: '24h' }
+			);
+			reply.redirect(`/login-success?token=${jwt}&new=${isNewUser}`);
+		} else {
+			reply.redirect('/login-error?reason=user_creation_failed');
+		}
 	} catch (error) {
 		console.error('OAuth callback error:', error);
 		reply.redirect('/login-error');
@@ -56,12 +85,8 @@ export async function handlerGoogleCallback(req: FastifyRequest, reply: FastifyR
 }
 
 // verifier l'etat de connexion d'un compte 
-export async function getAuthStatus(req: GoogleAUthRequest, reply: FastifyReply) {
+export async function getAuthStatus(req: AuthenticatedRequest, reply: FastifyReply) {
 	try {
-		if (!req.user) {
-			return reply.status(401).send({ error: 'Unauthorized' });
-		}
-
 		const user = getUserById(req.user.userId);
 		if (!user) {
 			return reply.status(404).send({ error: 'User not found' });
@@ -83,22 +108,14 @@ export async function getAuthStatus(req: GoogleAUthRequest, reply: FastifyReply)
 	}
 }
 
-export async function linkGoogleAccount(req: GoogleAUthRequest, reply: FastifyReply) {
-	if (!req.user) {
-		return reply.status(401).send({ error: 'Unauthorized' });
-	}
-
+export async function linkGoogleAccount(req: AuthenticatedRequest, reply: FastifyReply) {
 	// encodeURIComponent pour eviter que la var userId casse l'url
 	const redirectUrl = `/user/auth/google?linkAccount=${encodeURIComponent(req.user.userId)}`;
 	reply.redirect(redirectUrl);
 }
 
-export async function unlinkGoogleAccount(req: GoogleAUthRequest, reply: FastifyReply) {
+export async function unlinkGoogleAccount(req: AuthenticatedRequest, reply: FastifyReply) {
 	try {
-		if (!req.user) {
-			return reply.status(401).send({ error: 'Unauthorized' });
-		}
-
 		const success = unlinkAccount(req.user.userId, 'google');
 		if (success) {
 			reply.send({ success: true, message: 'Google account unlinked successfully' });

@@ -6,7 +6,7 @@ Content-Type: application/json
 
 {
 	"userName": "test",
-	"email": "tes@email.com",
+	"email": "test@email.com",
 	"password": "mypassword"
 }
 
@@ -15,7 +15,7 @@ POST http://localhost:4001/user/login
 Content-Type: application/json
 
 {
-	"email": "tes@email.com",
+	"email": "test@email.com",
 	"password": "mypassword"
 }
 
@@ -65,7 +65,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjZDk4Z
 ### Update un status
 PUT http://localhost:4001/user/status
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjMDY1M2M0Ny1iMzg1LTRhZjYtYWYwMS1kMTRmNWExYjk5MzEiLCJpYXQiOjE3NDE3OTU4MjksImV4cCI6MTc0MTg4MjIyOX0.RvU_A7LDnFBR6EChGaPLvwLbHqhQyGz8PikHVbmqsHo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMWZjYzQ5ZS00N2FlLTQ1OTctOGVjNi01ZGU3OWJlM2JlNjAiLCJpYXQiOjE3NDIyMjY1MjgsImV4cCI6MTc0MjMxMjkyOH0.JA0eowRa5gpv2MOeRvS6-k4oped_MGl75BojRz2XaUY
 
 {
 	"status": "online"
@@ -74,7 +74,34 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjMDY1M
 ### Voir tous les users Online
 GET http://localhost:4001/user/online
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjMDY1M2M0Ny1iMzg1LTRhZjYtYWYwMS1kMTRmNWExYjk5MzEiLCJpYXQiOjE3NDE3OTU2MDUsImV4cCI6MTc0MTg4MjAwNX0.5674qx4zcgAFZBfQVrQciVm9zzcE5Eh7ZR9573UG6vQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMWZjYzQ5ZS00N2FlLTQ1OTctOGVjNi01ZGU3OWJlM2JlNjAiLCJpYXQiOjE3NDIyMjYxNjgsImV4cCI6MTc0MjMxMjU2OH0.HeGHnYz7EIodZQ5OlnQWvuqtKlnqoYnggki1BkvBcdc
+
+
+############################ GOOGLE OAUTH2 ############################
+
+
+### Déclencher l'authentification Google (ouvrira la page de connexion Google dans le navigateur)
+GET http://localhost:4001/user/auth/google
+
+### Vérifier l'état d'authentification OAuth (avec un token JWT valide)
+GET http://localhost:4001/user/auth/status
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMWZjYzQ5ZS00N2FlLTQ1OTctOGVjNi01ZGU3OWJlM2JlNjAiLCJpYXQiOjE3NDIyMjY1MjgsImV4cCI6MTc0MjMxMjkyOH0.JA0eowRa5gpv2MOeRvS6-k4oped_MGl75BojRz2XaUY
+
+### Lier un compte Google à un compte utilisateur existant (nécessite un token JWT valide)
+GET http://localhost:4001/user/link/google
+Authorization: Bearer VOTRE_TOKEN_JWT_ICI
+
+### Délier un compte Google (nécessite un token JWT valide)
+DELETE http://localhost:4001/user/unlink/google
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMWZjYzQ5ZS00N2FlLTQ1OTctOGVjNi01ZGU3OWJlM2JlNjAiLCJpYXQiOjE3NDIyMjY1MjgsImV4cCI6MTc0MjMxMjkyOH0.JA0eowRa5gpv2MOeRvS6-k4oped_MGl75BojRz2XaUY
+
+### Vérifier les pages de redirection
+GET http://localhost:4001/user/login-success?token=exemple_token&new=true
+
+### Vérifier la page d'erreur de connexion
+GET http://localhost:4001/user/login-error
+
+
 
 ############################ GAME ############################
 

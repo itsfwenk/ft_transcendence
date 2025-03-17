@@ -52,7 +52,7 @@ export function saveUser(userName: string, email: string, password: string) {
 	`);
 	const result = stmt.run(userId, userName, email, password);
 
-	return { userId, userName, email, role: 'user', status: 'offline' };
+	return { userId, userName, email, passwordHsh: password, role: 'user', status: 'offline' };
 }
 
 export function getUserByEmail(email: string): User | undefined {

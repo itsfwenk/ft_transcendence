@@ -15,7 +15,6 @@ interface LinkedAccount {
 
 // Lier un compte externe a un user
 export function linkAccount(
-	id: number,
 	userId: string,
 	provider: string,
 	providerId: string,

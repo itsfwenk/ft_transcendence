@@ -119,7 +119,7 @@ export function endGameInDb(gameId: number): Game | null {
 }
 
 
-async function updateBallPositionInDb(gameId: number, ball: Ball) {
+export async function updateBallPositionInDb(gameId: number, ball: Ball) {
 	try {
 		const updatedBallJSON = JSON.stringify(ball);
 		const stmt = db.prepare(`

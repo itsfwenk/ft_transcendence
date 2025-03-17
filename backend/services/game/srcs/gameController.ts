@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { endGameInDb, getGamebyId, saveGame, updateGameScore } from './gameDb.js'
+import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb } from './gameDb.js'
 import { Ball, Paddle, Game } from './gameDb.js'
 import axios from 'axios';
 
@@ -122,11 +122,97 @@ export async function updateBallPosition(gameId: number) {
 		const ball: Ball = game.ball;
 		ball.x += ball.dx;
 		ball.y += ball.dy;
-		if (ball.y <= 0 || ball.y >= parseInt(process.env.CANVAS_HEIGHT as string, 10)) {
+		// Check top-bottom collisions
+		if (ball.y - ball.radius <= 0) {
 			ball.dy *= -1;
+			ball.y += 3;
 		}
+		else if (ball.y  + ball.radius >= parseInt(process.env.CANVAS_HEIGHT as string, 10)) {
+			ball.dy *= -1;
+			ball.y -= 3;
+		}
+
+		// Check collision with paddles
+		const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
+		const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
+		const speedIncrease = parseInt(process.env.SPEED_INCREASE as string, 10);
+
+		let leftPaddle : Paddle | null | undefined = await getPaddle(gameId, `left`);
+		if (leftPaddle === null || leftPaddle === undefined)
+			console.error(`Error with left paddle`)
+
+		else if (
+			ball.x - ball.radius <= leftPaddle.x + paddleWidth &&
+			ball.y >= leftPaddle.y && ball.y <= leftPaddle.y + paddleHeight
+		) {
+			let relativeIntersectY = ball.y - (leftPaddle.y + paddleHeight / 2);
+			let normalizedIntersectY = relativeIntersectY / (paddleHeight / 2);
+			
+			ball.dx *= -1;
+			ball.dy = normalizedIntersectY * Math.abs(ball.dx);
+			ball.x += 2;
+	
+			ball.dx *= speedIncrease;
+			ball.dy *= speedIncrease;
+		}
+
+		let rightPaddle : Paddle | null | undefined = await getPaddle(gameId, `right`);
+		if (rightPaddle === null || rightPaddle === undefined)
+			console.error(`Error with right paddle`)
+
+		else if (
+			ball.x + ball.radius >= rightPaddle.x &&
+			ball.y >= rightPaddle.y && ball.y <= rightPaddle.y + paddleHeight
+		) {
+			let relativeIntersectY = ball.y - (rightPaddle.y + paddleHeight / 2);
+			let normalizedIntersectY = relativeIntersectY / (paddleHeight / 2);
+			
+			ball.dx *= -1;
+			ball.dy = normalizedIntersectY * Math.abs(ball.dx);
+			ball.x -= 2;
+			ball.dx *= speedIncrease;
+			ball.dy *= speedIncrease;
+		}
+		const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
+		const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
+
+		if (ball.x < 0) {
+			updateGameScore(gameId, game.score1, game.score2 + 1);
+			game.score2++;
+			resetBall();
+		  } 
+		else if (ball.x > canvasWidth) {
+			updateGameScore(gameId, game.score1 + 1, game.score2);
+			game.score1++;
+			resetBall();
+		  }
+		function resetBall() {
+			ball.x = canvasWidth / 2;
+			ball.y = canvasHeight / 2;
+			ball.dx = Math.random() > 0.5 ? 3 : -3;
+			ball.dy = Math.random() > 0.5 ? 3 : -3;
+		  }
+		
+		updateBallPositionInDb(gameId, ball);
 	}
 	catch (error) {
 		console.error("Error updating ball:", error);
 	}
+}
+
+async function getPaddle(gameId: number, side: string) {
+	try {
+		const game = getGamebyId(gameId);
+		if (!game) {
+			console.error(`Game ${gameId} not found`);
+			return;
+		}
+		if (side === `left`)
+			return (game.leftPaddle);
+		else (side === `right`)
+			return (game.rightPaddle);
+	} catch (error) {
+		console.error(`❌ Error while retrieving paddle`);
+		}
+	  return null;
 }

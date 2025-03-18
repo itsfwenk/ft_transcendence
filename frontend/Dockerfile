@@ -5,7 +5,7 @@ RUN npm install
 COPY . .
 
 FROM base AS dev
-EXPOSE 3000
+EXPOSE 5173
 CMD ["npm", "run", "dev"]
 
 FROM base AS build

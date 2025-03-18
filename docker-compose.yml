@@ -1,31 +1,18 @@
 services:
-  fastify-image:
-    container_name: fastify-image
-    image: fastify-image
-    networks:
-      - app-network
+  frontend:
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: ${FRONTEND_TARGET}
     ports:
-      - "3000:3000"
-    volumes:
-      - ./pong-fastify:/app
-      - ./vite_pong/dist:/app/vite_pong/dist
-    working_dir: /app
-    command: ["npm", "run", "dev"]
-
-  caddy-image:
-    container_name: caddy-image
+      - "${FRONTEND_PORT}"
     networks:
       - app-network
-    image: caddy:latest
-    ports:
-      - "8080:80"
-      - "8443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./vite_pong/dist:/usr/share/caddy
+    volumes: 
+      - ${FRONTEND_VOLUMES}
+    working_dir: ${FRONTEND_WORKDIR}
+    restart: always
+    env_file: .env
   user:
     build: 
       context: ./backend

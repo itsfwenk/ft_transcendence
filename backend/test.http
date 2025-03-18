@@ -1,0 +1,167 @@
+
+############################ USER ############################
+### Inscription
+POST http://localhost:4001/user/register
+Content-Type: application/json
+
+{
+	"userName": "test",
+	"email": "test@email.com",
+	"password": "mypassword"
+}
+
+### Connexion
+POST http://localhost:4001/user/login
+Content-Type: application/json
+
+{
+	"email": "test@email.com",
+	"password": "mypassword"
+}
+
+### Accéder au profil (JWT requis)
+GET http://localhost:4001/user/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc0MTY5Nzk3OCwiZXhwIjoxNzQxNzg0Mzc4fQ.Q4m9z2-daQXII2kQCG5D_YzkPfZ2p2QdS0GTkUpl8Hw
+
+### 🔍 Voir un utilisateur
+GET http://localhost:4001/user/c0653c47-b385-4af6-af01-d14f5a1b9931
+
+### Update info user
+PUT http://localhost:4001/user/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc0MTcwMzU4NywiZXhwIjoxNzQxNzg5OTg3fQ.6vCZ8h66yq_X9zRHpBuhVkbEZjpkh9yHvhbGi6pKX7s
+
+{
+  "userName": "okan",
+  "email": "okan@email.com"
+}
+
+### Delete un user
+DELETE http://localhost:4001/user/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNzhiMDI4MC04YjVmLTRhZWYtODM5Ny05YTk5OTkwNDE2ZmQiLCJpYXQiOjE3NDE3MDU5NDQsImV4cCI6MTc0MTc5MjM0NH0.acAaJ7rrfhPgc-79VqlQLBNR3COfQqw2o8PIYePKQ3s
+
+{}
+
+### Logout un User
+POST http://localhost:4001/user/logout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjZDk4ZTI3NS1lY2U5LTQwYWYtYTU0My03ZjYzM2NmNGE3MWIiLCJpYXQiOjE3NDE4NTY4OTgsImV4cCI6MTc0MTk0MzI5OH0.Mx9kbY-yF8Wr87I-7-NpycV_VPYwAUnt5R5ulRCZo5Q
+
+{
+	"userId": "c0653c47-b385-4af6-af01-d14f5a1b9931"
+}
+
+### Update un role
+PUT http://localhost:4001/user/role
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjZDk4ZTI3NS1lY2U5LTQwYWYtYTU0My03ZjYzM2NmNGE3MWIiLCJpYXQiOjE3NDE4NTY4OTgsImV4cCI6MTc0MTk0MzI5OH0.Mx9kbY-yF8Wr87I-7-NpycV_VPYwAUnt5R5ulRCZo5Q
+
+{
+	"userId": "cd98e275-ece9-40af-a543-7f633cf4a71b",
+	"role": "admin"
+}
+
+### Update un status
+PUT http://localhost:4001/user/status
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlZjk0MGJlMi1kODc2LTQ1NGUtOWJkYi01NWM3ZWJkYTI4M2UiLCJpYXQiOjE3NDIyMjc2MjMsImV4cCI6MTc0MjMxNDAyM30.B3gNnjInIftLL-0Ac6L0wwmksyKS9iaMQel-1dyXWWw
+
+{
+	"status": "online"
+}
+
+### Voir tous les users Online
+GET http://localhost:4001/user/online
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMWZjYzQ5ZS00N2FlLTQ1OTctOGVjNi01ZGU3OWJlM2JlNjAiLCJpYXQiOjE3NDIyMjYxNjgsImV4cCI6MTc0MjMxMjU2OH0.HeGHnYz7EIodZQ5OlnQWvuqtKlnqoYnggki1BkvBcdc
+
+
+############################ GOOGLE OAUTH2 ############################
+
+
+### Déclencher l'authentification Google (ouvrira la page de connexion Google dans le navigateur)
+GET http://localhost:4001/user/auth/google
+
+### Vérifier l'état d'authentification OAuth (avec un token JWT valide)
+GET http://localhost:4001/user/auth/status
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlZjEyYzA2MS0yNGQzLTQ4ZDYtYTQxMi05NDc1ZWRmMmFiYzUiLCJpYXQiOjE3NDIyMjc2OTUsImV4cCI6MTc0MjMxNDA5NX0.GEGh9mqHjyDUckMzcNNYPkzi27UIgNFQA1kb7a1pJhA
+
+### Lier un compte Google à un compte utilisateur existant (nécessite un token JWT valide)
+GET http://localhost:4001/user/link/google
+Authorization: Bearer VOTRE_TOKEN_JWT_ICI
+
+### Délier un compte Google (nécessite un token JWT valide)
+DELETE http://localhost:4001/user/unlink/google
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMWZjYzQ5ZS00N2FlLTQ1OTctOGVjNi01ZGU3OWJlM2JlNjAiLCJpYXQiOjE3NDIyMjY1MjgsImV4cCI6MTc0MjMxMjkyOH0.JA0eowRa5gpv2MOeRvS6-k4oped_MGl75BojRz2XaUY
+
+### Vérifier les pages de redirection
+GET http://localhost:4001/user/login-success?token=exemple_token&new=true
+
+### Vérifier la page d'erreur de connexion
+GET http://localhost:4001/user/login-error
+
+
+
+############################ GAME ############################
+
+### Start game
+POST http://localhost:4002/game/start
+Content-Type: application/json
+
+{
+	"player1_id": 1,
+	"player2_id": 2
+}
+
+
+### Get game
+GET http://localhost:4002/game/2
+
+
+### Update Score
+PUT http://localhost:4002/game/2/score
+Content-Type: application/json
+
+{"score1": 2, "score2": 3}
+
+### End Game
+POST http://localhost:4002/game/2/end
+
+############################ MATCHMAKING ############################
+
+### join queue1v1
+POST http://localhost:4003/matchmaking/join
+Content-Type: application/json
+
+{
+	"playerId": 1
+}
+
+
+
+### join queueTournament
+POST http://localhost:4003/matchmaking/tournament/join
+Content-Type: application/json
+
+{
+	"playerId": 4
+}
+
+
+
+
+### start tournament queue + create tournament
+POST http://localhost:4003/matchmaking/tournament/start
+Content-Type: application/json
+
+{
+	"playerId": 2
+}
+
+### launch match
+POST http://localhost:4003/matchmaking/tournament/match/start/0d247bfa-3b08-4398-9cbd-167376c4ee9b
+
+
+### udpate match
+POST http://localhost:4003/matchmaking/tournament/match/update/0d247bfa-3b08-4398-9cbd-167376c4ee9b

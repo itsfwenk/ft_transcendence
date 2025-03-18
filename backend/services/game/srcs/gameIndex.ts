@@ -3,7 +3,8 @@ import gameRoutes from './gameRoutes.js';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import fastifyWebsocket from "@fastify/websocket";
-import { endGameInDb, getGamebyId, saveGame, updateGameScore } from './gameDb.js'
+import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb } from './gameDb.js'
+import { updateGames } from './gameController.js'
 import Database from 'better-sqlite3';
 
 const app = Fastify();
@@ -28,11 +29,7 @@ app.register(swaggerUI, {
 //enregistrer les routes
 app.register(gameRoutes, { prefix: '/game' });
 
-let intervalId: ReturnType<typeof setInterval> = setInterval(() => {
-
-
-
-}, 16);
+let intervalId: ReturnType<typeof setInterval> = setInterval(updateGames, 16);
 
 process.on("SIGINT", () => {
 	console.log("Shutting down server...");

@@ -81,11 +81,41 @@ export function saveGame(player1_id: number, player2_id: number, matchId?: strin
 	return stmt2.get(result.lastInsertRowid) as Game;
 }
 
-export function getGamebyId(gameId: number): Game {
-	//return games.find(g => g.gameId === gameId);
-	const stmt = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
-	return stmt.get(gameId) as Game;
+// export async function getGamebyId(gameId: number): Promise<Game> {
+// 	//return games.find(g => g.gameId === gameId);
+// 	const stmt = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
+// 	return stmt.get(gameId) as Game;
+// }
+
+export async function getGamebyId(gameId: number): Promise<Game | null> {
+	try {
+		const stmt = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
+		const row: any = stmt.get(gameId);
+
+		if (!row) return null;
+
+		const game: Game = {
+			gameId: row.gameId,
+			player1_id: row.player1_id,
+			player2_id: row.player2_id,
+			score1: row.score1,
+			score2: row.score2,
+			leftPaddle: JSON.parse(row.leftPaddle),
+			rightPaddle: JSON.parse(row.rightPaddle),
+			ball: JSON.parse(row.ball),
+			status: row.status as 'ongoing' | 'finished',
+			winner_id: row.winner_id,
+			matchId: row.matchId
+		};
+
+		return game;
+	} catch (error) {
+		console.error(`Error fetching game ${gameId}:`, error);
+		return null;
+	}
 }
+
+
 
 export function updateGameScore(gameId: number, score1: number, score2: number) {
 	const stmt = db.prepare (`
@@ -131,6 +161,17 @@ export async function updateBallPositionInDb(gameId: number, ball: Ball) {
 	} catch (err) {
 	  console.error('Error updating game in the database:', err);
 	}
+}
+
+export async function getAllGamesId() : Promise<{ gameId: number }[]> {
+	try {
+		const stmt = db.prepare('SELECT gameId FROM games');
+		const allIds : { gameId: number }[] = stmt.all() as { gameId: number }[];
+		return allIds;
+	  } catch (error) {
+		console.error('Error fetching game Ids:', error);
+		return [];
+	  }
 }
 
 // export async function updateBallPositionsInDb() {

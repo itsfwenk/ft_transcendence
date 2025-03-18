@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb } from './gameDb.js'
+import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId } from './gameDb.js'
 import { Ball, Paddle, Game } from './gameDb.js'
 import axios from 'axios';
 
@@ -50,7 +50,7 @@ export async function startGame(req: FastifyRequest<{ Body: { player1_id: number
 
 // recuperer une partie
 export async function getGame(req: FastifyRequest<{ Params: { gameId: string } }>, reply: FastifyReply) {
-	const game = getGamebyId(parseInt(req.params.gameId));
+	const game = await getGamebyId(parseInt(req.params.gameId));
 	if (!game) return reply.status(404).send({ error: 'Game not found' });
 
 	reply.send(game);
@@ -61,7 +61,7 @@ export async function updateScore(req: FastifyRequest<{ Params: { gameId: string
 	const { gameId } = req.params as {gameId: string};
 	const { score1, score2 } = req.body as { score1: number, score2:number }
 
-	const game = getGamebyId(parseInt(gameId));
+	const game = await getGamebyId(parseInt(gameId));
 	if (!game) return reply.status(404).send({error: "Game not found"});
 	// Vérifier que les scores sont bien des nombres
 	if (typeof score1 !== 'number' || typeof score2 !== 'number') {
@@ -114,11 +114,14 @@ async function getUserById(userId: number) {
 
 export async function updateBallPosition(gameId: number) {
 	try {
-		const game = getGamebyId(gameId);
+		// console.log(`updateBallPosition called`);
+		const game = await getGamebyId(gameId);
 		if (!game) {
 			console.error(`Game ${gameId} not found`);
 			return;
 		}
+		if (game.status === `finished`)
+			return
 		const ball: Ball = game.ball;
 		ball.x += ball.dx;
 		ball.y += ball.dy;
@@ -177,12 +180,12 @@ export async function updateBallPosition(gameId: number) {
 		const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
 
 		if (ball.x < 0) {
-			updateGameScore(gameId, game.score1, game.score2 + 1);
+			await updateGameScore(gameId, game.score1, game.score2 + 1);
 			game.score2++;
 			resetBall();
 		  } 
 		else if (ball.x > canvasWidth) {
-			updateGameScore(gameId, game.score1 + 1, game.score2);
+			await updateGameScore(gameId, game.score1 + 1, game.score2);
 			game.score1++;
 			resetBall();
 		  }
@@ -193,7 +196,7 @@ export async function updateBallPosition(gameId: number) {
 			ball.dy = Math.random() > 0.5 ? 3 : -3;
 		  }
 		
-		updateBallPositionInDb(gameId, ball);
+		await updateBallPositionInDb(gameId, ball);
 	}
 	catch (error) {
 		console.error("Error updating ball:", error);
@@ -202,7 +205,7 @@ export async function updateBallPosition(gameId: number) {
 
 async function getPaddle(gameId: number, side: string) {
 	try {
-		const game = getGamebyId(gameId);
+		const game = await getGamebyId(gameId);
 		if (!game) {
 			console.error(`Game ${gameId} not found`);
 			return;
@@ -215,4 +218,18 @@ async function getPaddle(gameId: number, side: string) {
 		console.error(`❌ Error while retrieving paddle`);
 		}
 	  return null;
+}
+
+export async function updateGames() {
+
+	try {
+		const allIds : {gameId: number }[] = await getAllGamesId();
+	
+		await Promise.all(allIds.map(async (gameId) => {
+		  updateBallPosition(gameId.gameId)
+		}));
+	  } catch (error) {
+		console.error('Error fetching games:', error);
+		return;
+	  }
 }

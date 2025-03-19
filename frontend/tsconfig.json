@@ -20,5 +20,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["srcs/**/*.ts"],
+  "include": ["srcs/**/*.ts", "srcs/tailwind.config.js"],
 }

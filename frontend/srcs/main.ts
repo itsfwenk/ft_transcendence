@@ -1,4 +1,4 @@
-import './style.css'
+import './styles.css'
 import { initRouter } from './router';
 
 // Initialisation du routeur

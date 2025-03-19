@@ -5,6 +5,7 @@ import swaggerUI from '@fastify/swagger-ui';
 import userRoutes from './userRoutes.js';
 import dotenv from 'dotenv'
 import googleAuthRoutes from './googleAuthRoutes.js';
+import cors from '@fastify/cors'
 
 const app = Fastify();
 
@@ -22,6 +23,10 @@ app.register(swagger, {
       version: '1.0.0'
     }
   }
+});
+
+app.register(cors, {
+	origin: 'http://localhost:5173', // ou '*' pour autoriser toutes les origines (pas recommandé en prod)
 });
 
 app.register(swaggerUI, {

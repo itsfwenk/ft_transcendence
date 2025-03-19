@@ -28,5 +28,8 @@
     "hi-base32": "^0.5.1",
     "typescript": "^5.8.2",
     "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@fastify/cors": "^11.0.0"
   }
 }

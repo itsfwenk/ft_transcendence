@@ -37,7 +37,7 @@ clean:
 re: clean up
 
 rm-db:
-	rm ./backend/db/games.db ./backend/db/users.db
+	rm ./backend/db/games.db ./backend/db/users.db ./backend/db/matchmaking.db
 
 prune: clean rm-db
 	@docker system prune -a --volumes -f

@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 
+//connexion a la database game
 const db = new Database('/app/db/matchmaking.db');
 
 export interface Match {
@@ -18,7 +19,7 @@ export interface Match {
 export interface Tournament {
 	id: string;
 	status: 'scheduled' | 'ongoing' | 'completed';
-	players: number[];
+	players: number[]; // Liste des IDs des joueurs
 	matches: Match[];
 	createdAt: Date;
 	updatedAt: Date;
@@ -107,9 +108,9 @@ export function createTournament(players: number[]): Tournament {
 interface TournamentRow {
     id: string;
     status: 'scheduled' | 'ongoing' | 'completed';
-    players: string;
-    createdAt: string;
-    updatedAt: string;
+    players: string; // JSON string of player IDs
+    createdAt: string; // Date stored as string in the database
+    updatedAt: string; // Date stored as string in the database
 }
 
 interface MatchRow {

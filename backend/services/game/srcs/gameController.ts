@@ -2,6 +2,8 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId } from './gameDb.js'
 import { Ball, Paddle, Game } from './gameDb.js'
 import axios from 'axios';
+import { WebSocket } from "ws";
+import jwt from 'jsonwebtoken';
 
 /*
 // Interface pour le body de startGame
@@ -233,3 +235,108 @@ export async function updateGames() {
 		return;
 	  }
 }
+
+const JWT_SECRET = "secret_key";
+
+export async function websocketHandshake(socket: WebSocket, req: FastifyRequest) {
+	console.log('websocketHandshake called');
+
+	const { token, gameId, playerId } = req.query as { token: string, gameId: string, playerId: string };
+
+	try {
+		const decoded = jwt.verify(token, JWT_SECRET);
+		console.log('Authenticated Player:', decoded);
+	
+
+		const game : Game = await getGamebyId(parseInt(gameId)) as Game;
+
+		// // Handle the player's key press in the game
+		// socket.on('message', (message) => {
+		//   const { key } = JSON.parse(message.toString());
+	
+		//   // Update the player state based on the key press (e.g., moving paddles)
+		//   if (key === 'ArrowUp') {
+		// 	game.pl [playerId].position.y -= 1;
+		//   } else if (key === 'ArrowDown') {
+		// 	g [playerId].position.y += 1;
+		//   }
+	
+		//   // Send updated game state back to the client
+		//   socket.send(JSON.stringify({
+		// 	type: 'gameStateUpdate',
+		// 	gameId: gameId,
+		// 	gameState: gameState
+		//   }));
+		// });
+	  } catch (err) {
+		console.error("JWT verification failed:", err);
+		socket.close(1000, 'Invalid Token');
+
+	socket.on('message', (message: string) => {
+		console.log('Received:', message.toString());
+		socket.send('Hello from Fastify WebSockets');
+	});
+
+	// Handle socket close
+	socket.on('close', () => {
+		console.log('Client disconnected');
+	});
+
+	socket.on('error', (err: Error) => {
+		console.error('WebSocket error:', err.message);
+	  });
+}
+}
+
+// export async function movePaddleUp(gameId: number, paddle: number) {
+// 	const game = await getGamebyId(gameId);
+// 	if (!game) {
+// 		console.log(`Game not found in movePaddleUp`);
+// 		return
+// 		}
+// 	if (paddle === 1) {
+// 		movePaddleUpInDb();
+// 		}
+// 	}
+// }
+
+//////////
+// import { FastifyInstance, FastifyPluginOptions } from "fastify";
+// import jwt from "jsonwebtoken";
+
+// export default async function gameRoutes(fastify: FastifyInstance, options: FastifyPluginOptions) {
+//     fastify.get("/game/ws", { websocket: true }, (connection, req) => {
+//         const token = req.query.token as string;  // Extract token from the query string
+
+//         // Verify the token
+//         try {
+//             const decoded = jwt.verify(token, "your_secret_key");  // Verify the JWT using the secret key
+//             const playerId = decoded.username;  // Assume playerId is in the 'username' field
+
+//             console.log(`Player ${playerId} connected`);
+
+//             // Store the connection and associate it with the player
+//             playerConnections.set(playerId, connection.socket);
+
+//             // Handle player messages
+//             connection.socket.on("message", (message) => {
+//                 console.log(`Received from ${playerId}: ${message.toString()}`);
+//             });
+
+//             connection.socket.on("close", () => {
+//                 // Cleanup when the player disconnects
+//                 playerConnections.delete(playerId);
+//                 console.log(`Player ${playerId} disconnected`);
+//             });
+
+//             connection.socket.send("Welcome to the game!");
+
+//         } catch (err) {
+//             console.log("Invalid token, closing connection.");
+//             connection.socket.close();  // Close connection if the token is invalid
+//         }
+//     });
+// }
+
+// // Store player connections in a map
+// const playerConnections = new Map<string, WebSocket>();  // playerId -> WebSocket connection

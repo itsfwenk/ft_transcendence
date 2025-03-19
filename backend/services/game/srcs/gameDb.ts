@@ -174,14 +174,26 @@ export async function getAllGamesId() : Promise<{ gameId: number }[]> {
 	  }
 }
 
-// export async function updateBallPositionsInDb() {
-// 	const games = await db.prepare('SELECT * FROM games WHERE status = "ongoing"').all();
-// 	await db.all()
-// 	// for (const row of stmt.iterate()) {
-// 	// 	const game = row as Game;
-// 	// 	if (game.status === 'ongoing') {
-// 	// 		game.ball.x += game.ball.dx;
-// 	// 		game.ball.y += game.ball.dy;
-// 	// 	}
-// 	// }
-// }
+export async function updatePaddleInDb(gameId: number, paddle: Paddle, side: string) {
+	try {
+		const updatedPaddleJSON = JSON.stringify(paddle);
+		let stmt;
+		if (side === `left`) {
+			stmt = db.prepare(`
+				UPDATE games
+				SET leftPaddle = ?
+				WHERE gameId = ?
+			`);
+		}
+		else {
+			stmt = db.prepare(`
+				UPDATE games
+				SET rightPaddle = ?
+				WHERE gameId = ?
+			`);
+		};
+		stmt.run(updatedPaddleJSON, gameId);
+	} catch (err) {
+	  console.error('Error updating paddle in the database:', err);
+	}
+}

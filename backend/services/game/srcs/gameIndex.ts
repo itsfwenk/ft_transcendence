@@ -3,9 +3,8 @@ import gameRoutes from './gameRoutes.js';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import fastifyWebsocket from "@fastify/websocket";
-import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb } from './gameDb.js'
 import { updateGames } from './gameController.js'
-import Database from 'better-sqlite3';
+// import Database from 'better-sqlite3';
 
 const app = Fastify();
 

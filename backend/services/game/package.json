@@ -21,9 +21,11 @@
     "better-sqlite3": "^11.8.1",
     "electron": "^35.0.0",
     "fastify": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
     "typescript": "^5.8.2"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/ws": "^8.18.0"
   }
 }

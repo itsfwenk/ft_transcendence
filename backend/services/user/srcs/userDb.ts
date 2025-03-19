@@ -18,6 +18,7 @@ export interface User {
 	userName: string;
 	email: string;
 	password: string;
+	socket: WebSocket;
 }
 
 const users: User[] = [];

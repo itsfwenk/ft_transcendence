@@ -30,9 +30,9 @@ export interface Paddle {
 }
 
 export interface Game {
-	gameId: number;
-	player1_id: number;
-	player2_id: number;
+	gameId: string;
+	player1_id: string;
+	player2_id: string;
 	score1: number;
 	score2: number;
 	leftPaddle: Paddle;
@@ -87,7 +87,7 @@ export function saveGame(player1_id: number, player2_id: number, matchId?: strin
 // 	return stmt.get(gameId) as Game;
 // }
 
-export async function getGamebyId(gameId: number): Promise<Game | null> {
+export async function getGamebyId(gameId: string): Promise<Game | null> {
 	try {
 		const stmt = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
 		const row: any = stmt.get(gameId);
@@ -117,7 +117,7 @@ export async function getGamebyId(gameId: number): Promise<Game | null> {
 
 
 
-export function updateGameScore(gameId: number, score1: number, score2: number) {
+export function updateGameScore(gameId: string, score1: number, score2: number) {
 	const stmt = db.prepare (`
 		UPDATE games
 		SET score1 = ?, score2 = ?
@@ -135,7 +135,7 @@ export function endGameInDb(gameId: number): Game | null {
 	const game = db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | undefined;
 	if (!game) return null;
 
-	let winner_id: number | null = null;
+	let winner_id: string | null = null;
 	if (game.score1 > game.score2) winner_id = game.player1_id;
 	else if (game.score2 > game.score1) winner_id = game.player2_id;
 
@@ -149,7 +149,7 @@ export function endGameInDb(gameId: number): Game | null {
 }
 
 
-export async function updateBallPositionInDb(gameId: number, ball: Ball) {
+export async function updateBallPositionInDb(gameId: string, ball: Ball) {
 	try {
 		const updatedBallJSON = JSON.stringify(ball);
 		const stmt = db.prepare(`
@@ -163,10 +163,10 @@ export async function updateBallPositionInDb(gameId: number, ball: Ball) {
 	}
 }
 
-export async function getAllGamesId() : Promise<{ gameId: number }[]> {
+export async function getAllGamesId() : Promise<{ gameId: string }[]> {
 	try {
 		const stmt = db.prepare('SELECT gameId FROM games');
-		const allIds : { gameId: number }[] = stmt.all() as { gameId: number }[];
+		const allIds : { gameId: string }[] = stmt.all() as { gameId: string }[];
 		return allIds;
 	  } catch (error) {
 		console.error('Error fetching game Ids:', error);
@@ -174,7 +174,55 @@ export async function getAllGamesId() : Promise<{ gameId: number }[]> {
 	  }
 }
 
-export async function updatePaddleInDb(gameId: number, paddle: Paddle, side: string) {
+export async function updatePaddlesInDb(gameId: string) {
+	try {
+			const game = await getGamebyId(gameId);
+			const leftPaddle = game?.leftPaddle;
+			const rightPaddle = game?.rightPaddle;
+			if (leftPaddle && rightPaddle) {
+				leftPaddle.y = leftPaddle.y + leftPaddle.dy;
+				rightPaddle.y = rightPaddle.y + rightPaddle.dy;
+
+				leftPaddle.y = Math.max(0, Math.min(canvasHeight - paddleHeight, leftPaddle.y));
+				rightPaddle.y = Math.max(0, Math.min(canvasHeight - paddleHeight, rightPaddle.y));
+			}
+			const stmt = db.prepare (`
+				UPDATE games
+				SET leftPaddle = ?, rightPaddle = ?
+				WHERE gameId = ?
+			`)
+			const leftPaddleJSON = JSON.stringify(leftPaddle);
+			const rightPaddleJSON = JSON.stringify(rightPaddle);
+			stmt.run(leftPaddleJSON, rightPaddleJSON, gameId);
+
+
+	} catch (err) {
+	  console.error('Error updating paddles in the database:', err);
+	}
+}
+
+export async function updatePaddleDelta(gameId: string, playerId: string, delta: number) {
+	try {
+		const	game = await getGamebyId(gameId);
+		let		paddle;
+		if (game) {
+			if (playerId === game.player1_id) {
+				paddle = game.leftPaddle;
+				paddle.dy = delta;
+				updateEntirePaddleInDb(gameId, paddle, `left`);
+			}
+			else {
+				paddle = game.rightPaddle;
+				paddle.dy = delta;
+				updateEntirePaddleInDb(gameId, paddle, `right`);
+			}
+		}
+	} catch (err) {
+ 		console.error('Error updating paddle delta in the database:', err);
+	}
+}
+
+function updateEntirePaddleInDb(gameId: string, paddle: Paddle, side: string) {
 	try {
 		const updatedPaddleJSON = JSON.stringify(paddle);
 		let stmt;
@@ -194,6 +242,6 @@ export async function updatePaddleInDb(gameId: number, paddle: Paddle, side: str
 		};
 		stmt.run(updatedPaddleJSON, gameId);
 	} catch (err) {
-	  console.error('Error updating paddle in the database:', err);
+		console.error('Error updating paddle in the database:', err);
 	}
 }

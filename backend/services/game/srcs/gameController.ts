@@ -1,9 +1,20 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId } from './gameDb.js'
+import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId, updatePaddleDelta, updatePaddlesInDb } from './gameDb.js'
 import { Ball, Paddle, Game } from './gameDb.js'
 import axios from 'axios';
 import { WebSocket } from "ws";
 import jwt from 'jsonwebtoken';
+
+const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
+const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
+const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
+const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
+const paddleSpeed = parseInt(process.env.PADDLE_SPEED as string, 10);
+const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
+const speedIncrease = parseInt(process.env.SPEED_INCREASE as string, 10);
+
+const activeUsers = new Map<string, WebSocket>(); // userId -> WebSocket
+export default activeUsers;
 
 /*
 // Interface pour le body de startGame
@@ -52,7 +63,7 @@ export async function startGame(req: FastifyRequest<{ Body: { player1_id: number
 
 // recuperer une partie
 export async function getGame(req: FastifyRequest<{ Params: { gameId: string } }>, reply: FastifyReply) {
-	const game = await getGamebyId(parseInt(req.params.gameId));
+	const game = await getGamebyId(req.params.gameId);
 	if (!game) return reply.status(404).send({ error: 'Game not found' });
 
 	reply.send(game);
@@ -63,13 +74,13 @@ export async function updateScore(req: FastifyRequest<{ Params: { gameId: string
 	const { gameId } = req.params as {gameId: string};
 	const { score1, score2 } = req.body as { score1: number, score2:number }
 
-	const game = await getGamebyId(parseInt(gameId));
+	const game = await getGamebyId(gameId);
 	if (!game) return reply.status(404).send({error: "Game not found"});
 	// Vérifier que les scores sont bien des nombres
 	if (typeof score1 !== 'number' || typeof score2 !== 'number') {
 		return reply.status(400).send({ error: "Scores must be numbers" });
 	}
-	const updatedGame = updateGameScore(parseInt(gameId), score1, score2);
+	const updatedGame = updateGameScore(gameId, score1, score2);
 	if (!updatedGame) return reply.status(500).send({ error: "Failed to update score" });
 	reply.send({success: true, game: updatedGame});
 }
@@ -114,7 +125,7 @@ async function getUserById(userId: number) {
 	}
 }
 
-export async function updateBallPosition(gameId: number) {
+export async function updateBallPosition(gameId: string) {
 	try {
 		// console.log(`updateBallPosition called`);
 		const game = await getGamebyId(gameId);
@@ -132,15 +143,12 @@ export async function updateBallPosition(gameId: number) {
 			ball.dy *= -1;
 			ball.y += 3;
 		}
-		else if (ball.y  + ball.radius >= parseInt(process.env.CANVAS_HEIGHT as string, 10)) {
+		else if (ball.y  + ball.radius >= canvasHeight) {
 			ball.dy *= -1;
 			ball.y -= 3;
 		}
 
 		// Check collision with paddles
-		const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
-		const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
-		const speedIncrease = parseInt(process.env.SPEED_INCREASE as string, 10);
 
 		let leftPaddle : Paddle | null | undefined = await getPaddle(gameId, `left`);
 		if (leftPaddle === null || leftPaddle === undefined)
@@ -178,8 +186,6 @@ export async function updateBallPosition(gameId: number) {
 			ball.dx *= speedIncrease;
 			ball.dy *= speedIncrease;
 		}
-		const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
-		const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
 
 		if (ball.x < 0) {
 			await updateGameScore(gameId, game.score1, game.score2 + 1);
@@ -205,7 +211,7 @@ export async function updateBallPosition(gameId: number) {
 	}
 }
 
-async function getPaddle(gameId: number, side: string) {
+async function getPaddle(gameId: string, side: string) {
 	try {
 		const game = await getGamebyId(gameId);
 		if (!game) {
@@ -225,10 +231,11 @@ async function getPaddle(gameId: number, side: string) {
 export async function updateGames() {
 
 	try {
-		const allIds : {gameId: number }[] = await getAllGamesId();
+		const allIds : {gameId: string }[] = await getAllGamesId();
 	
 		await Promise.all(allIds.map(async (gameId) => {
 		  updateBallPosition(gameId.gameId)
+		  updatePaddlesInDb(gameId.gameId)
 		}));
 	  } catch (error) {
 		console.error('Error fetching games:', error);
@@ -238,51 +245,53 @@ export async function updateGames() {
 
 const JWT_SECRET = "secret_key";
 
-export async function websocketHandshake(socket: WebSocket, req: FastifyRequest) {
+export async function websocketHandshake(connection: WebSocket, req: FastifyRequest) {
 	console.log('websocketHandshake called');
 
 	const { token, gameId, playerId } = req.query as { token: string, gameId: string, playerId: string };
-
+	
+	activeUsers.set(playerId, connection);
+	console.log(`User ${playerId} connected via WebSocket`);
+	
 	try {
 		const decoded = jwt.verify(token, JWT_SECRET);
 		console.log('Authenticated Player:', decoded);
 	
-
-		const game : Game = await getGamebyId(parseInt(gameId)) as Game;
-
-		// // Handle the player's key press in the game
-		// socket.on('message', (message) => {
-		//   const { key } = JSON.parse(message.toString());
-	
-		//   // Update the player state based on the key press (e.g., moving paddles)
-		//   if (key === 'ArrowUp') {
-		// 	game.pl [playerId].position.y -= 1;
-		//   } else if (key === 'ArrowDown') {
-		// 	g [playerId].position.y += 1;
-		//   }
-	
-		//   // Send updated game state back to the client
-		//   socket.send(JSON.stringify({
-		// 	type: 'gameStateUpdate',
-		// 	gameId: gameId,
-		// 	gameState: gameState
-		//   }));
-		// });
+		connection.on('message', (message) => {
+			const { key, type } = JSON.parse(message.toString());
+			if (!key || !type) {
+				console.warn("Invalid message received:", message.toString());
+				return;
+			}
+			if (key === 'ArrowUp') {
+				if (type === "keydown") {
+					updatePaddleDelta(gameId, playerId, -paddleSpeed);
+				}
+				else if (type === "keyup") {
+					updatePaddleDelta(gameId, playerId, 0);
+				}
+			} else if (key === 'ArrowDown') {
+				if (type === "keydown") {
+					updatePaddleDelta(gameId, playerId, paddleSpeed);
+				}
+				else if (type === "keyup") {
+					updatePaddleDelta(gameId, playerId, 0);
+				}
+			}
+		})
 	  } catch (err) {
-		console.error("JWT verification failed:", err);
-		socket.close(1000, 'Invalid Token');
+		console.error("Error in backend Websocket handling", err);
+		connection.close(1000, 'Invalid Token');
 
-	socket.on('message', (message: string) => {
-		console.log('Received:', message.toString());
-		socket.send('Hello from Fastify WebSockets');
-	});
+
+
 
 	// Handle socket close
-	socket.on('close', () => {
+	connection.on('close', () => {
 		console.log('Client disconnected');
 	});
 
-	socket.on('error', (err: Error) => {
+	connection.on('error', (err: Error) => {
 		console.error('WebSocket error:', err.message);
 	  });
 }

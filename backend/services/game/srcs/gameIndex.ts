@@ -8,6 +8,10 @@ import { updateGames } from './gameController.js'
 
 const app = Fastify();
 
+const activeUsers = new Map<number, WebSocket>(); // userId -> WebSocket
+export default activeUsers;
+
+
 app.register(swagger, {
 	swagger: {
 		info: {

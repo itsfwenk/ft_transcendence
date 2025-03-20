@@ -16,14 +16,13 @@ export default function Home() {
           </p>
         </div>
       `;
-      // Vous pouvez ajouter ici la logique pour le formulaire de login, par exemple:
       const loginForm = document.getElementById('loginForm') as HTMLFormElement;
       loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = (document.getElementById('email') as HTMLInputElement).value
 		const password = (document.getElementById('password') as HTMLInputElement).value
         try {
-			// Appel direct vers le service User sans passer par une API Gateway
+
 			const response = await fetch('http://localhost:4001/user/login', {
 			  method: 'POST',
 			  headers: {
@@ -38,14 +37,11 @@ export default function Home() {
 	
 			const data = await response.json();
 			console.log("Réponse de login:", data);
-			// Par exemple, stockez le token dans le localStorage et redirigez vers le menu principal
 			localStorage.setItem('authToken', data.token);
-			// Utilisez history.pushState ou un routeur pour rediriger vers la page de menu
 			history.pushState(null, '', '/menu');
 			window.dispatchEvent(new PopStateEvent('popstate'));
 		  } catch (error) {
 			console.error("Erreur de login:", error);
-			// Afficher un message d'erreur à l'utilisateur
 		  }
       });
     }

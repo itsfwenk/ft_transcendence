@@ -2,6 +2,7 @@ import Home from './pages/home';
 import Profile from './pages/profile';
 import Menu from './pages/menu';
 import Game from './pages/game';
+import Queue from './pages/queue';
 
 // Définir vos routes sous forme d'un objet
 const routes: { [key: string]: () => void } = {
@@ -9,6 +10,7 @@ const routes: { [key: string]: () => void } = {
   '/profile': Profile,
   '/menu': Menu,
   '/game': Game,
+  '/queue': Queue,
 };
 
 export function initRouter() {

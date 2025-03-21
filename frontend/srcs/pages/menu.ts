@@ -1,7 +1,7 @@
 // src/pages/Home.ts
 export default function menu() {
-    const app = document.getElementById('app');
-    if (app) {
+	const app = document.getElementById('app');
+	if (app) {
 		app.innerHTML = `
 		<div class="flex flex-col items-center justify-center min-h-screen">
 			<h1 class="text-3xl font-bold text-blue-600 mb-4">Bienvenue sur Pong Game</h1>
@@ -39,10 +39,10 @@ export default function menu() {
 		  } catch (error) {
 			console.error("Erreur de login:", error);
 		  }
-      });
+	});
 
-	  const playOnlineButton = document.getElementById('onlineBtn') as HTMLFormElement;
-	  playOnlineButton.addEventListener('click', async(e) => {
+	const playOnlineButton = document.getElementById('onlineBtn') as HTMLFormElement;
+	playOnlineButton.addEventListener('click', async(e) => {
 		e.preventDefault();
         console.log("online button...");
 		const currentPlayerId = localStorage.getItem('userId');
@@ -69,6 +69,6 @@ export default function menu() {
 		} catch (error) {
 			  console.error("Erreur de login:", error);
 		}
-	  })
+	})
     }
-  }
+}

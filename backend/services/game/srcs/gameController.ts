@@ -310,55 +310,13 @@ async function broadcastGameToPlayers(gameId: string) {
 	});
 }
   
-// export async function movePaddleUp(gameId: number, paddle: number) {
-// 	const game = await getGamebyId(gameId);
-// 	if (!game) {
-// 		console.log(`Game not found in movePaddleUp`);
-// 		return
-// 		}
-// 	if (paddle === 1) {
-// 		movePaddleUpInDb();
-// 		}
-// 	}
-// }
-
-//////////
-// import { FastifyInstance, FastifyPluginOptions } from "fastify";
-// import jwt from "jsonwebtoken";
-
-// export default async function gameRoutes(fastify: FastifyInstance, options: FastifyPluginOptions) {
-//     fastify.get("/game/ws", { websocket: true }, (connection, req) => {
-//         const token = req.query.token as string;  // Extract token from the query string
-
-//         // Verify the token
-//         try {
-//             const decoded = jwt.verify(token, "your_secret_key");  // Verify the JWT using the secret key
-//             const playerId = decoded.username;  // Assume playerId is in the 'username' field
-
-//             console.log(`Player ${playerId} connected`);
-
-//             // Store the connection and associate it with the player
-//             playerConnections.set(playerId, connection.socket);
-
-//             // Handle player messages
-//             connection.socket.on("message", (message) => {
-//                 console.log(`Received from ${playerId}: ${message.toString()}`);
-//             });
-
-//             connection.socket.on("close", () => {
-//                 // Cleanup when the player disconnects
-//                 playerConnections.delete(playerId);
-//                 console.log(`Player ${playerId} disconnected`);
-//             });
-
-//             connection.socket.send("Welcome to the game!");
-
-//         } catch (err) {
-//             console.log("Invalid token, closing connection.");
-//             connection.socket.close();  // Close connection if the token is invalid
-//         }
-//     });
-// }
-
-// // Store player connections in a map
-// const playerConnections = new Map<string, WebSocket>();  // playerId -> WebSocket connection
+export function websocketAuthMiddleware(req: FastifyRequest<{ Querystring: { token: string } }> ) {
+	try {
+	  const token = req.query.token as string;
+	  if (!token) throw new Error("No token provided");
+  
+	  return jwt.verify(token, process.env.JWT_SECRET!); // Returns decoded user
+	} catch (err) {
+	  return null; // Return null if verification fails
+	}
+  }

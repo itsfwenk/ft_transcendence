@@ -229,13 +229,13 @@ async function getPaddle(gameId: string, side: string) {
 }
 
 export async function updateGames() {
-
 	try {
 		const allIds : {gameId: string }[] = await getAllGamesId();
 	
 		await Promise.all(allIds.map(async (gameId) => {
-		  updateBallPosition(gameId.gameId)
-		  updatePaddlesInDb(gameId.gameId)
+		  updateBallPosition(gameId.gameId);
+		  updatePaddlesInDb(gameId.gameId);
+		  broadcastGameToPlayers(gameId.gameId);
 		}));
 	  } catch (error) {
 		console.error('Error fetching games:', error);
@@ -280,7 +280,7 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
 			}
 		})
 	  } catch (err) {
-		console.error("Error in backend Websocket handling", err);
+		console.error("Server side Websocket error", err);
 		connection.close(1000, 'Invalid Token');
 
 
@@ -288,7 +288,8 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
 
 	// Handle socket close
 	connection.on('close', () => {
-		console.log('Client disconnected');
+		activeUsers.delete(playerId);
+		console.log(`User ${playerId} disconnected`);
 	});
 
 	connection.on('error', (err: Error) => {
@@ -297,6 +298,18 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
 }
 }
 
+async function broadcastGameToPlayers(gameId: string) {
+	const game = await getGamebyId(gameId);
+	if (!game) return;
+
+	[game.player1_id, game.player2_id].forEach(userId => {
+		const socket = activeUsers.get(userId);
+		if (socket) {
+		socket.send(JSON.stringify(game));
+		}
+	});
+}
+  
 // export async function movePaddleUp(gameId: number, paddle: number) {
 // 	const game = await getGamebyId(gameId);
 // 	if (!game) {

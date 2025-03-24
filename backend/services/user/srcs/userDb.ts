@@ -14,7 +14,8 @@ db.exec(`
 		email TEXT UNIQUE NOT NULL,
 		passwordHsh TEXT NOT NULL,
 		role TEXT NOT NULL,
-		status TEXT NOT NULL
+		status TEXT NOT NULL,
+		avatarUrl TEXT DEFAULT '/avatars/default.png'
 	)
 `);
 
@@ -39,6 +40,7 @@ export interface User {
 	passwordHsh: string;
 	role: string;
 	status: string;
+	avatarUrl: string;
 }
 
 const users: User[] = [];
@@ -47,12 +49,12 @@ export function saveUser(userName: string, email: string, password: string) {
 	const userId = uuidv4();
 
 	const stmt = db.prepare(`
-		INSERT INTO users (userId, userName, email, passwordHsh, role, status)
-		VALUES (?, ?, ?, ?, 'user', 'offline')
+		INSERT INTO users (userId, userName, email, passwordHsh, role, status, avatarUrl)
+		VALUES (?, ?, ?, ?, 'user', 'offline', '../avatars/default.png')
 	`);
 	const result = stmt.run(userId, userName, email, password);
 
-	return { userId, userName, email, passwordHsh: password, role: 'user', status: 'offline' };
+	return { userId, userName, email, passwordHsh: password, role: 'user', status: 'offline', avatarUrl: '/avatars/default.png' };
 }
 
 export function getUserByEmail(email: string): User | undefined {

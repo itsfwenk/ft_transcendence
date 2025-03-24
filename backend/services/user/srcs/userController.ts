@@ -101,7 +101,7 @@ export async function getUserProfile(req: ProfileRequest, reply: FastifyReply) {
 	if (!user)
 		return reply.status(404).send({ error: 'User not found' });
 
-	reply.send({ UserId: user.userId, username: user.userName, email: user.email});
+	reply.send({ UserId: user.userId, username: user.userName, email: user.email, avatarUrl: user.avatarUrl });
 }
 
 export async function getUserByIdController(req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) {

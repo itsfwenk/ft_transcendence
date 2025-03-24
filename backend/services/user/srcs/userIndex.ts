@@ -5,6 +5,8 @@ import swaggerUI from '@fastify/swagger-ui';
 import userRoutes from './userRoutes.js';
 import dotenv from 'dotenv'
 import googleAuthRoutes from './googleAuthRoutes.js';
+import path from 'path';
+import fs from 'fs';
 
 const app = Fastify();
 
@@ -60,4 +62,17 @@ app.register(googleAuthRoutes, { prefix: '/user' });
 
 app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	console.log('User Service running on http://localhost:4001');
+});
+
+app.get('/avatars/:filename', (request, reply) => {
+	const { filename } = request.params as { filename: string };
+	const avatarsDir = '/app/public/avatars';
+	const filePath = path.join(avatarsDir, filename);
+
+	fs.access(filePath, fs.constants.F_OK, (err) => {
+		if (err) {
+			return (reply as any).sendFile('default.png', avatarsDir);
+		}
+		(reply as any).sendFile(filename, avatarsDir);
+	});
 });

@@ -21,7 +21,7 @@ Content-Type: application/json
 
 ### Accéder au profil (JWT requis)
 GET http://localhost:4001/user/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc0MTY5Nzk3OCwiZXhwIjoxNzQxNzg0Mzc4fQ.Q4m9z2-daQXII2kQCG5D_YzkPfZ2p2QdS0GTkUpl8Hw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmYjBkNTA2Yy0wMTViLTRhODYtYmUyNS1iZmVhMjAxMTQyNjUiLCJpYXQiOjE3NDI4MjY3NTksImV4cCI6MTc0MjkxMzE1OX0.YqGhjB98o_NoipX_rfg2kadOnPMd7hmw6m9D2EVP5WA
 
 ### 🔍 Voir un utilisateur
 GET http://localhost:4001/user/c0653c47-b385-4af6-af01-d14f5a1b9931
@@ -77,6 +77,30 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMWZjYzQ5ZS00N2FlLTQ1OTctOGVjNi01ZGU3OWJlM2JlNjAiLCJpYXQiOjE3NDIyMjYxNjgsImV4cCI6MTc0MjMxMjU2OH0.HeGHnYz7EIodZQ5OlnQWvuqtKlnqoYnggki1BkvBcdc
 
 
+############################ AVATAR ############################
+
+
+### Obtenir l'avatar d'un utilisateur
+GET http://localhost:4001/user/avatars/fb0d506c-015b-4a86-be25-bfea20114265
+### NEED FIX
+
+### Télécharger un nouvel avatar (nécessite un token JWT valide)
+PUT http://localhost:4001/user/avatar
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmYjBkNTA2Yy0wMTViLTRhODYtYmUyNS1iZmVhMjAxMTQyNjUiLCJpYXQiOjE3NDI4MjY3NTksImV4cCI6MTc0MjkxMzE1OX0.YqGhjB98o_NoipX_rfg2kadOnPMd7hmw6m9D2EVP5WA
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="avatar"; filename="test-avatar.png"
+Content-Type: image/png
+
+< ./test-avatar.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Réinitialiser l'avatar (supprimer et revenir à l'avatar par défaut)
+DELETE http://localhost:4001/user/avatar
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmYjBkNTA2Yy0wMTViLTRhODYtYmUyNS1iZmVhMjAxMTQyNjUiLCJpYXQiOjE3NDI4MjY3NTksImV4cCI6MTc0MjkxMzE1OX0.YqGhjB98o_NoipX_rfg2kadOnPMd7hmw6m9D2EVP5WA
+
+
 ############################ GOOGLE OAUTH2 ############################
 
 
@@ -113,7 +137,6 @@ Content-Type: application/json
 	"player1_id": 1,
 	"player2_id": 2
 }
-
 
 ### Get game
 GET http://localhost:4002/game/2

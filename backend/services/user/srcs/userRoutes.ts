@@ -1,6 +1,8 @@
 import fastify, { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
 import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount, updateRole, updateStatus, getOnlineUsers, logoutUser } from './userController.js';
 import jwt from '@fastify/jwt'
+import multipart from '@fastify/multipart';
+import { deleteAvatar, getAvatar, uplpoadAvatar } from './avatarController.js';
 
 
 const User = {
@@ -13,6 +15,13 @@ const User = {
 }
 
 export default async function userRoutes(fastify: any) {
+
+  fastify.register(multipart, {
+	limits: {
+		fileSize: 1000000 // 1MB
+	}
+  });
+
   fastify.post('/register', {
     schema: {
       body: {
@@ -112,6 +121,18 @@ export default async function userRoutes(fastify: any) {
 	  }
 	}
   }, updateProfile);
+
+  fastify.put('/avatar', {
+    preHandler: [fastify.authenticate],
+    handler: uplpoadAvatar
+  });
+
+  fastify.delete('/avatar', {
+    preHandler: [fastify.authenticate],
+    handler: deleteAvatar
+  });
+
+  fastify.get('/avatar/:userId', getAvatar);
   
   fastify.delete('/profile', {
 	  preHandler: [fastify.authenticate],

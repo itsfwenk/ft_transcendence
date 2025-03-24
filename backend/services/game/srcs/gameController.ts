@@ -3,7 +3,7 @@ import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPosition
 import { Ball, Paddle, Game } from './gameDb.js'
 import axios from 'axios';
 import { WebSocket } from "ws";
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
 const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
@@ -243,59 +243,61 @@ export async function updateGames() {
 	  }
 }
 
-const JWT_SECRET = "secret_key";
+// const JWT_SECRET = "secret_key";
 
-export async function websocketHandshake(connection: WebSocket, req: FastifyRequest) {
+export async function websocketHandshake(connection: WebSocket, req: FastifyRequest<{ Querystring: { token: string } }>) {
 	console.log('websocketHandshake called');
 
-	const { token, gameId, playerId } = req.query as { token: string, gameId: string, playerId: string };
+	const decoded = websocketAuthMiddleware(req);
+	if (!decoded) {
+		console.error('Error in websocketAuthMiddleware');
+		return;
+	}
+	const { userId, gameId } = decoded;
+	console.log('Authenticated Player :', userId);
+
+	activeUsers.set(userId, connection);
+	console.log(`User ${userId} connected via WebSocket`);
 	
-	activeUsers.set(playerId, connection);
-	console.log(`User ${playerId} connected via WebSocket`);
-	
-	try {
-		const decoded = jwt.verify(token, JWT_SECRET);
-		console.log('Authenticated Player:', decoded);
-	
-		connection.on('message', (message) => {
-			const { key, type } = JSON.parse(message.toString());
-			if (!key || !type) {
-				console.warn("Invalid message received:", message.toString());
-				return;
-			}
-			if (key === 'ArrowUp') {
-				if (type === "keydown") {
-					updatePaddleDelta(gameId, playerId, -paddleSpeed);
-				}
-				else if (type === "keyup") {
-					updatePaddleDelta(gameId, playerId, 0);
-				}
-			} else if (key === 'ArrowDown') {
-				if (type === "keydown") {
-					updatePaddleDelta(gameId, playerId, paddleSpeed);
-				}
-				else if (type === "keyup") {
-					updatePaddleDelta(gameId, playerId, 0);
-				}
-			}
-		})
-	  } catch (err) {
-		console.error("Server side Websocket error", err);
-		connection.close(1000, 'Invalid Token');
+    connection.on('message', (message) => {
+        try {
+            const { key, type } = JSON.parse(message.toString());
+            if (!key || !type) {
+                console.warn("Invalid message received:", message.toString());
+                return;
+            }
+
+            if (key === 'ArrowUp') {
+                if (type === "keydown") {
+                    updatePaddleDelta(gameId, userId, -paddleSpeed);
+                } else if (type === "keyup") {
+                    updatePaddleDelta(gameId, userId, 0);
+                }
+            } else if (key === 'ArrowDown') {
+                if (type === "keydown") {
+                    updatePaddleDelta(gameId, userId, paddleSpeed);
+                } else if (type === "keyup") {
+                    updatePaddleDelta(gameId, userId, 0);
+                }
+            }
+        } catch (err) {
+            console.error("Error processing WebSocket message:", err);
+            connection.close(1003, 'Invalid message format'); // Close with unsupported data error
+        }
+    });
 
 
 
 
 	// Handle socket close
 	connection.on('close', () => {
-		activeUsers.delete(playerId);
-		console.log(`User ${playerId} disconnected`);
+		activeUsers.delete(userId);
+		console.log(`User ${userId} disconnected`);
 	});
 
 	connection.on('error', (err: Error) => {
 		console.error('WebSocket error:', err.message);
 	  });
-}
 }
 
 async function broadcastGameToPlayers(gameId: string) {
@@ -312,11 +314,20 @@ async function broadcastGameToPlayers(gameId: string) {
   
 export function websocketAuthMiddleware(req: FastifyRequest<{ Querystring: { token: string } }> ) {
 	try {
-	  const token = req.query.token as string;
-	  if (!token) throw new Error("No token provided");
-  
-	  return jwt.verify(token, process.env.JWT_SECRET!); // Returns decoded user
+		const token : string = req.query.token;
+
+		if (!token)
+			throw new Error("No token provided");
+
+		const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+		if (decoded && typeof decoded === 'object' && 'gameId' in decoded && 'userId' in decoded) {
+			const { userId, gameId } = decoded;
+			return { userId, gameId };
+		}
+		else
+			throw new Error("Invalid token payload");
 	} catch (err) {
-	  return null; // Return null if verification fails
+		console.error("Token verification failed:", err);
+		return null;
 	}
   }

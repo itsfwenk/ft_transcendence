@@ -38,6 +38,7 @@ export default function Home() {
 			const data = await response.json();
 			console.log("Réponse de login:", data);
 			localStorage.setItem('authToken', data.token);
+			localStorage.setItem('userId', data.user.userId);
 			history.pushState(null, '', '/menu');
 			window.dispatchEvent(new PopStateEvent('popstate'));
 		  } catch (error) {

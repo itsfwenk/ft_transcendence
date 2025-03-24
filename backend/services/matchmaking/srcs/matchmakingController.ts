@@ -1,19 +1,21 @@
 import axios from 'axios';
 import {createTournament, Tournament, getMatchbyId, Match, updateMatchv2} from './matchmakingDb';
 
-const queue1v1: number[] = [];
-const queueTournament: number[] = [];
+export const websocketClients: Set<WebSocket> = new Set();
+
+export const queue1v1: string[] = [];
+export const queueTournament: string[] = [];
 
 
 //join 1v1 queue
-export async function joinQueue1v1(playerId: number) {
+export async function joinQueue1v1(playerId: string) {
 	queue1v1.push(playerId);
 	console.log(queue1v1);
 	attemptMatch();
 }
 
 //join tournament 1
-export async function joinTournamentQueue(playerId: number) {
+export async function joinTournamentQueue(playerId: string) {
 	queueTournament.push(playerId);
 	console.log(queueTournament);
 }
@@ -39,9 +41,9 @@ export async function launchMatch(matchId: string): Promise<Match | undefined> {
 	return (match);
 }
 
-export async function createGameSession(player1_id:number, player2_id:number, matchId?:string): Promise<string | undefined> {
+export async function createGameSession(player1_id:string, player2_id:string, matchId?:string): Promise<string | undefined> {
 	try {
-		const baseUrl = process.env.GAME_SERVICE_BASE_URL || 'http://game:4002';
+		const baseUrl = process.env.GAME_SERVICE_BASE_URL || 'http://localhost:4000/api-game';
 		let response;
 		if (matchId) {
 			console.log(matchId);
@@ -57,14 +59,27 @@ export async function createGameSession(player1_id:number, player2_id:number, ma
 	}
 }
 
-function attemptMatch() {
+async function attemptMatch() {
 	if (queue1v1.length >= 2) {
 		const player1 = queue1v1.shift();
 		const player2 = queue1v1.shift();
 		if (player1 && player2) {
-			console.log('creating a matching between')
-			createGameSession(player1, player2)
+			console.log('creating a matching betweenm', player1, player2)
+			try {
+				const gameSessionId = await createGameSession(player1, player2);
+				if (gameSessionId) {
+					const message = JSON.stringify({
+						gameSessionId
+					});
+					websocketClients.forEach((socket) => {
+						socket.send(message);
+					})
+				}
+			} catch (error) {
+				console.error('Erreur lors de la création de la game session:', error);
+			}
 		}
+	
 	}
 }
 
@@ -76,7 +91,7 @@ export async function attemptTournament(): Promise<Tournament | undefined> {
 		const player3 = queueTournament.shift();
 		const player4 = queueTournament.shift();
 		if (player1 && player2 && player3 && player4) {
-            let players: number[] = [player1, player2, player3, player4];
+            let players: string[] = [player1, player2, player3, player4];
 			console.log('creating a tournament between')
 			const tournament = createTournament(players);
 			if (!tournament) {

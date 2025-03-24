@@ -18,7 +18,7 @@ const db = new better_sqlite3_1.default('/app/db/users.db');
 //Creation de la table users si elle n'existe pas
 db.exec(`
 	CREATE TABLE IF NOT EXISTS users (
-	  userId INTEGER PRIMARY KEY AUTOINCREMENT,
+	  userId STRING PRIMARY KEY AUTOINCREMENT,
 	  userName TEXT NOT NULL,
 	  email TEXT UNIQUE NOT NULL,
 	  passwordHsh TEXT NOT NULL

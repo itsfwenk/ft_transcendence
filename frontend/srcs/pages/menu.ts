@@ -24,7 +24,7 @@ export default function menu() {
         console.log("local button...");
 		try {
 
-			const response = await fetch('http://localhost:4000/game/start', {
+			const response = await fetch('http://localhost:4000/api-game/start', {
 			  method: 'POST',
 			});
 	
@@ -46,17 +46,18 @@ export default function menu() {
 		e.preventDefault();
         console.log("online button...");
 		const currentPlayerId = localStorage.getItem('userId');
+		console.log(currentPlayerId);
 		if (!currentPlayerId) {
 			console.error("Aucun utilisateur connecté");
 			return;
 		}
 		try {
-			const response = await fetch('http://localhost:4000/matchmaking/join', {
+			const response = await fetch('http://localhost:4000/api-matchmaking/join', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ playerId: Number(currentPlayerId) })
+				body: JSON.stringify({ playerId: currentPlayerId })
 			});
 	  
 			if (!response.ok) {

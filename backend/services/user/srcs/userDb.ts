@@ -79,6 +79,16 @@ export function getUserByEmail(email: string): User | undefined {
 	}
 }
 
+export function getUserByUserName(name: string): User | undefined {
+	try {
+		const stmt = db.prepare(`SELECT * FROM users WHERE userName = ?`);
+		return stmt.get(name) as User | undefined;
+	} catch (error) {
+		console.error('Error fetching user by userName:', error);
+		throw new Error('Database error');
+	}
+}
+
 export function getUserById(userId: string): User | undefined {
 	const stmt = db.prepare(`SELECT * FROM users WHERE userId = ?`);
 	const user = stmt.get(userId);

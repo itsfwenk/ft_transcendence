@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcrypt';
 import jwt from '@fastify/jwt';
-import { saveUser, getUserByEmail, getUserById, isValidEmail, updateUser, deleteUser, updateUserRole, updateUserStatus, getUsersByRole, getUserWithStatus, User } from './userDb.js';
+import { saveUser, getUserByEmail, getUserById, isValidEmail, updateUser, deleteUser, updateUserRole, updateUserStatus, getUsersByRole, getUserWithStatus, User, getUserByUserName } from './userDb.js';
 
 // Interface pour les requêtes de création d'utilisateur
 interface RegisterRequest extends FastifyRequest {
@@ -24,6 +24,10 @@ export async function registerUser(req:RegisterRequest, reply:FastifyReply) {
 		// Vérifier si l'utilisateur existe déjà
 		if (getUserByEmail(email)) {
 			return reply.status(400).send({ error: 'Email already use' });
+		}
+
+		if (getUserByUserName(userName)) {
+			return reply.status(400).send({ error: 'UserName already use' });
 		}
 	
 		if (!password || password.length < 6) {

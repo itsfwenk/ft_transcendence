@@ -7,8 +7,8 @@ const startGameSchema: FastifySchema = {
 	  type: 'object',
 	  required: ['player1_id', 'player2_id'],
 	  properties: {
-		player1_id: { type: 'number' },
-		player2_id: { type: 'number' }
+		player1_id: { type: 'string' },
+		player2_id: { type: 'string' }
 	  }
 	}
 };

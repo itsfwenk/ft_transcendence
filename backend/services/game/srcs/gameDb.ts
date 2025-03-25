@@ -31,15 +31,15 @@ export interface Paddle {
 
 export interface Game {
 	gameId: number;
-	player1_id: number;
-	player2_id: number;
+	player1_id: string;
+	player2_id: string;
 	score1: number;
 	score2: number;
 	leftPaddle: Paddle;
 	rightPaddle: Paddle;
 	ball: Ball;
 	status: 'ongoing' | 'finished';
-	winner_id?: number | null;
+	winner_id?: string | null;
 	matchId?: string | null;
 }
 
@@ -55,22 +55,22 @@ db.exec(`
 
 	CREATE TABLE IF NOT EXISTS games (
 	  gameId INTEGER PRIMARY KEY AUTOINCREMENT,
-	  player1_id INTEGER NOT NULL,
-	  player2_id INTEGER NOT NULL,
+	  player1_id STRING NOT NULL,
+	  player2_id STRING NOT NULL,
 	  score1 INTEGER DEFAULT 0,
 	  score2 INTEGER DEFAULT 0,
 	  leftPaddle TEXT NOT NULL DEFAULT '{"x": 0, "y": ${paddleBasePosition}, "dy": 0}',
 	  rightPaddle TEXT NOT NULL DEFAULT '{"x": ${canvasWidth - 10}, "y": ${paddleBasePosition}, "dy": 0}',
 	  ball TEXT NOT NULL DEFAULT '{"x": ${canvasWidth / 2}, "y": ${canvasHeight / 2}, "radius": ${ballRadius}, "dx": ${Math.random() > 0.5 ? 3 : -3}, "dy": ${Math.random() > 0.5 ? 3 : -3}}',
 	  status TEXT CHECK(status IN ('ongoing', 'finished')) DEFAULT 'ongoing',
-	  winner_id INTEGER NULL,
+	  winner_id STRING NULL,
 	  matchId TEXT NULL
 	);
 `);
 
   
 
-export function saveGame(player1_id: number, player2_id: number, matchId?: string): Game {
+export function saveGame(player1_id: string, player2_id: string, matchId?: string): Game {
 	const stmt = db.prepare(`
 		INSERT INTO games (player1_id, player2_id, matchId)
 		VALUES (?, ?, ?)
@@ -105,7 +105,7 @@ export function endGameInDb(gameId: number): Game | null {
 	const game = db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | undefined;
 	if (!game) return null;
 
-	let winner_id: number | null = null;
+	let winner_id: string | null = null;
 	if (game.score1 > game.score2) winner_id = game.player1_id;
 	else if (game.score2 > game.score1) winner_id = game.player2_id;
 

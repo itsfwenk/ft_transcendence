@@ -1,13 +1,17 @@
 import { FastifyRequest, FastifyReply, FastifySchema } from 'fastify';
-import { attemptTournament, launchMatch, joinQueue1v1, joinTournamentQueue } from './matchmakingController.js';
+import { queue1v1, queueTournament, attemptTournament, launchMatch, joinQueue1v1, joinTournamentQueue } from './matchmakingController.js';
 import {  updateMatch, getMatchbyId, getTournamentById, scheduleFinal, finishTournament} from './matchmakingDb.js'
+import { request } from 'axios';
+import { WebSocket } from "ws";
+
+export const websocketClients = new Map<string, WebSocket>(); //userId -> websocket
 
 const playerIdSchema: FastifySchema = {
 	body: {
 	  type: 'object',
 	  required: ['playerId'],
 	  properties: {
-		playerId: { type: 'number' },
+		playerId: { type: 'string' },
 	  }
 	}
 };
@@ -45,24 +49,48 @@ const UpdateMatchSchema: FastifySchema = {
 		properties: {
 		  score1: { type: 'number' },
 		  score2: { type: 'number' },
-		  winner_id: { type: 'number' }
+		  winner_id: { type: 'string' }
 		},
 		required: ['score1', 'score2', 'winner_id']
 	},
 };
 
+const queueStatusSchema: FastifySchema = {
+	querystring: {
+	  type: 'object',
+	  properties: {
+		type: { type: 'string', enum: ['1v1', 'tournament'] }
+	  },
+	  additionalProperties: false
+	},
+};
+
 export default async function matchmakingRoutes(fastify: any) {
 	fastify.post('/join', { schema: playerIdSchema }, async (request:FastifyRequest, reply:FastifyReply) => {
-		const {playerId} = request.body as {playerId:number};
+		const {playerId} = request.body as {playerId:string};
 		const result = joinQueue1v1(playerId);
 		reply.send(result);
+	})
+	fastify.get('/queue-status', {schema: queueStatusSchema}, async(request:FastifyRequest, reply:FastifyReply) => {
+		const type = (request.query as { type: string }).type;
+		if (type === 'tournament') {
+			return reply.send({
+				queueType: 'tournament',
+				count: queueTournament.length,
+			});
+		} else if (type === '1v1') {
+			return reply.send({
+				queueType: '1v1',
+				count: queue1v1.length,
+			});
+		}
 	})
 	fastify.post('/match/update/:matchId', { schema: UpdateMatchSchema }, async (request:FastifyRequest, reply:FastifyReply) => {
 		const { matchId } = request.params as {matchId: string};
 		const { score1, score2, winner_id } = request.body as {
 		  score1: number;
 		  score2: number;
-		  winner_id: number;
+		  winner_id: string;
 		};
 		const updatedMatch = updateMatch(matchId, score1, score2, winner_id);
   		reply.send({ success: true, updatedMatch });
@@ -76,7 +104,7 @@ export default async function matchmakingRoutes(fastify: any) {
 	})
 	fastify.post('/tournament/join', { schema: playerIdSchema }, async(request:FastifyRequest, reply:FastifyReply) => {
 	
-		const {playerId} = request.body as {playerId:number};
+		const {playerId} = request.body as {playerId:string};
 		const result = joinTournamentQueue(playerId);
 		reply.send({success: true, result});
 	})
@@ -105,5 +133,32 @@ export default async function matchmakingRoutes(fastify: any) {
 		finishTournament(tournamentId);
   		reply.send({ success: true});
 	})
+	fastify.get('/ws', { websocket: true }, (connection: WebSocket, request: FastifyRequest) => {
+		const { playerId } = request.query as { playerId?: string };
+		console.log('Query params:', request.query);
+		if (!playerId) {
+			console.error("playerId non fourni, fermeture de la connexion");
+			connection.close();
+			return;
+		}
 
+		 // Vérifier si une connexion existe déjà pour ce playerId
+		 if (websocketClients.has(playerId)) {
+			console.warn(`Une connexion existe déjà pour le playerId: ${playerId}. Fermeture de la nouvelle connexion.`);
+			connection.close();
+			return;
+		  }
+
+		connection.on('message', (msg) => {
+			console.log('📩 Message reçu :', msg.toString());
+		});
+		console.log(`Un client WebSocket est connecté pour le playerId: ${playerId}`);
+		// Stocker la connexion dans la Map avec le playerId comme clé
+		websocketClients.set(playerId, connection);
+	  
+		connection.on('close', () => {
+		  console.log(`Un client WebSocket s'est déconnecté pour le playerId: ${playerId}`);
+		  websocketClients.delete(playerId);
+		});
+	});
 }

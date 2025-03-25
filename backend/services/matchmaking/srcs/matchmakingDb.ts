@@ -1,16 +1,17 @@
 import Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 
+//connexion a la database game
 const db = new Database('/app/db/matchmaking.db');
 
 export interface Match {
 	id: string;
 	round: number;
-	player1_Id: number;
-	player2_Id: number;
+	player1_Id: string;
+	player2_Id: string;
 	player1Score: number;
 	player2Score: number;
-	winner_Id?: number;
+	winner_Id?: string;
 	status: 'scheduled' | 'in_progress' | 'completed';
 	matchTime: Date;
 }
@@ -18,7 +19,7 @@ export interface Match {
 export interface Tournament {
 	id: string;
 	status: 'scheduled' | 'ongoing' | 'completed';
-	players: number[];
+	players: string[]; // Liste des IDs des joueurs
 	matches: Match[];
 	createdAt: Date;
 	updatedAt: Date;
@@ -39,18 +40,18 @@ db.exec(`
 		id TEXT PRIMARY KEY,
 		tournamentId TEXT, -- Clé étrangère vers Tournament.id
 		round INTEGER,
-		player1_Id INTEGER,
-		player2_Id INTEGER,
+		player1_Id STRING,
+		player2_Id STRING,
 		player1Score INTEGER,
 		player2Score INTEGER,
-		winnerId INTEGER NULL,
+		winnerId STRING NULL,
 		status TEXT,  -- scheduled, in_progress, completed,
 		matchTime DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (tournamentId) REFERENCES Tournament(id)
 	);
 `);
 
-export function createTournament(players: number[]): Tournament {
+export function createTournament(players: string[]): Tournament {
 
 	if (players.length !== 4) {
 		throw new Error("Pas assez de joueurs.");
@@ -107,19 +108,19 @@ export function createTournament(players: number[]): Tournament {
 interface TournamentRow {
     id: string;
     status: 'scheduled' | 'ongoing' | 'completed';
-    players: string;
-    createdAt: string;
-    updatedAt: string;
+    players: string; // JSON string of player IDs
+    createdAt: string; // Date stored as string in the database
+    updatedAt: string; // Date stored as string in the database
 }
 
 interface MatchRow {
     id: string;
     round: number;
-    player1_Id: number;
-    player2_Id: number;
+    player1_Id: string;
+    player2_Id: string;
     player1Score: number;
     player2Score: number;
-    winnerId: number;
+    winnerId: string;
     status: 'scheduled' | 'in_progress' | 'completed';
 	matchTime: string;
 }
@@ -148,7 +149,7 @@ export function getTournamentById(tournamentId: string): Tournament | null {
     };
 }
 
-export function updateMatch(matchId: string, score1: number, score2: number, winnerId: number): any {
+export function updateMatch(matchId: string, score1: number, score2: number, winnerId: string): any {
 	const stmt = db.prepare(`
 		UPDATE TournamentMatch
 		SET player1Score = ?, player2Score = ?, winnerId = ?, status = 'completed', matchTime = CURRENT_TIMESTAMP

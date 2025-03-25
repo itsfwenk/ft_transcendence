@@ -1,4 +1,18 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: ${FRONTEND_TARGET}
+    ports:
+      - "${FRONTEND_PORT}"
+    networks:
+      - app-network
+    volumes: 
+      - ${FRONTEND_VOLUMES}
+    working_dir: ${FRONTEND_WORKDIR}
+    restart: always
+    env_file: .env
   user:
     build: 
       context: ./backend

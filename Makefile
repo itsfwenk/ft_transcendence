@@ -24,6 +24,8 @@ install-deps:
 	cd backend/services/matchmaking && npm install
 	@echo "Installation des dépendances pour gateway..."
 	cd backend/gateway && npm install
+	@echo "Installation des dépendances pour frontend..."
+	cd frontend && npm install
 
 clean:
 	@docker stop $$(docker ps -qa) || true

@@ -9,16 +9,17 @@ db.exec(`
 	  userId INTEGER PRIMARY KEY AUTOINCREMENT,
 	  userName TEXT NOT NULL,
 	  email TEXT UNIQUE NOT NULL,
-	  password TEXT NOT NULL
+	  password TEXT NOT NULL,
+	  token TEST NOT NULL
 	)
 `);
 
 export interface User {
-	userId: number;
+	userId: string;
 	userName: string;
 	email: string;
 	password: string;
-	socket: WebSocket;
+	token: string;
 }
 
 const users: User[] = [];

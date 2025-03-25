@@ -254,7 +254,6 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
 		return;
 	}
 	const { userId, gameId } = decoded;
-	console.log('Authenticated Player :', userId);
 
 	activeUsers.set(userId, connection);
 	console.log(`User ${userId} connected via WebSocket`);
@@ -285,9 +284,6 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
             connection.close(1003, 'Invalid message format'); // Close with unsupported data error
         }
     });
-
-
-
 
 	// Handle socket close
 	connection.on('close', () => {

@@ -1,4 +1,26 @@
 // src/pages/Home.ts
+
+export async function fetchUserProfile() {
+	try {
+	  const response = await fetch('http://localhost:4000/api-user/getProfile', {
+		method: 'GET',
+		credentials: 'include',
+		headers: {
+		  'Content-Type': 'application/json'
+		}
+	  });
+	  if (!response.ok) {
+		throw new Error(`Erreur lors de la récupération du profil: ${response.statusText}`);
+	  }
+	  const data = await response.json();
+	  console.log("Profil utilisateur:", data);
+	  return data;
+	} catch (error) {
+	  console.error("Erreur de récupération du profil:", error);
+	  return null;
+	}
+}
+
 export default function menu() {
 	const app = document.getElementById('app');
 	if (app) {
@@ -18,8 +40,8 @@ export default function menu() {
 
 	
 		
-      const playLocalButton = document.getElementById('localBtn') as HTMLFormElement;
-      playLocalButton.addEventListener('click', async(e) => {
+    const playLocalButton = document.getElementById('localBtn') as HTMLFormElement;
+    	playLocalButton.addEventListener('click', async(e) => {
         e.preventDefault();
         console.log("local button...");
 		try {
@@ -42,15 +64,20 @@ export default function menu() {
 	});
 
 	const playOnlineButton = document.getElementById('onlineBtn') as HTMLFormElement;
+
+
 	playOnlineButton.addEventListener('click', async(e) => {
 		e.preventDefault();
         console.log("online button...");
-		const currentPlayerId = localStorage.getItem('userId');
-		console.log(currentPlayerId);
-		if (!currentPlayerId) {
+		const userProfile = await fetchUserProfile();
+		console.log(userProfile);
+		if (!userProfile) {
 			console.error("Aucun utilisateur connecté");
 			return;
 		}
+
+		const currentPlayerId = userProfile.userId;
+		console.log("currentPlayerId:", currentPlayerId)
 		try {
 			const response = await fetch('http://localhost:4000/api-matchmaking/join', {
 				method: 'POST',

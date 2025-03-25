@@ -21,8 +21,10 @@ app.register(swagger,{
 
 app.register(cors, {
 	origin: 'http://localhost:5173', // ou '*' pour autoriser toutes les origines (pas recommandé en prod)
+	credentials: true,
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-	allowedHeaders: ['Content-Type', 'Authorization']
+	allowedHeaders: ['Content-Type', 'Authorization'],
+	
 });
 
 app.register(swaggerUI, {

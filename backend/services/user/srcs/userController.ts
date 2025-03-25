@@ -72,6 +72,13 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 				{ expiresIn: '24h' }
 			);
 
+			reply.setCookie('authToken', token, {
+				httpOnly: true,
+				secure: process.env.NODE_ENV === 'production',  // en production, utilisez HTTPS
+				sameSite: 'strict',
+				path: '/',  // disponible pour toutes les routes
+			  });
+
 			reply.send({ token,
 				user: { 
 					userId: user.userId,

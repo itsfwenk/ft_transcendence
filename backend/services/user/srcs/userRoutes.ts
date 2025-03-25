@@ -1,4 +1,4 @@
-import fastify, { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
+import fastify, { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest, FastifySchema } from 'fastify';
 import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount, updateRole, updateStatus, getOnlineUsers, logoutUser } from './userController.js';
 import jwt from '@fastify/jwt'
 
@@ -157,6 +157,18 @@ export default async function userRoutes(fastify: any) {
 	handler: getOnlineUsers
   });
 
-  
+  interface JwtPayload {
+	userId: string;
+  }
+  fastify.get('/getProfile', async (req:FastifyRequest, reply:FastifyReply) => {
+	try {
+	  const payload = await req.jwtVerify<JwtPayload>();
+	  return reply.send({
+		userId: payload.userId,
+	  });
+	} catch (err) {
+	  reply.code(401).send({ error: 'Non autorisé' });
+	}
+  });
 
 }

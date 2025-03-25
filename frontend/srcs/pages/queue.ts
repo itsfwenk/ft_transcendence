@@ -1,4 +1,6 @@
-export default function Queue() {
+import { fetchUserProfile } from "./menu";
+
+export default async function Queue() {
 	const app = document.getElementById('app');
 	if (!app) return;
   
@@ -12,17 +14,29 @@ export default function Queue() {
 	// Appel à la fonction qui rejoint la queue 1v1
 	// Supposons que joinQueue1v1 prenne l'id du joueur courant, par exemple récupéré via un token ou stocké globalement
 	
-	const ws = new WebSocket('ws://localhost:4000/api-matchmaking/ws');
+	const userProfile = await fetchUserProfile();
+	console.log(userProfile);
+	if (!userProfile) {
+		console.error("Aucun utilisateur connecté");
+		return;
+	}
+	const currentPlayerId = userProfile.userId;
+	console.log("currentPlayerId:", currentPlayerId);
+	const ws = new WebSocket(`ws://localhost:4000/api-matchmaking/ws?playerId=${currentPlayerId}`);
 	ws.onopen = () => {
 		console.log('Connexion WebSocket établie');
 	};
 
 	ws.onmessage = (event) => {
-		const data = JSON.parse(event.data);
-		console.log('Notification WebSocket reçue:', data);
-		if (data.matchReady && data.gameSessionId) {
-		  history.pushState(null, '', `/game?gameSessionId=${data.gameSessionId}`);
-		  window.dispatchEvent(new PopStateEvent('popstate'));
+		try{
+			const data = JSON.parse(event.data);
+			console.log('Notification WebSocket reçue:', data);
+			if (data.gameSessionId) {
+				history.pushState(null, '', `/game?gameSessionId=${data.gameSessionId}`);
+				window.dispatchEvent(new PopStateEvent('popstate'));
+			}
+		} catch (error) {
+			console.error('Erreur lors du parsing du message:', error);
 		}
 	};
 	
@@ -33,7 +47,7 @@ export default function Queue() {
 	ws.onclose = () => {
 		console.log('Connexion WebSocket fermée');
 	};
-	
+}
 	// const playButton = document.getElementById('onlineBtn') as HTMLFormElement;
 	// playButton.addEventListener('click', async(e) => {
 	// 	e.preventDefault();
@@ -63,5 +77,4 @@ export default function Queue() {
 	// 	} else {
 	// 	console.error("Aucun utilisateur connecté.");
 	// 	}
-	// });
-  }
+	// })

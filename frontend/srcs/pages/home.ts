@@ -25,6 +25,7 @@ export default function Home() {
 
 			const response = await fetch('http://localhost:4000/api-user/login', {
 			  method: 'POST',
+			  credentials: 'include',
 			  headers: {
 				'Content-Type': 'application/json'
 			  },
@@ -37,8 +38,6 @@ export default function Home() {
 	
 			const data = await response.json();
 			console.log("Réponse de login:", data);
-			localStorage.setItem('authToken', data.token);
-			localStorage.setItem('userId', data.user.userId);
 			history.pushState(null, '', '/menu');
 			window.dispatchEvent(new PopStateEvent('popstate'));
 		  } catch (error) {

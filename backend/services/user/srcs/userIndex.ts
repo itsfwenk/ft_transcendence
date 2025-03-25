@@ -1,5 +1,6 @@
 import Fastify, { FastifyReply, FastifyRequest } from 'fastify';
 import jwt from '@fastify/jwt';
+import fastifyCookie from '@fastify/cookie';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import userRoutes from './userRoutes.js';
@@ -11,8 +12,19 @@ const app = Fastify();
 
 dotenv.config();
 
+app.register(fastifyCookie);
+
 // Configurer JWT
-app.register(jwt, { secret: 'supersecretkey' });
+//app.register(jwt, { secret: 'supersecretkey' });
+
+app.register(jwt, {
+	secret: 'supersecretkey',
+	cookie: {
+	  cookieName: 'authToken',
+	  signed: false,
+	}
+});
+
 
 // Configurer Swagger
 app.register(swagger, {
@@ -55,7 +67,7 @@ app.decorate("isAdmin", async function (req: IsAdminRequest, reply: FastifyReply
 	} catch (err) {
 	  reply.status(401).send({ error: "Unauthorized" });
 	}
-  });
+});
 
 // Enregistrer les routes utilisateur et google
 app.register(userRoutes, { prefix: '/user' });

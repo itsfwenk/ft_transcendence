@@ -4,14 +4,11 @@ export default function game() {
     if (app) {
       app.innerHTML = `
         <div class="flex flex-col items-center justify-center min-h-screen">
-          <h1 class="text-3xl font-bold mb-4">Bienvenue sur Pong Game</h1>
+			<h1 class="text-3xl font-bold text-blue-600 mb-4">Lancer la partie</h1>
           <form id="loginForm" class="space-y-4">
-            <input type="email" id="email" placeholder="Email" class="border p-2 rounded" required />
-            <input type="password" id="password" placeholder="Mot de passe" class="border p-2 rounded" required />
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Se connecter</button>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">lancer</button>
           </form>
           <p class="mt-4">
-            Pas de compte ? <a href="/signup" data-link class="text-indigo-600 hover:underline">Inscrivez-vous</a>
           </p>
         </div>
       `;

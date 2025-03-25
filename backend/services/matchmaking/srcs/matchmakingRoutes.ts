@@ -2,9 +2,9 @@ import { FastifyRequest, FastifyReply, FastifySchema } from 'fastify';
 import { queue1v1, queueTournament, attemptTournament, launchMatch, joinQueue1v1, joinTournamentQueue } from './matchmakingController.js';
 import {  updateMatch, getMatchbyId, getTournamentById, scheduleFinal, finishTournament} from './matchmakingDb.js'
 import { request } from 'axios';
-import { websocketClients } from './matchmakingController.js';
 import { WebSocket } from "ws";
 
+export const websocketClients = new Map<string, WebSocket>(); //userId -> websocket
 
 const playerIdSchema: FastifySchema = {
 	body: {
@@ -134,12 +134,31 @@ export default async function matchmakingRoutes(fastify: any) {
   		reply.send({ success: true});
 	})
 	fastify.get('/ws', { websocket: true }, (connection: WebSocket, request: FastifyRequest) => {
-		console.log('Un client WebSocket est connecté');
-		websocketClients.add(connection);
+		const { playerId } = request.query as { playerId?: string };
+		console.log('Query params:', request.query);
+		if (!playerId) {
+			console.error("playerId non fourni, fermeture de la connexion");
+			connection.close();
+			return;
+		}
+
+		 // Vérifier si une connexion existe déjà pour ce playerId
+		 if (websocketClients.has(playerId)) {
+			console.warn(`Une connexion existe déjà pour le playerId: ${playerId}. Fermeture de la nouvelle connexion.`);
+			connection.close();
+			return;
+		  }
+
+		connection.on('message', (msg) => {
+			console.log('📩 Message reçu :', msg.toString());
+		});
+		console.log(`Un client WebSocket est connecté pour le playerId: ${playerId}`);
+		// Stocker la connexion dans la Map avec le playerId comme clé
+		websocketClients.set(playerId, connection);
+	  
 		connection.on('close', () => {
-			console.log('Un client WebSocket s\'est déconnecté');
-			websocketClients.delete(connection);
+		  console.log(`Un client WebSocket s'est déconnecté pour le playerId: ${playerId}`);
+		  websocketClients.delete(playerId);
 		});
 	});
-	
 }

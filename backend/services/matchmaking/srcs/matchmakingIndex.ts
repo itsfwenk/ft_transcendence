@@ -11,6 +11,7 @@ const app = Fastify();
 
 
 await app.register(websocket);
+
 // Configurer Swagger
 app.register(swagger, {
   swagger: {

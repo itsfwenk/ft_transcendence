@@ -1,7 +1,8 @@
 import axios from 'axios';
+import type { WebSocket as WS } from 'ws';
 import {createTournament, Tournament, getMatchbyId, Match, updateMatchv2} from './matchmakingDb';
+import { websocketClients } from './matchmakingRoutes';
 
-export const websocketClients: Set<WebSocket> = new Set();
 
 export const queue1v1: string[] = [];
 export const queueTournament: string[] = [];

@@ -5,8 +5,8 @@ POST http://localhost:4001/user/register
 Content-Type: application/json
 
 {
-	"userName": "test",
-	"email": "test@email.com",
+	"userName": "arthur",
+	"email": "te@email.com",
 	"password": "mypassword"
 }
 
@@ -113,7 +113,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlZjEyY
 
 ### Lier un compte Google à un compte utilisateur existant (nécessite un token JWT valide)
 GET http://localhost:4001/user/link/google
-Authorization: Bearer VOTRE_TOKEN_JWT_ICI
+Authorization: Bearer 
 
 ### Délier un compte Google (nécessite un token JWT valide)
 DELETE http://localhost:4001/user/unlink/google
@@ -125,6 +125,28 @@ GET http://localhost:4001/user/login-success?token=exemple_token&new=true
 ### Vérifier la page d'erreur de connexion
 GET http://localhost:4001/user/login-error
 
+
+############################ FRIENDS ############################
+
+### Obtenir la liste d'amis
+GET http://localhost:4001/user/friends
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4OTkxZTk0Zi0xYmI3LTRjOTEtYjBkMS1lOTYyNmIzMGVkZjAiLCJpYXQiOjE3NDI5MDgxOTEsImV4cCI6MTc0Mjk5NDU5MX0.vYkF_ifVYKMgYdqVWm8BwK031LTvsnbXm-6EYiHT63Q
+
+### Obtenir les amis en ligne
+GET http://localhost:4001/user/friends/online
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4OTkxZTk0Zi0xYmI3LTRjOTEtYjBkMS1lOTYyNmIzMGVkZjAiLCJpYXQiOjE3NDI5MDgxOTEsImV4cCI6MTc0Mjk5NDU5MX0.vYkF_ifVYKMgYdqVWm8BwK031LTvsnbXm-6EYiHT63Q
+
+### Ajouter un ami
+POST http://localhost:4001/user/friends/64763982-8c99-4ccb-ac60-6faf937d0915
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4OTkxZTk0Zi0xYmI3LTRjOTEtYjBkMS1lOTYyNmIzMGVkZjAiLCJpYXQiOjE3NDI5MDgxOTEsImV4cCI6MTc0Mjk5NDU5MX0.vYkF_ifVYKMgYdqVWm8BwK031LTvsnbXm-6EYiHT63Q
+
+### Vérifier si un utilisateur est ami
+GET http://localhost:4001/user/friends/check/ea25878f-40a1-45a4-bbae-253264ffd4fe
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4OTkxZTk0Zi0xYmI3LTRjOTEtYjBkMS1lOTYyNmIzMGVkZjAiLCJpYXQiOjE3NDI5MDgxOTEsImV4cCI6MTc0Mjk5NDU5MX0.vYkF_ifVYKMgYdqVWm8BwK031LTvsnbXm-6EYiHT63Q
+
+### Supprimer un ami
+DELETE http://localhost:4001/user/friends/ea25878f-40a1-45a4-bbae-253264ffd4fe
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4OTkxZTk0Zi0xYmI3LTRjOTEtYjBkMS1lOTYyNmIzMGVkZjAiLCJpYXQiOjE3NDI5MDgxOTEsImV4cCI6MTc0Mjk5NDU5MX0.vYkF_ifVYKMgYdqVWm8BwK031LTvsnbXm-6EYiHT63Q
 
 
 ############################ GAME ############################

@@ -33,6 +33,18 @@ db.exec(`
 	)
 `);
 
+db.exec(`
+	  CREATE TABLE IF NOT EXISTS friendships (
+	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+	  userId TEXT NOT NULL,
+	  friendId TEXT NOT NULL,
+	  createdAt INTEGER NOT NULL,
+	  FOREIGN KEY (userId) REFERENCES users(userId),
+	  FOREIGN KEY (friendId) REFERENCES users(userId),
+	  UNIQUE(userId, friendId)
+	)
+`);
+
 export interface User {
 	userId: string;
 	userName: string;
@@ -50,11 +62,11 @@ export function saveUser(userName: string, email: string, password: string) {
 
 	const stmt = db.prepare(`
 		INSERT INTO users (userId, userName, email, passwordHsh, role, status, avatarUrl)
-		VALUES (?, ?, ?, ?, 'user', 'offline', '../avatars/default.png')
+		VALUES (?, ?, ?, ?, 'user', 'online', '../avatars/default.png')
 	`);
 	const result = stmt.run(userId, userName, email, password);
 
-	return { userId, userName, email, passwordHsh: password, role: 'user', status: 'offline', avatarUrl: '/avatars/default.png' };
+	return { userId, userName, email, passwordHsh: password, role: 'user', status: 'online', avatarUrl: '/avatars/default.png' };
 }
 
 export function getUserByEmail(email: string): User | undefined {

@@ -1,5 +1,8 @@
-import { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
-import { registerUser, loginUser, getUserProfile, getUserByIdController } from './userController.js';
+import fastify, { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
+import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount, updateRole, updateStatus, getOnlineUsers, logoutUser } from './userController.js';
+import jwt from '@fastify/jwt'
+import multipart from '@fastify/multipart';
+import { deleteAvatar, getAvatar, uplpoadAvatar } from './avatarController.js';
 
 
 const User = {
@@ -12,6 +15,13 @@ const User = {
 }
 
 export default async function userRoutes(fastify: any) {
+
+  fastify.register(multipart, {
+	limits: {
+		fileSize: 1000000 // 1MB
+	}
+  });
+
   fastify.post('/register', {
     schema: {
       body: {
@@ -74,4 +84,100 @@ export default async function userRoutes(fastify: any) {
   }, getUserProfile);
 
   fastify.get("/:userId", getUserByIdController);
+
+  fastify.put('/profile', {
+	preHandler: [fastify.authenticate],
+	schema: {
+	  headers: {
+		type: 'object',
+		properties: {
+		  Authorization: { type: 'string', description: 'Bearer <token>' }
+		},
+		required: ['Authorization']
+	  },
+	  body: {
+		type: 'object',
+		properties: {
+		  userName: { type: 'string' },
+		  email: { type: 'string', format: 'email' },
+		  password: { type: 'string', minLength: 6 }
+		}
+	  },
+	  response: {
+		200: {
+		  type: 'object',
+		  properties: {
+			success: { type: 'boolean' },
+			user: {
+			  type: 'object',
+			  properties: {
+				userId: { type: 'number' },
+				userName: { type: 'string' },
+				email: { type: 'string' }
+			  }
+			}
+		  }
+		}
+	  }
+	}
+  }, updateProfile);
+
+  fastify.put('/avatar', {
+    preHandler: [fastify.authenticate],
+    handler: uplpoadAvatar
+  });
+
+  fastify.delete('/avatar', {
+    preHandler: [fastify.authenticate],
+    handler: deleteAvatar
+  });
+
+  fastify.get('/avatar/:userId', getAvatar);
+  
+  fastify.delete('/profile', {
+	  preHandler: [fastify.authenticate],
+	  handler: deleteAccount
+  });
+
+  fastify.post('/logout', {
+	preHandler: [fastify.authenticate],
+	handler: logoutUser
+  })
+
+  fastify.put('/role', {
+	preHandler: [fastify.authenticate],
+	schema: {
+		body: {
+			type: 'object',
+			required: ['userId', 'role'],
+			properties: {
+				userId: { type: 'string' },
+				role: { type: 'string', enum: ['user', 'admin'] }
+			}
+		}
+	},
+	handler: updateRole
+  })
+
+  fastify.put('/status', {
+	preHandler: [fastify.authenticate],
+	schema: {
+		body: {
+			type: 'object',
+			required: ['status'],
+			properties: {
+				status: { type: 'string', enum: ['online', 'offline'] }
+			}
+		}
+	},
+	handler: updateStatus
+  });
+
+  fastify.get('/online', {
+	preHandler: [fastify.authenticate],
+	handler: getOnlineUsers
+  });
+
+  
+
 }

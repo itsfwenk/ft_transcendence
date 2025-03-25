@@ -1,4 +1,4 @@
-import Fastify, { FastifyReply, FastifyRequest } from 'fastify';
+import Fastify from 'fastify';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import matchmakingRoutes from './matchmakingRoutes.js';
@@ -20,11 +20,6 @@ app.register(swaggerUI, {
   routePrefix: '/docs',
   staticCSP: true
 });
-
-//Register bcrypt
-
-
-
 
 // Enregistrer les routes utilisateur
 app.register(matchmakingRoutes, { prefix: '/matchmaking' });

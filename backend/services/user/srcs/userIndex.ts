@@ -3,8 +3,14 @@ import jwt from '@fastify/jwt';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import userRoutes from './userRoutes.js';
+import dotenv from 'dotenv'
+import googleAuthRoutes from './googleAuthRoutes.js';
+import path from 'path';
+import fs from 'fs';
 
 const app = Fastify();
+
+dotenv.config();
 
 // Configurer JWT
 app.register(jwt, { secret: 'supersecretkey' });
@@ -25,10 +31,7 @@ app.register(swaggerUI, {
   staticCSP: true
 });
 
-//Register bcrypt
-
-
-// Middleware pour vérifier l'authentification
+// Middleware pour jwt
 app.decorate("authenticate", async function (req: FastifyRequest, reply: FastifyReply) {
   try {
     await req.jwtVerify();
@@ -37,9 +40,39 @@ app.decorate("authenticate", async function (req: FastifyRequest, reply: Fastify
   }
 });
 
-// Enregistrer les routes utilisateur
+interface IsAdminRequest extends FastifyRequest {
+	user: { role: string };
+}
+
+// Middleware pour verif admin et jwt
+app.decorate("isAdmin", async function (req: IsAdminRequest, reply: FastifyReply) {
+	try {
+	  await req.jwtVerify();
+	  if (req.user.role !== 'admin') {
+		reply.status(403).send({ error: "Permission denied" });
+	  }
+	} catch (err) {
+	  reply.status(401).send({ error: "Unauthorized" });
+	}
+  });
+
+// Enregistrer les routes utilisateur et google
 app.register(userRoutes, { prefix: '/user' });
+app.register(googleAuthRoutes, { prefix: '/user' });
 
 app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	console.log('User Service running on http://localhost:4001');
+});
+
+app.get('/avatars/:filename', (request, reply) => {
+	const { filename } = request.params as { filename: string };
+	const avatarsDir = '/app/public/avatars';
+	const filePath = path.join(avatarsDir, filename);
+
+	fs.access(filePath, fs.constants.F_OK, (err) => {
+		if (err) {
+			return (reply as any).sendFile('default.png', avatarsDir);
+		}
+		(reply as any).sendFile(filename, avatarsDir);
+	});
 });

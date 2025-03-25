@@ -1,16 +1,21 @@
 FROM node:20-bullseye-slim
 
 RUN apt-get update && apt-get install -y \
-    python3 make g++ libsqlite3-dev curl net-tools \
+    python3 make g++ libsqlite3-dev sqlite3 curl net-tools \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y sqlite3 curl net-tools
 
+RUN mkdir -p /app/public/avatars
+
 WORKDIR /app
 
 COPY services/user/package*.json ./
 COPY services/user/tsconfig.json ./
+COPY services/user/avatars/* /app/public/avatars/
+
+RUN chmod -R 755 /app/public/avatars
 
 ENV npm_config_build_from_source=true
 ENV npm_config_prebuild_install=false

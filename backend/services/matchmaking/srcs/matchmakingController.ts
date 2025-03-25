@@ -1,21 +1,5 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
 import axios from 'axios';
-import {createTournament, Tournament} from './matchmakingDb';
-
-// Interface pour les requêtes de création 
-interface queueRequest extends FastifyRequest {
-	body: {
-	  userName: string;
-	  email: string;
-	  password: string;
-	};
-}
-
-interface queueItem {
-	playerId: number;
-	joinTime: number;
-	status?: 'matched' | 'waiting';
-}
+import {createTournament, Tournament, getMatchbyId, Match, updateMatchv2} from './matchmakingDb';
 
 const queue1v1: number[] = [];
 const queueTournament: number[] = [];
@@ -34,6 +18,27 @@ export async function joinTournamentQueue(playerId: number) {
 	console.log(queueTournament);
 }
 
+export async function launchMatch(matchId: string): Promise<Match | undefined> {
+	const match = getMatchbyId(matchId);
+	if (!match) {
+		throw new Error("Aucun match avec cet id.");
+	}
+	if (match.status !== 'scheduled') {
+		throw new Error("Match deja lance");
+	}
+	console.log(match);
+	console.log(`Lancement du match ${match.id} entre le joueur ${match.player1_Id} et le joueur ${match.player2_Id}`);
+	const gameSessionId = await createGameSession(match.player1_Id, match.player2_Id, match.id);
+	if (!gameSessionId) {
+		throw new Error("La session de jeu n'a pas pu être créée.");
+	}
+	console.log(` la game session est: ${gameSessionId}`)
+	match.status = 'in_progress';
+	console.log(`match ${match.id} lance avec gameSessionId: ${gameSessionId}`);
+	updateMatchv2(match);
+	return (match);
+}
+
 export async function createGameSession(player1_id:number, player2_id:number, matchId?:string): Promise<string | undefined> {
 	try {
 		const baseUrl = process.env.GAME_SERVICE_BASE_URL || 'http://game:4002';
@@ -44,7 +49,6 @@ export async function createGameSession(player1_id:number, player2_id:number, ma
 		} else {
 			response = await axios.post(`${baseUrl}/game/start`, {player1_id, player2_id});
 		}
-		//const response = await axios.post(`${baseUrl}/game/start`, {player1_id, player2_id});
 		console.log('Partie creee:', response.data);
 		return response.data.game.gameId;
 	} catch (error) {
@@ -53,21 +57,6 @@ export async function createGameSession(player1_id:number, player2_id:number, ma
 	}
 }
 
-// export function addPlayerQueue(playerId: number) {
-// 	const newItem: queueItem = {
-// 		playerId,
-// 		joinTime: Date.now(),
-// 		status: 'waiting',
-// 	};
-// 	matchmakingQueue.push(newItem);
-// }
-//status queue
-
-//matchplayers
-
-//join tournament queue
-
-// removePlayer 
 function attemptMatch() {
 	if (queue1v1.length >= 2) {
 		const player1 = queue1v1.shift();

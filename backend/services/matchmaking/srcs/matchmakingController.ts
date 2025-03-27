@@ -18,7 +18,8 @@ export async function joinQueue1v1(playerId: string) {
 //join tournament 1
 export async function joinTournamentQueue(playerId: string) {
 	queueTournament.push(playerId);
-	console.log(queueTournament);
+	console.log("queueTournament:", queueTournament);
+	attemptTournament();
 }
 
 export async function launchMatch(matchId: string): Promise<Match | undefined> {
@@ -34,6 +35,14 @@ export async function launchMatch(matchId: string): Promise<Match | undefined> {
 	const gameSessionId = await createGameSession(match.player1_Id, match.player2_Id, match.id);
 	if (!gameSessionId) {
 		throw new Error("La session de jeu n'a pas pu être créée.");
+	}
+	if (gameSessionId) {
+		const message = JSON.stringify({
+			gameSessionId
+		});
+		websocketClients.forEach((socket) => {
+			socket.send(message);
+		})
 	}
 	console.log(` la game session est: ${gameSessionId}`)
 	match.status = 'in_progress';
@@ -98,10 +107,16 @@ export async function attemptTournament(): Promise<Tournament | undefined> {
 			if (!tournament) {
 				throw Error ("No tournament created");
 			}
+			const message = JSON.stringify({
+				tournament
+			});
+			websocketClients.forEach((socket) => {
+				socket.send(message);
+			})
 			console.log("Tournoi cree:", tournament);
 			return (tournament);
 		}
-	} else {
-		throw Error ("Pas assez de joueurs dans la Tournament Queue");
-	}
+	} //else {
+		//throw Error ("Pas assez de joueurs dans la Tournament Queue");
+	//}
 }

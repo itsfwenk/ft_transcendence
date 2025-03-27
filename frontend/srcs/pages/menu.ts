@@ -98,5 +98,42 @@ export default function menu() {
 			  console.error("Erreur de login:", error);
 		}
 	})
+
+
+	const playTournamentButton = document.getElementById('tournamentBtn') as HTMLFormElement;
+	playTournamentButton.addEventListener('click', async(e) => {
+		e.preventDefault();
+        console.log("tournament button...");
+		const userProfile = await fetchUserProfile();
+		console.log(userProfile);
+		if (!userProfile) {
+			console.error("Aucun utilisateur connecté");
+			return;
+		}
+
+		const currentPlayerId = userProfile.userId;
+		console.log("currentPlayerId:", currentPlayerId)
+		try {
+			const response = await fetch('http://localhost:4000/api-matchmaking/tournament/join', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ playerId: currentPlayerId })
+			});
+			console.log("response tournament/join", response)
+			if (!response.ok) {
+				throw new Error(`Erreur lors du lancement de la page: ${response.statusText}`);
+			}
+			const data = await response.json();
+			console.log("Réponse de login:", data);
+			history.pushState(null, '', '/queue_tournament');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+		} catch (error) {
+			  console.error("Erreur de login:", error);
+		}
+	})
+
+
     }
 }

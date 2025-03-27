@@ -41,18 +41,18 @@ export function handleWebSocketConnection(fastify: FastifyInstance, socket: WebS
 			socket.close(1008, 'Authentication failed');
 			return;
 		}
+		
+		if (activeConnections.has(userId)) {
+			socket.send(JSON.stringify({
+				type: 'error',
+				code: 'already_connected',
+				message: 'You are already connected from another device or browser'
+			  }));
+			  socket.close(4001, 'Already connected');
+			  return;
+		}
 
 		console.log(`User ${userId} connected via WebSocket`);
-
-		// if (activeConnections.has(userId)) {
-		// 	socket.send(JSON.stringify({
-		// 		type: 'error',
-		// 		code: 'already_connected',
-		// 		message: 'Vous êtes déjà connecté depuis un autre appareil'
-		// 	  }));
-		// 	  socket.close(4001, 'Already connected');
-		// 	  return;
-		// }
 
 		activeConnections.set(userId, socket);
 

@@ -8,6 +8,8 @@ import dotenv from 'dotenv'
 import googleAuthRoutes from './googleAuthRoutes.js';
 import path from 'path';
 import fs from 'fs';
+import websocket from '@fastify/websocket';
+import { handleWebSocketConnection } from './WebsocketHandler.js';
 
 
 const app = Fastify();
@@ -75,6 +77,14 @@ app.decorate("isAdmin", async function (req: IsAdminRequest, reply: FastifyReply
 app.register(userRoutes, { prefix: '/user' });
 app.register(googleAuthRoutes, { prefix: '/user' });
 
+app.register(websocket);
+
+app.register(async function (fastify) {
+	fastify.get('/ws', { websocket: true }, (connection, req) => {
+		handleWebSocketConnection(fastify, connection, req);
+	});
+});
+
 app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	console.log('User Service running on http://localhost:4001');
 });
@@ -91,3 +101,4 @@ app.get('/avatars/:filename', (request, reply) => {
 		(reply as any).sendFile(filename, avatarsDir);
 	});
 });
+

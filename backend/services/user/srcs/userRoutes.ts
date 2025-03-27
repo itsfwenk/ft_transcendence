@@ -1,5 +1,5 @@
 import fastify, { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest, FastifySchema } from 'fastify';
-import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount, updateRole, updateStatus, getOnlineUsers, logoutUser } from './userController.js';
+import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount, updateRole, updateStatus, getOnlineUsers, logoutUser, checkUserConnectionStatus } from './userController.js';
 import jwt from '@fastify/jwt'
 import multipart from '@fastify/multipart';
 import { deleteAvatar, getAvatar, uplpoadAvatar } from './avatarController.js';
@@ -172,6 +172,30 @@ export default async function userRoutes(fastify: any) {
 		}
 	},
 	handler: updateStatus
+  });
+
+  fastify.get('/status/userId', {
+	schema: {
+		params: {
+			type:'object',
+			properties: {
+				userId: { type: 'string' }
+			},
+			required: ['userId']
+		},
+		response: {
+			200: {
+				type: 'object',
+				properties: {
+					userId: { type: 'string' },
+					userName: { type: 'string' },
+					isConnected: { type: 'boolean' },
+					status: { type: 'string' }
+				}
+			}
+		}
+	},
+	handler: checkUserConnectionStatus
   });
 
   fastify.get('/online', {

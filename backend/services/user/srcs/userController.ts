@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcrypt';
 import jwt from '@fastify/jwt';
 import { saveUser, getUserByEmail, getUserById, isValidEmail, updateUser, deleteUser, updateUserRole, updateUserStatus, getUsersByRole, getUserWithStatus, User, getUserByUserName } from './userDb.js';
+import { getConnectedUsers, isUserConnected } from './WebsocketHandler.js';
 
 // Interface pour les requêtes de création d'utilisateur
 interface RegisterRequest extends FastifyRequest {
@@ -278,16 +279,40 @@ export async function updateStatus(req: UpdateStatusRequest, reply: FastifyReply
 
 export async function getOnlineUsers(req: FastifyRequest, reply: FastifyReply) {
 	try {
-		const onlineUsers = getUserWithStatus('online');
-		return reply.send({
-			users: onlineUsers.map(user => ({
+		const connectedUsersIds = getConnectedUsers();
+		const onlineUsers = connectedUsersIds.map(userId => {
+			const user = getUserById(userId);
+			return user ? {
 				userId: user.userId,
 				userName: user.userName,
-				status: user.status,
-			}))
+				status: 'online',
+			} : null;
+		}).filter(Boolean);
+
+		return reply.send({
+			users: onlineUsers
 		});
 	} catch (error) {
 		console.error(error);
 		return reply.status(500).send({ error: 'Internal server error' });
 	}
 }
+
+export async function checkUserConnectionStatus(req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) {
+	const { userId } = req.params;
+	const user =getUserById(userId);
+
+	if (!user) {
+		return reply.status(404).send({ error: 'User not found' });
+	}
+
+	const isConnected = isUserConnected(userId);
+
+	return reply.send({
+		userId,
+		userName: user.userName,
+		isConnected,
+		status: isConnected ? 'online' : 'offline'
+	});
+}
+

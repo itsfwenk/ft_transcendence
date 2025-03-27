@@ -3,8 +3,9 @@ import fastifyHttpProxy from '@fastify/http-proxy';
 
 export default async function matchmakingProxy(fastify:FastifyInstance) {
 	fastify.register(fastifyHttpProxy, {
-		upstream: 'http://localhost:4003',
-		prefix: '/matchmaking',
+		upstream: 'http://matchmaking:4003',
+		prefix: '/api-matchmaking',
 		rewritePrefix: '/matchmaking',
+		websocket: true
 	})
 };

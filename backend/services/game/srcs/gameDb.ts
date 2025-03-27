@@ -39,7 +39,7 @@ export interface Game {
 	rightPaddle: Paddle;
 	ball: Ball;
 	status: 'ongoing' | 'finished';
-	winner_id?: number | null;
+	winner_id?: string | null;
 	matchId?: string | null;
 }
 
@@ -55,22 +55,22 @@ db.exec(`
 
 	CREATE TABLE IF NOT EXISTS games (
 	  gameId INTEGER PRIMARY KEY AUTOINCREMENT,
-	  player1_id INTEGER NOT NULL,
-	  player2_id INTEGER NOT NULL,
+	  player1_id STRING NOT NULL,
+	  player2_id STRING NOT NULL,
 	  score1 INTEGER DEFAULT 0,
 	  score2 INTEGER DEFAULT 0,
 	  leftPaddle TEXT NOT NULL DEFAULT '{"x": 0, "y": ${paddleBasePosition}, "dy": 0}',
 	  rightPaddle TEXT NOT NULL DEFAULT '{"x": ${canvasWidth - 10}, "y": ${paddleBasePosition}, "dy": 0}',
 	  ball TEXT NOT NULL DEFAULT '{"x": ${canvasWidth / 2}, "y": ${canvasHeight / 2}, "radius": ${ballRadius}, "dx": ${Math.random() > 0.5 ? 3 : -3}, "dy": ${Math.random() > 0.5 ? 3 : -3}}',
 	  status TEXT CHECK(status IN ('ongoing', 'finished')) DEFAULT 'ongoing',
-	  winner_id INTEGER NULL,
+	  winner_id STRING NULL,
 	  matchId TEXT NULL
 	);
 `);
 
   
 
-export function saveGame(player1_id: number, player2_id: number, matchId?: string): Game {
+export function saveGame(player1_id: string, player2_id: string, matchId?: string): Game {
 	const stmt = db.prepare(`
 		INSERT INTO games (player1_id, player2_id, matchId)
 		VALUES (?, ?, ?)

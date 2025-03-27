@@ -42,7 +42,7 @@ interface EndGameRequest extends FastifyRequest {
 */
 
 //demarrer une partie
-export async function startGame(req: FastifyRequest<{ Body: { player1_id: number; player2_id: number; matchId?: string } }>, reply: FastifyReply) {
+export async function startGame(req: FastifyRequest<{ Body: { player1_id: string; player2_id: string; matchId?: string } }>, reply: FastifyReply) {
 	const { player1_id, player2_id, matchId } = req.body;
 	const player1 = await getUserById(player1_id);
 	const player2 = await getUserById(player2_id);
@@ -107,7 +107,7 @@ export async function endGame(req:FastifyRequest<{ Params: { gameId: string } }>
 	}
 }
 
-async function getUserById(userId: number) {
+async function getUserById(userId: string) {
 	try {
 		console.log(userId);
 		const baseUrl = process.env.USER_SERVICE_BASE_URL || 'http://user:4001';

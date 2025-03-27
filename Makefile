@@ -24,6 +24,8 @@ install-deps:
 	cd backend/services/matchmaking && npm install
 	@echo "Installation des dépendances pour gateway..."
 	cd backend/gateway && npm install
+	@echo "Installation des dépendances pour frontend..."
+	cd frontend && npm install
 
 clean:
 	@docker stop $$(docker ps -qa) || true
@@ -32,10 +34,10 @@ clean:
 	@docker network prune -f || true
 	@docker system prune -a --volumes -f
 
-re: clean up
+re: clean rm-db up
 
 rm-db:
-	rm ./backend/db/games.db ./backend/db/users.db
+	rm ./backend/db/games.db ./backend/db/users.db ./backend/db/matchmaking.db
 
 prune: clean rm-db
 	@docker system prune -a --volumes -f

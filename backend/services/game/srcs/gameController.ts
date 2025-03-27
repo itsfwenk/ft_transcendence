@@ -58,7 +58,11 @@ export async function startGame(req: FastifyRequest<{ Body: { player1_id: string
         newGame = saveGame(player1_id, player2_id, matchId);
     } else {
         newGame = saveGame(player1_id, player2_id);
-    }	reply.send({ success: true, game: newGame });
+    }
+	const gameId = { gameId: newGame.gameId };
+	await updateUserGameId(player1_id, gameId);
+	await updateUserGameId(player2_id, gameId);
+	reply.send({ success: true, game: newGame });
 }
 
 // recuperer une partie
@@ -124,6 +128,24 @@ async function getUserById(userId: string) {
 	  return null;
 	}
 }
+
+async function updateUserGameId(userId: string, gameId: Partial<{ gameId: string }>) {
+	try {
+	  console.log(`Updating user ${userId}`);
+	  const baseUrl = process.env.USER_SERVICE_BASE_URL || 'http://user:4001';
+	  const response = await axios.patch(`${baseUrl}/user/${userId}`, gameId);
+	  return response.data;
+	} catch (error) {
+	  if (axios.isAxiosError(error)) {
+		console.error(`❌ Axios error while updating user ${userId}:`, error.response?.data || error.message);
+	  } else if (error instanceof Error) {
+		console.error(`❌ Generic error while updating user ${userId}:`, error.message);
+	  } else {
+		console.error(`❌ Unknown error occurred`);
+	  }
+	  return null;
+	}
+  }
 
 export async function updateBallPosition(gameId: string) {
 	try {

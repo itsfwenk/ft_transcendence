@@ -4,6 +4,7 @@ import jwt from '@fastify/jwt'
 import multipart from '@fastify/multipart';
 import { deleteAvatar, getAvatar, uplpoadAvatar } from './avatarController.js';
 import { addFriendController, checkFriendshipController, getFriendsController, getOnlineFriendsController, removeFriendController } from './friendController.js';
+import { getUserById, updateUserGameId } from './userDb.js';
 
 
 const User = {
@@ -361,4 +362,36 @@ export default async function userRoutes(fastify: any) {
 	}
   });
 
+
+  fastify.patch('/user/:id', {
+    schema: {
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+        },
+        required: ['id'],
+      },
+      body: {
+        type: 'object',
+        properties: {
+          gameId: { type: 'string' },
+        },
+        required: ['gameId'],
+      },
+    },
+  }, async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id: userId } = req.params as { id: string };
+      const { gameId } = req.body as { gameId: string };
+  
+      const userUpdate = await updateUserGameId(userId, gameId);
+  
+      return reply.send({ success: true, user: userUpdate });
+    } catch (error) {
+      console.error("Error updating user game ID:", error);
+      return reply.status(500).send({ error: "Internal Server Error" });
+    }
+  });
+  
 }

@@ -11,7 +11,7 @@ const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
 const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
 const paddleSpeed = parseInt(process.env.PADDLE_SPEED as string, 10);
 const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
-const speedIncrease = parseInt(process.env.SPEED_INCREASE as string, 10);
+const speedIncrease = parseFloat(process.env.SPEED_INCREASE as string);
 
 const activeUsers = new Map<string, WebSocket>(); // userId -> WebSocket
 export default activeUsers;
@@ -208,24 +208,26 @@ export async function updateBallPosition(gameId: string) {
 			ball.dx *= speedIncrease;
 			ball.dy *= speedIncrease;
 		}
-
+		// console.log(ball.dx, ball.dy);
+		// console.log(speedIncrease);
 		if (ball.x < 0) {
 			await updateGameScore(gameId, game.score1, game.score2 + 1);
-			game.score2++;
+			// game.score2++;
 			resetBall();
 		  } 
 		else if (ball.x > canvasWidth) {
 			await updateGameScore(gameId, game.score1 + 1, game.score2);
-			game.score1++;
+			// game.score1++;
 			resetBall();
 		  }
 		function resetBall() {
+			// console.log(`call resestBall`);
 			ball.x = canvasWidth / 2;
 			ball.y = canvasHeight / 2;
 			ball.dx = Math.random() > 0.5 ? 3 : -3;
 			ball.dy = Math.random() > 0.5 ? 3 : -3;
 		  }
-		
+		// console.log(ball.x, ball.y, ball.dx, ball.dy);
 		await updateBallPositionInDb(gameId, ball);
 	}
 	catch (error) {
@@ -253,7 +255,7 @@ async function getPaddle(gameId: string, side: string) {
 export async function updateGames() {
 	try {
 		const allIds : {gameId: string }[] = await getAllGamesId();
-	
+		// console.log(`updateGames called`);
 		await Promise.all(allIds.map(async (gameId) => {
 		  updateBallPosition(gameId.gameId);
 		  updatePaddlesInDb(gameId.gameId);

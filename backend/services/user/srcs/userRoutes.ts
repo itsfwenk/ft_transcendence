@@ -363,14 +363,14 @@ export default async function userRoutes(fastify: any) {
   });
 
 
-  fastify.patch('/user/:id', {
+  fastify.patch('/:userId', {
     schema: {
       params: {
         type: 'object',
         properties: {
-          id: { type: 'string' },
+          userId: { type: 'string' },
         },
-        required: ['id'],
+        required: ['userId'],
       },
       body: {
         type: 'object',
@@ -382,7 +382,7 @@ export default async function userRoutes(fastify: any) {
     },
   }, async (req: FastifyRequest, reply: FastifyReply) => {
     try {
-      const { id: userId } = req.params as { id: string };
+      const { userId: userId } = req.params as { userId: string };
       const { gameId } = req.body as { gameId: string };
   
       const userUpdate = await updateUserGameId(userId, gameId);

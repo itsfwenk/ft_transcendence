@@ -25,20 +25,23 @@ const updateScoreSchema: FastifySchema = {
 	}
 };
 
-const websocketSchema: FastifySchema = {
-	querystring: {
-	  type: 'object',
-	  required: ['token'],
-	  properties: {
-		token: { type: 'string' }
-	  },
-	}
-};
+// const websocketSchema: FastifySchema = {
+// 	querystring: {
+// 	  type: 'object',
+// 	  required: ['token'],
+// 	  properties: {
+// 		token: { type: 'string' }
+// 	  },
+// 	}
+// };
 
 export default async function gameRoutes(fastify: FastifyInstance, options: FastifyPluginOptions) {
 	fastify.post('/start', { schema: startGameSchema}, startGame);
 	fastify.get('/:gameId', getGame );
 	fastify.put('/:gameId/score', { schema: updateScoreSchema }, updateScore);
 	fastify.post('/:gameId/end', endGame);
-	fastify.get('/game/ws', { websocket: true, schema: websocketSchema }, websocketHandshake);
+	fastify.get('/ws', { websocket: true }, (connection, req) => {
+		console.log("Websocket route triggered");
+		websocketHandshake(connection, req)
+	});
 }

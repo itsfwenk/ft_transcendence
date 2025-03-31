@@ -269,15 +269,19 @@ export async function updateGames() {
 
 // const JWT_SECRET = "secret_key";
 
-export async function websocketHandshake(connection: WebSocket, req: FastifyRequest<{ Querystring: { token: string } }>) {
+export async function websocketHandshake(connection: WebSocket, req: FastifyRequest) {
 	console.log('websocketHandshake called');
 
-	const decoded = websocketAuthMiddleware(req);
+	const token = req.headers["sec-websocket-protocol"] as string;
+	console.log(token);
+	const decoded = websocketAuthMiddleware(token);
 	if (!decoded) {
 		console.error('Error in websocketAuthMiddleware');
+		connection.close(1003, 'Invalid message format');
 		return;
 	}
-	const { userId, gameId } = decoded;
+	const { userId } = decoded;
+	const	user = await getUserById(userId);
 
 	activeUsers.set(userId, connection);
 	console.log(`User ${userId} connected via WebSocket`);
@@ -285,6 +289,7 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
     connection.on('message', (message) => {
         try {
             const { key, type } = JSON.parse(message.toString());
+			console.log(key, type);
             if (!key || !type) {
                 console.warn("Invalid message received:", message.toString());
                 return;
@@ -292,15 +297,15 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
 
             if (key === 'ArrowUp') {
                 if (type === "keydown") {
-                    updatePaddleDelta(gameId, userId, -paddleSpeed);
+                    updatePaddleDelta(user.inGameId, userId, -paddleSpeed);
                 } else if (type === "keyup") {
-                    updatePaddleDelta(gameId, userId, 0);
+                    updatePaddleDelta(user.inGameId, userId, 0);
                 }
             } else if (key === 'ArrowDown') {
                 if (type === "keydown") {
-                    updatePaddleDelta(gameId, userId, paddleSpeed);
+                    updatePaddleDelta(user.inGameId, userId, paddleSpeed);
                 } else if (type === "keyup") {
-                    updatePaddleDelta(gameId, userId, 0);
+                    updatePaddleDelta(user.inGameId, userId, 0);
                 }
             }
         } catch (err) {
@@ -313,10 +318,13 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
 	connection.on('close', () => {
 		activeUsers.delete(userId);
 		console.log(`User ${userId} disconnected`);
+		connection.close(1003, 'Invalid message format');
+
 	});
 
 	connection.on('error', (err: Error) => {
 		console.error('WebSocket error:', err.message);
+		connection.close(1003, 'Invalid message format');
 	  });
 }
 
@@ -332,15 +340,15 @@ async function broadcastGameToPlayers(gameId: string) {
 	});
 }
   
-export function websocketAuthMiddleware(req: FastifyRequest<{ Querystring: { token: string } }> ) {
+export function websocketAuthMiddleware(token: string) {
 	try {
-		const token : string = req.query.token;
+		// const token : string = req.query.token;
 
 		if (!token)
 			throw new Error("No token provided");
 
 		const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-		if (decoded && typeof decoded === 'object' && 'gameId' in decoded && 'userId' in decoded) {
+		if (decoded && typeof decoded === 'object' && 'userId' in decoded) {
 			const { userId, gameId } = decoded;
 			return { userId, gameId };
 		}

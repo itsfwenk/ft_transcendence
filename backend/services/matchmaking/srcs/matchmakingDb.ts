@@ -12,13 +12,13 @@ export interface Match {
 	player1Score: number;
 	player2Score: number;
 	winner_Id?: string;
-	status: 'scheduled' | 'in_progress' | 'completed';
+	status: 'pending' | 'ready' | 'in_progress' | 'completed';
 	matchTime: Date;
 }
   
 export interface Tournament {
 	id: string;
-	status: 'scheduled' | 'ongoing' | 'completed';
+	status: 'scheduled' | 'in_progress' | 'completed';
 	players: string[]; // Liste des IDs des joueurs
 	matches: Match[];
 	createdAt: Date;
@@ -45,7 +45,7 @@ db.exec(`
 		player1Score INTEGER,
 		player2Score INTEGER,
 		winnerId STRING NULL,
-		status TEXT,  -- scheduled, in_progress, completed,
+		status TEXT,  -- pending, ready, in_progress, completed,
 		matchTime DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (tournamentId) REFERENCES Tournament(id)
 	);
@@ -72,7 +72,7 @@ export function createTournament(players: string[]): Tournament {
 		player2_Id: players[1],
 		player1Score: 0,
 		player2Score: 0,
-		status: 'scheduled',
+		status: 'pending',
 		matchTime: new Date()
 	};
 	const match2: Match = {
@@ -82,7 +82,7 @@ export function createTournament(players: string[]): Tournament {
 		player2_Id: players[3],
 		player1Score: 0,
 		player2Score: 0,
-		status: 'scheduled',
+		status: 'pending',
 		matchTime: new Date()
 	};
 
@@ -107,7 +107,7 @@ export function createTournament(players: string[]): Tournament {
 
 interface TournamentRow {
     id: string;
-    status: 'scheduled' | 'ongoing' | 'completed';
+    status: 'scheduled' | 'in_progress' | 'completed';
     players: string; // JSON string of player IDs
     createdAt: string; // Date stored as string in the database
     updatedAt: string; // Date stored as string in the database
@@ -121,7 +121,7 @@ interface MatchRow {
     player1Score: number;
     player2Score: number;
     winnerId: string;
-    status: 'scheduled' | 'in_progress' | 'completed';
+    status: 'pending' | 'ready' | 'in_progress' | 'completed';
 	matchTime: string;
 }
 

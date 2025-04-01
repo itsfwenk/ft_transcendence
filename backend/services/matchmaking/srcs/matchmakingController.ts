@@ -27,7 +27,7 @@ export async function launchMatch(matchId: string): Promise<Match | undefined> {
 	if (!match) {
 		throw new Error("Aucun match avec cet id.");
 	}
-	if (match.status !== 'scheduled') {
+	if (match.status !== 'ready') {
 		throw new Error("Match deja lance");
 	}
 	console.log(match);

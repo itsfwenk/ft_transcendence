@@ -143,11 +143,11 @@ export default async function matchmakingRoutes(fastify: any) {
 		}
 
 		 // Vérifier si une connexion existe déjà pour ce playerId
-		 if (websocketClients.has(playerId)) {
-			console.warn(`Une connexion existe déjà pour le playerId: ${playerId}. Fermeture de la nouvelle connexion.`);
-			connection.close();
-			return;
-		  }
+		if (websocketClients.has(playerId)) {
+		console.warn(`Une connexion existe déjà pour le playerId: ${playerId}. Fermeture de la nouvelle connexion.`);
+		connection.close();
+		return;
+		}
 
 		connection.on('message', (msg) => {
 			console.log('📩 Message reçu :', msg.toString());

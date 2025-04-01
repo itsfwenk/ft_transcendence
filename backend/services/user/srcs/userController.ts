@@ -80,7 +80,7 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 			reply.setCookie('authToken', token, {
 				httpOnly: true,
 				secure: process.env.NODE_ENV === 'production',  // en production, utilisez HTTPS
-				sameSite: 'strict',
+				sameSite: 'lax',
 				path: '/',  // disponible pour toutes les routes
 			  });
 

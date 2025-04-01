@@ -30,10 +30,12 @@
     "electron": "^35.0.0",
     "fastify": "^5.2.1",
     "hi-base32": "^0.5.1",
+    "node-fetch": "^2.7.0",
     "typescript": "^5.8.2",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@fastify/cors": "^11.0.0"
+    "@fastify/cors": "^11.0.0",
+    "@types/node-fetch": "^2.6.12"
   }
 }

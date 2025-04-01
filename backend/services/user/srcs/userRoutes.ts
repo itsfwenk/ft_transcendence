@@ -4,6 +4,7 @@ import jwt from '@fastify/jwt'
 import multipart from '@fastify/multipart';
 import { deleteAvatar, getAvatar, uplpoadAvatar } from './avatarController.js';
 import { addFriendController, checkFriendshipController, getFriendsController, getOnlineFriendsController, removeFriendController } from './friendController.js';
+import { getUserDashboard } from './userDashboardController.js';
 
 
 const User = {
@@ -371,9 +372,11 @@ export default async function userRoutes(fastify: any) {
     },
     handler: checkFriendshipController
   });
+  
   interface JwtPayload {
 	userId: string;
   }
+
   fastify.get('/getProfile', async (req:FastifyRequest, reply:FastifyReply) => {
 	try {
 	  const payload = await req.jwtVerify<JwtPayload>();
@@ -385,4 +388,69 @@ export default async function userRoutes(fastify: any) {
 	}
   });
 
+  fastify.get('/dashboard', {
+	  preHandler: [fastify.authenticate],
+	  schema: {
+	  headers: {
+		  type: 'object',
+		  properties: {
+		  Authorization: { type: 'string', description: 'Bearer <token>' }
+		  },
+		  required: ['Authorization']
+	  },
+	  response: {
+		  200: {
+		  type: 'object',
+		  properties: {
+			  user: {
+			  type: 'object',
+			  properties: {
+				  userId: { type: 'string' },
+				  userName: { type: 'string' },
+				  email: { type: 'string' },
+				  role: { type: 'string' },
+				  status: { type: 'string' },
+				  avatarUrl: { type: 'string' }
+			  }
+			  },
+			  stats: {
+			  type: 'object',
+			  properties: {
+				  totalGames: { type: 'number' },
+				  wins: { type: 'number' },
+				  losses: { type: 'number' },
+				  winRate: { type: 'number' }
+			  }
+			  },
+			  matchHistory: {
+			  type: 'array',
+			  items: {
+				  type: 'object',
+				  properties: {
+				  gameId: { type: 'string' },
+				  gameType: { type: 'string' },
+				  opponent: {
+					  type: 'object',
+					  properties: {
+					  userId: { type: 'string' },
+					  userName: { type: 'string' }
+					  }
+				  },
+				  result: { type: 'string', enum: ['win', 'loss'] },
+				  score: {
+					  type: 'object',
+					  properties: {
+					  player: { type: 'number' },
+					  opponent: { type: 'number' }
+					  }
+				  },
+				  date: { type: 'string' }
+				  }
+			  }
+			  }
+		  }
+		  }
+	  }
+	  }
+  }, getUserDashboard);
 }

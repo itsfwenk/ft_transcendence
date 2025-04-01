@@ -11,15 +11,11 @@ import fs from 'fs';
 import websocket from '@fastify/websocket';
 import { handleWebSocketConnection } from './WebsocketHandler.js';
 
-
 const app = Fastify();
 
 dotenv.config();
 
 app.register(fastifyCookie);
-
-// Configurer JWT
-//app.register(jwt, { secret: 'supersecretkey' });
 
 app.register(jwt, {
 	secret: 'supersecretkey',

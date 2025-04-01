@@ -8,6 +8,7 @@ import dotenv from 'dotenv'
 import googleAuthRoutes from './googleAuthRoutes.js';
 import path from 'path';
 import fs from 'fs';
+import cors from '@fastify/cors';
 
 
 const app = Fastify();
@@ -16,11 +17,16 @@ dotenv.config();
 
 app.register(fastifyCookie);
 
+app.register(cors, {
+	origin: 'http://localhost:4002', // Allow requests from port 4002
+	credentials: true, // Allow sending/receiving cookies
+  });
+
 // Configurer JWT
 //app.register(jwt, { secret: 'supersecretkey' });
 
 app.register(jwt, {
-	secret: 'supersecretkey',
+	secret: process.env.JWT_SECRET!,
 	cookie: {
 	  cookieName: 'authToken',
 	  signed: false,

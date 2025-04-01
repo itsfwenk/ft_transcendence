@@ -1,12 +1,17 @@
-import Fastify from 'fastify';
+import Fastify, { FastifyInstance } from 'fastify';
 import gameRoutes from './gameRoutes.js';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import fastifyWebsocket from "@fastify/websocket";
 import { updateGames } from './gameController.js'
+import fastifyCookie from '@fastify/cookie';
+import cors from '@fastify/cors';
+
 // import Database from 'better-sqlite3';
 
-const app = Fastify();
+const app: FastifyInstance = Fastify( {
+	logger: true,
+});
 
 const activeUsers = new Map<number, WebSocket>(); // userId -> WebSocket
 export default activeUsers;
@@ -23,6 +28,15 @@ app.register(swagger, {
 });
 
 app.register(fastifyWebsocket);
+
+app.register(fastifyCookie);
+
+app.register(cors, {
+	origin: 'http://localhost:4001',
+	credentials: true,
+  });
+
+
 
 app.register(swaggerUI, {
   routePrefix: '/docs',

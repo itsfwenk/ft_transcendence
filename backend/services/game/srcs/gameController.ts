@@ -272,8 +272,9 @@ export async function updateGames() {
 export async function websocketHandshake(connection: WebSocket, req: FastifyRequest) {
 	console.log('websocketHandshake called');
 
-	const token = req.headers["sec-websocket-protocol"] as string;
+	const token = req.cookies["authToken"] as string;
 	console.log(token);
+
 	const decoded = websocketAuthMiddleware(token);
 	if (!decoded) {
 		console.error('Error in websocketAuthMiddleware');

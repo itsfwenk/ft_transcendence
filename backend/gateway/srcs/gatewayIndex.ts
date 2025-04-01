@@ -5,17 +5,9 @@ import userProxy from './userProxy.js';
 import gameProxy from './gameProxy.js';
 import matchmakingProxy from './matchmakingProxy.js';
 import cors from '@fastify/cors';
-import websocket from '@fastify/websocket';
-import fastifyRedis from '@fastify/redis';
 
 const app = Fastify();
 
-
-async function build() {
-
-	await app.register(fastifyRedis, { host: '127.0.0.1' })
-	await app.register(websocket);
-}
 //Configurer Swagger UI
 app.register(swagger,{
 	swagger: {
@@ -40,8 +32,6 @@ app.register(swaggerUI, {
 	staticCSP: true
 });
 
-app.register(require('@fastify/redis'), { host: '127.0.0.1' })
-
 //Enregistrer les proxy pour User et Game
 app.register(userProxy);
 app.register(gameProxy);
@@ -50,7 +40,3 @@ app.register(matchmakingProxy);
 app.listen({port: 4000 , host: '0.0.0.0'}, () => {
 	console.log('API Gateway running on http://localhost:4000');
 });
-
-if (require.main === module) {
-	build().catch(console.error);
-}

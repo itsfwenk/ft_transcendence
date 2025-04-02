@@ -248,3 +248,36 @@ export function finishTournament(tournamentId: string):void {
 	`);
 	updateTournamentStmt.run(tournamentId);
 }
+
+// YOYO
+
+export function getMatchHistoryByUserId(userId: string) {
+	const stmt = db.prepare(`
+		SELECT tm.*, t.status as tournamentStatus
+		FROM TournamentMatch tm
+		LEFT JOIN Tournament t ON tm.tournamentId = t.id
+		WHERE (tm.player1_Id = ? OR tm.player2_Id = ?) AND tm.status = 'completed'
+		ORDER BY tm.matchTimne DESC
+	`);
+
+	const matches = stmt.all(userId, userId) as any[];
+
+	return matches.map(match => {
+		const isPlayer1 = match.player1_Id === userId;
+
+		return {
+			gameId: match.id,
+			gameType: match.tournamentId ? (match.round === 2 ? 'tournament-final' : 'tournament-semifinal') : '1v1',
+			opponent: {
+				userId: isPlayer1 ? match.player2_Id : match.player1_Id
+			},
+			result: match.winnerId === userId ? 'win' : 'loss',
+			score: {
+				player: isPlayer1 ? match.player1Score : match.player2Score,
+				opponent: isPlayer1 ? match.player2Score : match.player1Score
+			},
+			date: match.matchTime,
+			tournamentId: match.tournamentId || null
+		};
+	});
+}

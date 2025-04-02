@@ -7,7 +7,7 @@ Content-Type: application/json
 {
 	"userName": "yoyo",
 	"email": "test@email.com",
-	"password": "1234"
+	"password": "123456"
 }
 
 ### Connexion
@@ -16,7 +16,7 @@ Content-Type: application/json
 
 {
 	"email": "test@email.com",
-	"password": "1234"
+	"password": "123456"
 }
 
 ### Accéder au profil (JWT requis)
@@ -76,6 +76,9 @@ GET http://localhost:4001/user/online
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMWZjYzQ5ZS00N2FlLTQ1OTctOGVjNi01ZGU3OWJlM2JlNjAiLCJpYXQiOjE3NDIyMjYxNjgsImV4cCI6MTc0MjMxMjU2OH0.HeGHnYz7EIodZQ5OlnQWvuqtKlnqoYnggki1BkvBcdc
 
+### Obtenir le dashboard utilisateur
+GET http://localhost:4001/user/dashboard
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3MWJmMmFhYy0xZDdmLTRjYjctYTliZi02NWRiMDdjZjQ0YWYiLCJpYXQiOjE3NDM1OTc0NDcsImV4cCI6MTc0MzY4Mzg0N30.vavxuywdknOCYjUyr9Gzmf-qvXMkWtaHVwUR0MqKzR8
 
 ############################ AVATAR ############################
 

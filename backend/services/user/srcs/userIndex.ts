@@ -10,6 +10,7 @@ import path from 'path';
 import fs from 'fs';
 import cors from '@fastify/cors';
 
+dotenv.config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 
 const app = Fastify();
 
@@ -18,7 +19,7 @@ dotenv.config();
 app.register(fastifyCookie);
 
 app.register(cors, {
-	origin: 'http://localhost:4002', // Allow requests from port 4002
+	origin:  process.env.CORS_ORIGIN,
 	credentials: true, // Allow sending/receiving cookies
   });
 
@@ -83,6 +84,7 @@ app.register(googleAuthRoutes, { prefix: '/user' });
 
 app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	console.log('User Service running on http://localhost:4001');
+	console.log(process.env.CORS_ORIGIN);
 });
 
 app.get('/avatars/:filename', (request, reply) => {

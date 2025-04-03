@@ -14,9 +14,13 @@ dotenv.config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 
 const app = Fastify();
 
-dotenv.config();
+// dotenv.config();
 
-app.register(fastifyCookie);
+app.register(fastifyCookie, {
+	secret: process.env.COOKIE_SECRET,
+	// hook: 'onRequest', // set to false to disable cookie parsing on all requests
+	// parseOptions: {}     // options for parsing cookies
+  });
 
 app.register(cors, {
 	origin:  process.env.CORS_ORIGIN,
@@ -30,10 +34,9 @@ app.register(jwt, {
 	secret: process.env.JWT_SECRET!,
 	cookie: {
 	  cookieName: 'authToken',
-	  signed: false,
+	  signed: true,
 	}
 });
-
 
 // Configurer Swagger
 app.register(swagger, {
@@ -62,21 +65,21 @@ app.decorate("authenticate", async function (req: FastifyRequest, reply: Fastify
   }
 });
 
-interface IsAdminRequest extends FastifyRequest {
-	user: { role: string };
-}
+// interface IsAdminRequest extends FastifyRequest {
+// 	user: { role: string };
+// }
 
-// Middleware pour verif admin et jwt
-app.decorate("isAdmin", async function (req: IsAdminRequest, reply: FastifyReply) {
-	try {
-	  await req.jwtVerify();
-	  if (req.user.role !== 'admin') {
-		reply.status(403).send({ error: "Permission denied" });
-	  }
-	} catch (err) {
-	  reply.status(401).send({ error: "Unauthorized" });
-	}
-});
+// // Middleware pour verif admin et jwt
+// app.decorate("isAdmin", async function (req: IsAdminRequest, reply: FastifyReply) {
+// 	try {
+// 	  await req.jwtVerify();
+// 	  if (req.user.role !== 'admin') {
+// 		reply.status(403).send({ error: "Permission denied" });
+// 	  }
+// 	} catch (err) {
+// 	  reply.status(401).send({ error: "Unauthorized" });
+// 	}
+// });
 
 // Enregistrer les routes utilisateur et google
 app.register(userRoutes, { prefix: '/user' });

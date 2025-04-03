@@ -7,34 +7,29 @@ import websocket from '@fastify/websocket'
 const app = Fastify();
 
 (async () => {
+	await app.register(websocket);
 
+	// Configurer Swagger
+	app.register(swagger, {
+	swagger: {
+		info: {
+		title: 'Matchmaking API',
+		description: 'API documentation for User Service',
+		version: '1.0.0'
+		}
+	}
+	});
 
+	app.register(swaggerUI, {
+	routePrefix: '/docs',
+	staticCSP: true
+	});
 
-await app.register(websocket);
+	// Enregistrer les routes utilisateur
+	app.register(matchmakingRoutes, { prefix: '/matchmaking' });
 
-// Configurer Swagger
-app.register(swagger, {
-  swagger: {
-    info: {
-      title: 'Matchmaking API',
-      description: 'API documentation for User Service',
-      version: '1.0.0'
-    }
-  }
-});
-
-
-app.register(swaggerUI, {
-  routePrefix: '/docs',
-  staticCSP: true
-});
-
-
-// Enregistrer les routes utilisateur
-app.register(matchmakingRoutes, { prefix: '/matchmaking' });
-
-app.listen({port: 4003 , host: '0.0.0.0'}, () => {
-	console.log('Matchmaking Service running on http://localhost:4003');
-});
+	app.listen({port: 4003 , host: '0.0.0.0'}, () => {
+		console.log('Matchmaking Service running on http://localhost:4003');
+	});
 
 })();

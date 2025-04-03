@@ -1,12 +1,15 @@
 import Fastify from 'fastify';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
-import userProxy from './userProxy.js';
-import gameProxy from './gameProxy.js';
-import matchmakingProxy from './matchmakingProxy.js';
+import userProxy from './proxies/userProxy.js';
+import gameProxy from './proxies/gameProxy.js';
+import matchmakingProxy from './proxies/matchmakingProxy.js';
 import cors from '@fastify/cors';
+import fastifyWebsocket from '@fastify/websocket';
 
 const app = Fastify();
+
+app.register(fastifyWebsocket);
 
 //Configurer Swagger UI
 app.register(swagger,{

@@ -2,7 +2,8 @@ import axios from 'axios';
 import type { WebSocket as WS } from 'ws';
 import {createTournament, Tournament, getMatchbyId, Match, updateMatchv2} from './matchmakingDb';
 import { websocketClients } from './matchmakingRoutes';
-
+import { WSClient, WSMessage, WSClientId, MatchmakingEvents, RoomId } from './matchmakingWS';
+import WebSocket from 'ws';
 
 export const queue1v1: string[] = [];
 export const queueTournament: string[] = [];
@@ -81,9 +82,11 @@ async function attemptMatch() {
 					const message = JSON.stringify({
 						gameSessionId
 					});
-					websocketClients.forEach((socket) => {
-						socket.send(message);
-					})
+					const socket1 = websocketClients.get(player1);
+					const socket2 = websocketClients.get(player2);
+
+					socket1?.send(message);
+					socket2?.send(message);
 				}
 			} catch (error) {
 				console.error('Erreur lors de la création de la game session:', error);
@@ -108,15 +111,52 @@ export async function attemptTournament(): Promise<Tournament | undefined> {
 				throw Error ("No tournament created");
 			}
 			const message = JSON.stringify({
-				tournament
+				type: 'tournament_created',
+				payload: {tournament}
 			});
-			websocketClients.forEach((socket) => {
-				socket.send(message);
-			})
+			players.forEach((playerId) => {
+				const socket = websocketClients.get(playerId!);
+				if (socket && socket.readyState === WebSocket.OPEN) {
+					socket.send(message);
+				}
+			});
 			console.log("Tournoi cree:", tournament);
 			return (tournament);
 		}
-	} //else {
-		//throw Error ("Pas assez de joueurs dans la Tournament Queue");
-	//}
+	} 
+}
+
+interface MatchmakingMessage {
+	action: string;
+	payload?: any;
+}
+
+export function handleMatchmakingMessage(
+	msg: MatchmakingMessage,
+	playerId: string,
+	clients: Map<string, WebSocket>
+  ) {
+	switch (msg.action) {
+		case 'join_1v1':
+			console.log(`[MM] ${playerId} rejoint la file 1v1`);
+			joinQueue1v1(playerId);
+			break;
+	  
+		case 'join_tournament':
+			console.log(`[MM] ${playerId} rejoint la file tournoi`);
+			joinTournamentQueue(playerId);
+			break;
+	  
+		case 'leave_tournament':
+			console.log(`[MM] ${playerId} quitte la file tournoi`);
+			// tu peux faire queueTournament = queueTournament.filter(p => p !== playerId);
+			break;
+  
+		default:
+			console.warn(`[MM] Action inconnue : ${msg.action}`);
+			const ws = clients.get(playerId);
+			if (ws?.readyState === WebSocket.OPEN) {
+				ws.send(JSON.stringify({ error: 'Action inconnue' }));
+			}
+	}
 }

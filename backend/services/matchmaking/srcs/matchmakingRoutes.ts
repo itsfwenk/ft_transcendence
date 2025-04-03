@@ -4,7 +4,7 @@ import {  updateMatch, getMatchbyId, getTournamentById, scheduleFinal, finishTou
 import { request } from 'axios';
 import { WebSocket } from "ws";
 
-export const websocketClients = new Map<string, WebSocket>(); //userId -> websocket
+export const websocketClients = new Map<string, WebSocket>();
 
 const playerIdSchema: FastifySchema = {
 	body: {
@@ -133,32 +133,4 @@ export default async function matchmakingRoutes(fastify: any) {
 		finishTournament(tournamentId);
   		reply.send({ success: true});
 	})
-	fastify.get('/ws', { websocket: true }, (connection: WebSocket, request: FastifyRequest) => {
-		const { playerId } = request.query as { playerId?: string };
-		console.log('Query params:', request.query);
-		if (!playerId) {
-			console.error("playerId non fourni, fermeture de la connexion");
-			connection.close();
-			return;
-		}
-
-		 // Vérifier si une connexion existe déjà pour ce playerId
-		if (websocketClients.has(playerId)) {
-		console.warn(`Une connexion existe déjà pour le playerId: ${playerId}. Fermeture de la nouvelle connexion.`);
-		connection.close();
-		return;
-		}
-
-		connection.on('message', (msg) => {
-			console.log('📩 Message reçu :', msg.toString());
-		});
-		console.log(`Un client WebSocket est connecté pour le playerId: ${playerId}`);
-		// Stocker la connexion dans la Map avec le playerId comme clé
-		websocketClients.set(playerId, connection);
-	  
-		connection.on('close', () => {
-		  console.log(`Un client WebSocket s'est déconnecté pour le playerId: ${playerId}`);
-		  websocketClients.delete(playerId);
-		});
-	});
 }

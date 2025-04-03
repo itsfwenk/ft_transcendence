@@ -49,7 +49,7 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 			const msg = JSON.parse(event.data);
 			console.log('Notification WebSocket matchmaking reçue:', msg);
 			switch(msg.type) {
-				case 'launch_game':
+				case 'join_1v1':
 					history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
 					window.dispatchEvent(new PopStateEvent('popstate'));
 					break;
@@ -77,7 +77,7 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 
 export function getMatchmakingSocket(): WebSocket | null {
 	return matchmakingSocket;
-  }
+}
   
   export function getUserSocket(): WebSocket | null {
 	return userSocket;

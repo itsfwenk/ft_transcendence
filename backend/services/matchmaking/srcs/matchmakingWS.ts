@@ -1,12 +1,74 @@
 import {v4 as uuidv4} from 'uuid';
-import { WSClient, WSClientId, RoomId, WSMessage } from './wsTypes';
+import { FastifyInstance, FastifyRequest } from 'fastify';
+import { WebSocket } from "ws";
+import { handleMatchmakingMessage } from './matchmakingController';
+
+export type WSClientId = string;
+export type RoomId = string;
+
+export interface WSClient {
+	id: WSClientId;
+	userId: string;
+	connection: WebSocket;
+	rooms: Set<RoomId>;
+}
+
+export type WSMessage = {
+	type: string;
+	payload: any;
+};
+
+export interface MatchmakingEvents {
+	joinQueue1v1: { userId: string};
+	leaveQueue: {userId: string };
+}
+
+export const clients: Map<WSClientId, WSClient> = new Map();
+
+export const rooms: Map<RoomId, Set<WSClientId>> = new Map();
+
+export const userIdtoClientId: Map<string, WSClientId> = new Map();
+
+export const websocketClients = new Map<string, WebSocket>();
+
+export function registerMatchmakingWS(fastify: FastifyInstance) {
+	fastify.get('/ws', { websocket: true }, (connection: WebSocket, request: FastifyRequest) => {
+		const { playerId } = request.query as { playerId?: string };
+		console.log('Query params:', request.query);
+		if (!playerId) {
+			console.error("playerId non fourni, fermeture de la connexion");
+			connection.close();
+			return;
+		}
+
+		 // Vérifier si une connexion existe déjà pour ce playerId
+		if (websocketClients.has(playerId)) {
+			console.warn(`Une connexion existe déjà pour le playerId: ${playerId}. Fermeture de la nouvelle connexion.`);
+			connection.close();
+			return;
+		}
+
+		connection.on('message', (raw) => {
+			try {
+				const msg = JSON.parse(raw.toString());
+				handleMatchmakingMessage(msg, playerId, websocketClients);
+			} catch (err) {
+				console.error('Message JSON invalide :', err);
+			}
+		});
+		console.log(`Un client WebSocket est connecté pour le playerId: ${playerId}`);
+		// Stocker la connexion dans la Map avec le playerId comme clé
+		websocketClients.set(playerId, connection);
+	  
+		connection.on('close', () => {
+			console.log(`Un client WebSocket s'est déconnecté pour le playerId: ${playerId}`);
+			websocketClients.delete(playerId);
+		});
+	});
+}
 
 
-const clients: Map<WSClientId, WSClient> = new Map();
 
-const rooms: Map<RoomId, Set<WSClientId>> = new Map();
-
-const userIdtoClientId: Map<string, WSClientId> = new Map();
 
 export const addClient = (connection: WebSocket, userId: string): WSClient => {
 	const clientId = uuidv4();

@@ -2,13 +2,16 @@ import Fastify from 'fastify';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import matchmakingRoutes from './matchmakingRoutes.js';
+import { WebSocket } from "ws";
 import websocket from '@fastify/websocket'
+import { registerMatchmakingWS } from './matchmakingWS.js';
 
 const app = Fastify();
 
 (async () => {
-	await app.register(websocket);
-
+	app.register(websocket);
+	
+	registerMatchmakingWS(app);
 	// Configurer Swagger
 	app.register(swagger, {
 	swagger: {
@@ -31,5 +34,4 @@ const app = Fastify();
 	app.listen({port: 4003 , host: '0.0.0.0'}, () => {
 		console.log('Matchmaking Service running on http://localhost:4003');
 	});
-
 })();

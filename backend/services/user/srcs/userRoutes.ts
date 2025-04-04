@@ -388,6 +388,38 @@ export default async function userRoutes(fastify: any) {
 	}
   });
 
+
+  fastify.patch('/:userId', {
+    schema: {
+      params: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string' },
+        },
+        required: ['userId'],
+      },
+      body: {
+        type: 'object',
+        properties: {
+          gameId: { type: 'string' },
+        },
+        required: ['gameId'],
+      },
+    },
+  }, async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { userId: userId } = req.params as { userId: string };
+      const { gameId } = req.body as { gameId: string };
+  
+      const userUpdate = await updateUserGameId(userId, gameId);
+  
+      return reply.send({ success: true, user: userUpdate });
+    } catch (error) {
+      console.error("Error updating user game ID:", error);
+      return reply.status(500).send({ error: "Internal Server Error" });
+    }
+  });
+
   fastify.get('/dashboard', {
 	  preHandler: [fastify.authenticate],
 	  schema: {

@@ -129,7 +129,7 @@ export function initGame(){
         ball.dx *= SPEED_INCREASE;
         ball.dy *= SPEED_INCREASE;
     }
-
+    // console.log(ball.dx, ball.dy);
     // Ball movement
     ball.x += ball.dx;
     ball.y += ball.dy;

@@ -15,7 +15,8 @@ db.exec(`
 		passwordHsh TEXT NOT NULL,
 		role TEXT NOT NULL,
 		status TEXT NOT NULL,
-		avatarUrl TEXT DEFAULT '/avatars/default.png'
+		avatarUrl TEXT DEFAULT '/avatars/default.png',
+		inGameId TEST NOT NULL
 	)
 `);
 
@@ -53,6 +54,8 @@ export interface User {
 	role: string;
 	status: string;
 	avatarUrl: string;
+	inGameId: string;
+	// token: string;
 }
 
 const users: User[] = [];
@@ -61,12 +64,12 @@ export function saveUser(userName: string, email: string, password: string) {
 	const userId = uuidv4();
 
 	const stmt = db.prepare(`
-		INSERT INTO users (userId, userName, email, passwordHsh, role, status, avatarUrl)
-		VALUES (?, ?, ?, ?, 'user', 'online', '../avatars/default.png')
+		INSERT INTO users (userId, userName, email, passwordHsh, role, status, avatarUrl, inGameId)
+		VALUES (?, ?, ?, ?, 'user', 'online', '../avatars/default.png', ?)
 	`);
-	const result = stmt.run(userId, userName, email, password);
+	const result = stmt.run(userId, userName, email, password, "none");
 
-	return { userId, userName, email, passwordHsh: password, role: 'user', status: 'online', avatarUrl: '/avatars/default.png' };
+	return { userId, userName, email, passwordHsh: password, role: 'user', status: 'online', avatarUrl: '/avatars/default.png', inGameId:'none' };
 }
 
 export function getUserByEmail(email: string): User | undefined {
@@ -100,10 +103,10 @@ export function isValidEmail(email: string): boolean {
 	return emailRegex.test(email);
 }
 
-export function generateSessionId(): string {
-	const bytes = crypto.randomBytes(15);
-	return base32.encode(bytes).replace(/=/g, "");
-}
+// export function generateSessionId(): string {
+// 	const bytes = crypto.randomBytes(15);
+// 	return base32.encode(bytes).replace(/=/g, "");
+// }
 
 export function updateUser(userId: string, data: Partial<User>): User | undefined {
 	const entries = Object.entries(data).filter(([_, value]) => value !== undefined);
@@ -156,4 +159,10 @@ export function getUsersByRole(role: string): User[] {
 export function getUserWithStatus(status: string): User[] {
 	const stmt = db.prepare(`SELECT * FROM users WHERE status = ?`);
 	return stmt.all(status) as User[];
+}
+
+export async function updateUserGameId(userId: string, gameId: string) {
+	const stmt = db.prepare(`UPDATE users SET inGameId = ? WHERE userId = ?`);
+	const result = stmt.run(gameId, userId);
+	return result.changes > 0;
 }

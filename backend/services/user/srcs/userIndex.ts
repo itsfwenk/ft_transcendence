@@ -17,10 +17,10 @@ dotenv.config();
 
 app.register(fastifyCookie);
 
-app.register(cors, {
-	origin: 'http://localhost:4002', // Allow requests from port 4002
-	credentials: true, // Allow sending/receiving cookies
-  });
+// app.register(cors, {
+// 	origin: 'http://localhost:4002', // Allow requests from port 4002
+// 	credentials: true, // Allow sending/receiving cookies
+//   });
 
 // Configurer JWT
 //app.register(jwt, { secret: 'supersecretkey' });

@@ -3,15 +3,17 @@ import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import matchmakingRoutes from './matchmakingRoutes.js';
 import { WebSocket } from "ws";
-import websocket from '@fastify/websocket'
-import { registerMatchmakingWS } from './matchmakingWS.js';
+import websocket from '@fastify/websocket';
+import { handleMatchmakingMessage } from './matchmakingController';
+
+
 
 const app = Fastify();
 
 (async () => {
 	app.register(websocket);
 	
-	registerMatchmakingWS(app);
+	
 	// Configurer Swagger
 	app.register(swagger, {
 	swagger: {

@@ -1,6 +1,6 @@
 // src/pages/Home.ts
 
-import { getMatchmakingSocket, matchmakingWebSocket } from "../wsClient";
+import { getMatchmakingSocket } from "../wsClient";
 
 export async function fetchUserProfile() {
 	try {
@@ -66,8 +66,6 @@ export default function menu() {
 	});
 
 	const playOnlineButton = document.getElementById('onlineBtn') as HTMLFormElement;
-
-
 	playOnlineButton.addEventListener('click', async(e) => {
 		e.preventDefault();
         console.log("online button...");

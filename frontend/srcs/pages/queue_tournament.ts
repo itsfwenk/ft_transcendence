@@ -22,29 +22,4 @@ export default async function Queuetournament() {
 	}
 	const currentPlayerId = userProfile.userId;
 	console.log("currentPlayerId:", currentPlayerId);
-	const ws = new WebSocket(`ws://localhost:4000/api-matchmaking/ws?playerId=${currentPlayerId}`);
-	ws.onopen = () => {
-		console.log('Connexion WebSocket établie');
-	};
-
-	ws.onmessage = (event) => {
-		try{
-			const data = JSON.parse(event.data);
-			console.log('Notification WebSocket reçue:', data);
-			if (data.tournament) {
-				history.pushState(null, '', `/tournament?tournamentId=${data.tournament.id}`);
-				window.dispatchEvent(new PopStateEvent('popstate'));
-			}
-		} catch (error) {
-			console.error('Erreur lors du parsing du message:', error);
-		}
-	};
-	
-	ws.onerror = (error) => {
-		console.error('Erreur WebSocket:', error);
-	};
-	
-	ws.onclose = () => {
-		console.log('Connexion WebSocket fermée');
-	};
 }

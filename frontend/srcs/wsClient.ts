@@ -39,6 +39,7 @@ export function userWebSocket(userId: string): WebSocket {
 }
 
 export function matchmakingWebSocket(userId: string): WebSocket {
+	console.log("test_websocket", userId);
 	const ws = new WebSocket(`ws://localhost:4000/api-matchmaking/ws?playerId=${userId}`);
 	ws.onopen = () => {
 		console.log('Connexion WebSocket matchmaking établie');
@@ -49,11 +50,17 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 			const msg = JSON.parse(event.data);
 			console.log('Notification WebSocket matchmaking reçue:', msg);
 			switch(msg.type) {
-				case 'join_1v1':
+				case 'launch_1v1':
 					history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
 					window.dispatchEvent(new PopStateEvent('popstate'));
 					break;
-				case 'jointournament':
+				case 'launch_tournament':
+					const tournamentId = msg.payload?.tournament?.id;
+					if (tournamentId) {
+						console.log("Tournoi lancé avec ID :", tournamentId);
+						history.pushState(null, '', `/tournament?tournamentId=${tournamentId}`);
+						window.dispatchEvent(new PopStateEvent('popstate'));
+					}
 					break;
 				default:
 					break;

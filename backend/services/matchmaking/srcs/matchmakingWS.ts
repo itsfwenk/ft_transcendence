@@ -1,3 +1,4 @@
+/*
 import {v4 as uuidv4} from 'uuid';
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { WebSocket } from "ws";
@@ -29,10 +30,9 @@ export const rooms: Map<RoomId, Set<WSClientId>> = new Map();
 
 export const userIdtoClientId: Map<string, WSClientId> = new Map();
 
-export const websocketClients = new Map<string, WebSocket>();
-
 export function registerMatchmakingWS(fastify: FastifyInstance) {
-	fastify.get('/ws', { websocket: true }, (connection: WebSocket, request: FastifyRequest) => {
+	console.log("[MM] Route /matchmaking/ws appelée");
+	fastify.get('/matchmaking/ws', { websocket: true }, (connection: WebSocket, request: FastifyRequest) => {
 		const { playerId } = request.query as { playerId?: string };
 		console.log('Query params:', request.query);
 		if (!playerId) {
@@ -203,3 +203,4 @@ export const getRoomClients = (roomId: RoomId): WSClient[] => {
 }
 
 
+*/

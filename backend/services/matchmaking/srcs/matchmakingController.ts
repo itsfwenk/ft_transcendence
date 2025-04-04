@@ -2,7 +2,6 @@ import axios from 'axios';
 import type { WebSocket as WS } from 'ws';
 import {createTournament, Tournament, getMatchbyId, Match, updateMatchv2} from './matchmakingDb';
 import { websocketClients } from './matchmakingRoutes';
-import { WSClient, WSMessage, WSClientId, MatchmakingEvents, RoomId } from './matchmakingWS';
 import WebSocket from 'ws';
 
 export const queue1v1: string[] = [];
@@ -80,6 +79,7 @@ async function attemptMatch() {
 				const gameSessionId = await createGameSession(player1, player2);
 				if (gameSessionId) {
 					const message = JSON.stringify({
+						type: 'launch_1v1',
 						gameSessionId
 					});
 					const socket1 = websocketClients.get(player1);
@@ -111,7 +111,7 @@ export async function attemptTournament(): Promise<Tournament | undefined> {
 				throw Error ("No tournament created");
 			}
 			const message = JSON.stringify({
-				type: 'tournament_created',
+				type: 'launch_tournament',
 				payload: {tournament}
 			});
 			players.forEach((playerId) => {

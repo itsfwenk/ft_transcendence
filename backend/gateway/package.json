@@ -21,10 +21,13 @@
     "@fastify/websocket": "^11.0.2",
     "electron": "^35.0.0",
     "fastify": "^5.2.1",
+    "http-proxy": "^1.18.1",
     "typescript": "^5.8.2",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
-    "@types/ws": "^8.18.0"
+    "@types/http-proxy": "^1.17.16",
+    "@types/ws": "^8.18.1"
   }
 }

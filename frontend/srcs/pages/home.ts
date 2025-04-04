@@ -45,7 +45,7 @@ export default function Home() {
 				//recup du userId
 				const profile = await fetchUserProfile();
 				if (profile && profile.userId) {
-					userWebSocket(profile.userId);
+					//userWebSocket(profile.userId);
 					matchmakingWebSocket(profile.userId);
 				} else {
 					console.error ('Impossible de recuperer le profile du user');

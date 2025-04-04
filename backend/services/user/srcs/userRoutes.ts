@@ -274,43 +274,43 @@ export default async function userRoutes(fastify: any) {
     handler: getOnlineFriendsController
   });
 
-  fastify.post('/friends/:friendId', {
-    preHandler: [fastify.authenticate],
-    schema: {
-      headers: {
-        type: 'object',
-        properties: {
-          Authorization: { type: 'string', description: 'Bearer <token>' }
-        },
-        required: ['Authorization']
-      },
-      params: {
-        type: 'object',
-        properties: {
-          friendId: { type: 'string' }
-        },
-        required: ['friendId']
-      },
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' },
-            friend: {
-              type: 'object',
-              properties: {
-                userId: { type: 'string' },
-                userName: { type: 'string' },
-                status: { type: 'string' },
-                avatarUrl: { type: 'string' }
-              }
-            }
-          }
-        }
-      }
-    },
-    handler: addFriendController
+  fastify.post('/friends/:userName', {
+	preHandler: [fastify.authenticate],
+	schema: {
+	  headers: {
+		type: 'object',
+		properties: {
+		  Authorization: { type: 'string', description: 'Bearer <token>' }
+		},
+		required: ['Authorization']
+	  },
+	  params: {
+		type: 'object',
+		properties: {
+		  userName: { type: 'string' }
+		},
+		required: ['userName']
+	  },
+	  response: {
+		200: {
+		  type: 'object',
+		  properties: {
+			success: { type: 'boolean' },
+			message: { type: 'string' },
+			friend: {
+			  type: 'object',
+			  properties: {
+				userId: { type: 'string' },
+				userName: { type: 'string' },
+				status: { type: 'string' },
+				avatarUrl: { type: 'string' }
+			  }
+			}
+		  }
+		}
+	  }
+	},
+	handler: addFriendController
   });
 
   fastify.delete('/friends/:friendId', {

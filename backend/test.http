@@ -5,8 +5,8 @@ POST http://localhost:4001/user/register
 Content-Type: application/json
 
 {
-	"userName": "yoyo",
-	"email": "test@email.com",
+	"userName": "okan",
+	"email": "tes@email.com",
 	"password": "123456"
 }
 
@@ -15,7 +15,7 @@ POST http://localhost:4001/user/login
 Content-Type: application/json
 
 {
-	"email": "test@email.com",
+	"email": "tes@email.com",
 	"password": "123456"
 }
 
@@ -133,23 +133,23 @@ GET http://localhost:4001/user/login-error
 
 ### Obtenir la liste d'amis
 GET http://localhost:4001/user/friends
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NGQ0NjUwYi05OWZiLTQ1ZjAtOWZjNC1hNzM1M2FhMjRiMzMiLCJpYXQiOjE3NDI5OTY4NDQsImV4cCI6MTc0MzA4MzI0NH0.RL2XH8ZtRj0wNHi5kERdoLffOdYqQbgWESrOQkHTpgY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNjAxZTgwMC1iMTRhLTRjMzUtYWQ2MS1jM2ZlODM4MDA1ZmEiLCJpYXQiOjE3NDM3NzQwODAsImV4cCI6MTc0Mzg2MDQ4MH0.8UohA9139SPLFf8XoiZgDgMAeXZRNs-ZXYEDJez2eGM
 
 ### Obtenir les amis en ligne
 GET http://localhost:4001/user/friends/online
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NGQ0NjUwYi05OWZiLTQ1ZjAtOWZjNC1hNzM1M2FhMjRiMzMiLCJpYXQiOjE3NDI5OTY4NDQsImV4cCI6MTc0MzA4MzI0NH0.RL2XH8ZtRj0wNHi5kERdoLffOdYqQbgWESrOQkHTpgY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNjAxZTgwMC1iMTRhLTRjMzUtYWQ2MS1jM2ZlODM4MDA1ZmEiLCJpYXQiOjE3NDM3NzQwODAsImV4cCI6MTc0Mzg2MDQ4MH0.8UohA9139SPLFf8XoiZgDgMAeXZRNs-ZXYEDJez2eGM
 
 ### Ajouter un ami
-POST http://localhost:4001/user/friends/80ec34ba-6047-4c59-9f55-ca67139af670
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NGQ0NjUwYi05OWZiLTQ1ZjAtOWZjNC1hNzM1M2FhMjRiMzMiLCJpYXQiOjE3NDI5OTY4NDQsImV4cCI6MTc0MzA4MzI0NH0.RL2XH8ZtRj0wNHi5kERdoLffOdYqQbgWESrOQkHTpgY
+POST http://localhost:4001/user/friends/okan
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNjAxZTgwMC1iMTRhLTRjMzUtYWQ2MS1jM2ZlODM4MDA1ZmEiLCJpYXQiOjE3NDM3NzQwODAsImV4cCI6MTc0Mzg2MDQ4MH0.8UohA9139SPLFf8XoiZgDgMAeXZRNs-ZXYEDJez2eGM
 
 ### Vérifier si un utilisateur est ami
 GET http://localhost:4001/user/friends/check/80ec34ba-6047-4c59-9f55-ca67139af670
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NGQ0NjUwYi05OWZiLTQ1ZjAtOWZjNC1hNzM1M2FhMjRiMzMiLCJpYXQiOjE3NDI5OTY4NDQsImV4cCI6MTc0MzA4MzI0NH0.RL2XH8ZtRj0wNHi5kERdoLffOdYqQbgWESrOQkHTpgY
 
 ### Supprimer un ami
-DELETE http://localhost:4001/user/friends/80ec34ba-6047-4c59-9f55-ca67139af670
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NGQ0NjUwYi05OWZiLTQ1ZjAtOWZjNC1hNzM1M2FhMjRiMzMiLCJpYXQiOjE3NDI5OTY4NDQsImV4cCI6MTc0MzA4MzI0NH0.RL2XH8ZtRj0wNHi5kERdoLffOdYqQbgWESrOQkHTpgY
+DELETE http://localhost:4001/user/friends/8f59577b-bd11-41cb-bebb-479039c67bd1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwNjAxZTgwMC1iMTRhLTRjMzUtYWQ2MS1jM2ZlODM4MDA1ZmEiLCJpYXQiOjE3NDM3NzQwODAsImV4cCI6MTc0Mzg2MDQ4MH0.8UohA9139SPLFf8XoiZgDgMAeXZRNs-ZXYEDJez2eGM
 
 
 ############################ GAME ############################

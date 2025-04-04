@@ -1,24 +1,26 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { addFriend, removeFriend, getFriends, getOnlineFriends, areFriends } from "./friendDb";
-import { getUserById } from "./userDb";
+import { getUserByUserName } from "./userDb";
 
 interface AuthenticatedRequest extends FastifyRequest {
 	user: { userId: string };
 }
 
 interface FriendRequest extends AuthenticatedRequest {
-	params: { friendId: string };
+	params: { userName: string };
 }
 
 export async function addFriendController(req: FriendRequest, reply: FastifyReply) {
 	try {
 		const userId = req.user.userId;
-		const { friendId } = req.params;
+		const { userName } = req.params;
 
-		const friendUser = getUserById(friendId);
-		if (!friendId) {
+		const friendUser = getUserByUserName(userName);
+		if (!friendUser) {
 			return reply.status(404).send({ error: 'User not found' });
 		}
+
+		const friendId = friendUser.userId;
 
 		if (userId === friendId) {
 			return reply.status(400).send({ error: 'Cannot add yourself as a friend' });
@@ -26,7 +28,7 @@ export async function addFriendController(req: FriendRequest, reply: FastifyRepl
 
 		const success = addFriend(userId, friendId);
 
-		if (success && friendUser) {
+		if (success) {
 			return reply.send({
 				success: true,
 				message: 'Friend added successfully',
@@ -46,7 +48,11 @@ export async function addFriendController(req: FriendRequest, reply: FastifyRepl
 	}
 }
 
-export async function removeFriendController(req: FriendRequest, reply: FastifyReply) {
+interface FriendIdRequest extends AuthenticatedRequest {
+	params: { friendId: string };
+}
+
+export async function removeFriendController(req: FriendIdRequest, reply: FastifyReply) {
 	try {
 		const userId = req.user.userId;
 		const { friendId } = req.params;
@@ -101,7 +107,7 @@ export async function getOnlineFriendsController(req: AuthenticatedRequest, repl
 	}
 }
 
-export async function checkFriendshipController(req: FriendRequest, reply: FastifyReply) {
+export async function checkFriendshipController(req: FriendIdRequest, reply: FastifyReply) {
 	try {
 		const userId = req.user.userId;
 		const { friendId } = req.params;

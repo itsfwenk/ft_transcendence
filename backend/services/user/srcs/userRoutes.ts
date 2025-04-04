@@ -5,6 +5,7 @@ import multipart from '@fastify/multipart';
 import { deleteAvatar, getAvatar, uplpoadAvatar } from './avatarController.js';
 import { addFriendController, checkFriendshipController, getFriendsController, getOnlineFriendsController, removeFriendController } from './friendController.js';
 import { getUserDashboard } from './userDashboardController.js';
+import { updateUserGameId } from './userDb.js';
 
 
 const User = {

@@ -22,10 +22,10 @@ app.register(fastifyCookie, {
 	// parseOptions: {}     // options for parsing cookies
   });
 
-app.register(cors, {
-	origin:  process.env.CORS_ORIGIN,
-	credentials: true, // Allow sending/receiving cookies
-  });
+// app.register(cors, {
+// 	origin:  process.env.CORS_ORIGIN,
+// 	credentials: true, // Allow sending/receiving cookies
+//   });
 
 // Configurer JWT
 //app.register(jwt, { secret: 'supersecretkey' });

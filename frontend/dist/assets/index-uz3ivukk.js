@@ -10,7 +10,7 @@
             Pas de compte ? <a href="/signup" data-link class="text-indigo-600 hover:underline">Inscrivez-vous</a>
           </p>
         </div>
-      `,document.getElementById("loginForm").addEventListener("submit",async s=>{s.preventDefault();const n=document.getElementById("email").value,e=document.getElementById("password").value;try{const t=await fetch("http://localhost:4000/api-user/login",{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:n,password:e})});if(!t.ok)throw new Error(`Erreur lors de la connexion: ${t.statusText}`);const l=await t.json();console.log("Réponse de login:",l),history.pushState(null,"","/menu"),window.dispatchEvent(new PopStateEvent("popstate"))}catch(t){console.error("Erreur de login:",t)}}))}function u(){const o=document.getElementById("app");o&&(o.innerHTML=`
+      `,document.getElementById("loginForm").addEventListener("submit",async s=>{s.preventDefault();const n=document.getElementById("email").value,e=document.getElementById("password").value;try{const t=await fetch("https://api.10.32.6.3.com/api-user/login",{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:n,password:e})});if(!t.ok)throw new Error(`Erreur lors de la connexion: ${t.statusText}`);const l=await t.json();console.log("Réponse de login:",l),history.pushState(null,"","/menu"),window.dispatchEvent(new PopStateEvent("popstate"))}catch(t){console.error("Erreur de login:",t)}}))}function u(){const o=document.getElementById("app");o&&(o.innerHTML=`
         <div class="p-4">
           <h1 class="text-2xl font-bold">Mon Profil</h1>
           <!-- Contenu du profil ici -->

@@ -31,10 +31,10 @@ app.register(fastifyWebsocket);
 
 app.register(fastifyCookie);
 
-app.register(cors, {
-	origin: 'http://localhost:4001',
-	credentials: true,
-  });
+// app.register(cors, {
+// 	origin: 'http://localhost:4001',
+// 	credentials: true,
+//   });
 
 
 

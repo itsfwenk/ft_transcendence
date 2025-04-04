@@ -1,57 +1,52 @@
 {
-	email fli@student.42.fr
-	log {
-		output file /var/log/caddy/access.log {
-			roll_size 10MiB
-			roll_keep 10
-			roll_keep_for 720h
-		}
-	}
+    email your_email@example.com
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10MiB
+            roll_keep 10
+            roll_keep_for 720h
+        }
+    }
 }
 
-10.32.6.3.com {
-	reverse_proxy frontend:5173
-	log {
-		output file /var/log/caddy/errors.log {
-			roll_size 10MiB
-			roll_keep 10
-			roll_keep_for 720h
-		}
-	}
+10.32.6.3:8443 {
+    root * /usr/share/caddy/frontend
+    file_server
+    encode gzip
 }
 
-api.10.32.6.3.com {
-	reverse_proxy user:4001
-	log {
-		output file /var/log/caddy/errors.log {
-			roll_size 10MiB
-			roll_keep 10
-			roll_keep_for 720h
-		}
-	}
-    header Access-Control-Allow-Origin 10.32.6.3.com
+api.10.32.6.3:8443 {
+    reverse_proxy user:4001
+    log {
+        output file /var/log/caddy/errors.log {
+            roll_size 10MiB
+            roll_keep 10
+            roll_keep_for 720h
+        }
+    }
+    header Access-Control-Allow-Origin *
     header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
     header Access-Control-Allow-Headers "Content-Type, Authorization"
 }
 
-game.10.32.6.3.com {
-	reverse_proxy game:4002
-	log {
-		output file /var/log/caddy/errors.log {
-			roll_size 10MiB
-			roll_keep 10
-			roll_keep_for 720h
-		}
-	}
+game.10.32.6.3:8443 {
+    reverse_proxy game:4002
+    log {
+        output file /var/log/caddy/errors.log {
+            roll_size 10MiB
+            roll_keep 10
+            roll_keep_for 720h
+        }
+    }
 }
 
-matchmaking.10.32.6.3.com {
-	reverse_proxy matchmaking:4003
-	log {
-		output file /var/log/caddy/errors.log {
-			roll_size 10MiB
-			roll_keep 10
-			roll_keep_for 720h
-		}
-	}
+matchmaking.10.32.6.3:8443 {
+    reverse_proxy matchmaking:4003
+    log {
+        output file /var/log/caddy/errors.log {
+            roll_size 10MiB
+            roll_keep 10
+            roll_keep_for 720h
+        }
+    }
 }

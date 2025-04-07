@@ -1,3 +1,5 @@
+import {updateTournamentUI} from './pages/tournament';
+import { Tournament, TournamentState } from "./types";
 
 let userSocket: WebSocket | null = null;
 let matchmakingSocket: WebSocket | null = null;
@@ -45,6 +47,7 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 		console.log('Connexion WebSocket matchmaking établie');
 	};
 
+	// message recu du back impactant le front
 	ws.onmessage = (event) => {
 		try{
 			const msg = JSON.parse(event.data);
@@ -61,6 +64,11 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 						history.pushState(null, '', `/tournament?tournamentId=${tournamentId}`);
 						window.dispatchEvent(new PopStateEvent('popstate'));
 					}
+					break;
+				case 'tournament_state_update':
+					const state = msg.payload.state as TournamentState;
+					const tournament = msg.payload.tournament;
+					updateTournamentUI(state, tournament);
 					break;
 				default:
 					break;

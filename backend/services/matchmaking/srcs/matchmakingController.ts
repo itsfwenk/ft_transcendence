@@ -3,9 +3,12 @@ import type { WebSocket as WS } from 'ws';
 import {createTournament, Tournament, getMatchbyId, Match, updateMatchv2} from './matchmakingDb';
 import { websocketClients } from './matchmakingRoutes';
 import WebSocket from 'ws';
+import { getTournamentById } from './matchmakingDb';
 
 export const queue1v1: string[] = [];
 export const queueTournament: string[] = [];
+export const tournamentReadiness: Map<string, Set<string>> = new Map();
+
 
 
 //join 1v1 queue
@@ -19,7 +22,6 @@ export async function joinQueue1v1(playerId: string) {
 export async function joinTournamentQueue(playerId: string) {
 	queueTournament.push(playerId);
 	console.log("queueTournament:", queueTournament);
-	attemptTournament();
 }
 
 export async function launchMatch(matchId: string): Promise<Match | undefined> {
@@ -131,11 +133,51 @@ interface MatchmakingMessage {
 	payload?: any;
 }
 
-export function handleMatchmakingMessage(
+function broadcastTournamentState(tournament: Tournament) {
+	const message = JSON.stringify({
+		type: 'tournament_state_update',
+		payload: {
+			tournamentId: tournament.id,
+			state: tournament.state,
+			tournament
+		}
+	});
+
+	for (const playerId of tournament.players) {
+		const socket = websocketClients.get(playerId);
+		if (socket && socket.readyState === WebSocket.OPEN) {
+			socket.send(message);
+		}
+	}
+}
+
+function markPlayerAsReady(tournamentId: string, playerId: string): void {
+	if (!tournamentReadiness.has(tournamentId)) {
+		tournamentReadiness.set(tournamentId, new Set());
+	}
+
+	const readySet = tournamentReadiness.get(tournamentId)!;
+	readySet.add(playerId);
+
+	console.log(`[MM] ${playerId} est prêt pour le tournoi ${tournamentId}`);
+}
+
+function areAllPlayersReady(tournamentId: string) : boolean {
+	const tournament = getTournamentById(tournamentId);
+	if (!tournament) return false;
+
+	const readySet = tournamentReadiness.get(tournamentId);
+	if (!readySet) return false;
+
+	return readySet.size >= tournament.players.length;
+}
+
+export async function handleMatchmakingMessage(
 	msg: MatchmakingMessage,
 	playerId: string,
 	clients: Map<string, WebSocket>
   ) {
+	// message provenant du front vers le back
 	switch (msg.action) {
 		case 'join_1v1':
 			console.log(`[MM] ${playerId} rejoint la file 1v1`);
@@ -145,8 +187,23 @@ export function handleMatchmakingMessage(
 		case 'join_tournament':
 			console.log(`[MM] ${playerId} rejoint la file tournoi`);
 			joinTournamentQueue(playerId);
+			const tournament = await attemptTournament();
+			if (tournament) {
+				//tournament.state = 'tournament_queue';
+				broadcastTournamentState(tournament);
+			}
 			break;
-	  
+		case 'player_ready_for_tournament':
+			const tournamentId = msg.payload?.tournamentId;
+			markPlayerAsReady(tournamentId, playerId);
+			if (areAllPlayersReady(tournamentId)) {
+				const tournament.state = "semi_final_start";
+				broadcastTournamentState(tournament);
+				tournamentReadiness.delete(tournamentId);
+			}
+			console.log(`[MM] ${playerId} est pret pour le tournoi`);
+			break;
+		
 		case 'leave_tournament':
 			console.log(`[MM] ${playerId} quitte la file tournoi`);
 			// tu peux faire queueTournament = queueTournament.filter(p => p !== playerId);

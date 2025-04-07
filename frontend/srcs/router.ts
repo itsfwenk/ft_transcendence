@@ -4,7 +4,7 @@ import Menu from './pages/menu';
 import Game from './pages/game';
 import Queue from './pages/queue';
 import Queuetournament from './pages/queue_tournament';
-import Tournament from './pages/tournament';
+import Tournament_mgt from './pages/tournament';
 
 // Définir vos routes sous forme d'un objet
 const routes: { [key: string]: () => void } = {
@@ -14,7 +14,7 @@ const routes: { [key: string]: () => void } = {
   '/game': Game,
   '/queue': Queue,
   '/queue_tournament': Queuetournament,
-  '/tournament': Tournament,
+  '/tournament': Tournament_mgt,
 };
 
 export function initRouter() {

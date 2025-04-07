@@ -12,11 +12,11 @@ export default function game() {
           </p>
         </div>
       `;
-      // Vous pouvez ajouter ici la logique pour le formulaire de login, par exemple:
+      
       const loginForm = document.getElementById('loginForm') as HTMLFormElement;
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        // Implémentez votre logique d'authentification ici
+		
         console.log("Connexion...");
       });
     }

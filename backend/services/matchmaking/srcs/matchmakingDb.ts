@@ -19,6 +19,7 @@ export interface Match {
 export interface Tournament {
 	id: string;
 	status: 'scheduled' | 'in_progress' | 'completed';
+	state: 'tournament_launch' | 
 	players: string[]; // Liste des IDs des joueurs
 	matches: Match[];
 	createdAt: Date;

@@ -4,7 +4,7 @@ import {  updateMatch, getMatchbyId, getTournamentById, scheduleFinal, finishTou
 import { request } from 'axios';
 import { WebSocket } from "ws";
 //import WebSocket from '@fastify/websocket';
-import { handleMatchmakingMessage } from './matchmakingController';
+import { handleMatchmakingMessage, onMatchCompleted } from './matchmakingController';
 
 export const websocketClients = new Map<string, WebSocket>();
 
@@ -95,7 +95,8 @@ export default async function matchmakingRoutes(fastify: any) {
 		  winner_id: string;
 		};
 		const updatedMatch = updateMatch(matchId, score1, score2, winner_id);
-  		reply.send({ success: true, updatedMatch });
+		onMatchCompleted(updatedMatch.tournamentId, matchId);
+		reply.send({ success: true, updatedMatch });
 	})
 	fastify.get('/tournament/match/:matchId', { schema: matchIdSchema }, async (request:FastifyRequest<{ Params: { matchId: string } }>, reply:FastifyReply) => {
 		const { matchId } = request.params as {matchId: string};

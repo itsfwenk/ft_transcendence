@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { WebSocket as WS } from 'ws';
-import {createTournament, Tournament, getMatchbyId, Match, updateMatchv2} from './matchmakingDb';
+import {createTournament, Tournament, getMatchbyId, Match, updateMatchv2, scheduleFinal} from './matchmakingDb';
 import { websocketClients } from './matchmakingRoutes';
 import WebSocket from 'ws';
 import { getTournamentById } from './matchmakingDb';
@@ -128,11 +128,34 @@ export async function attemptTournament(): Promise<Tournament | undefined> {
 	} 
 }
 
+export function onMatchCompleted(tournamentId: string, matchId: string): void {
+	const tournament = getTournamentById(tournamentId);
+	if (!tournament) return;
+
+	const match = tournament.matches.find(m => m.id === matchId);
+	if (!match) return;
+
+	const semiFinals = tournament.matches.filter(m => m.round === 1);
+	const allDone = semiFinals.every(m => m.status === 'completed');
+
+	if (allDone) {
+		console.log(`[MM] Demi-finales terminées, lancement de la finale`);
+		scheduleFinal(tournament.id);
+		const final_match_id = tournament.matches.find(m => m.round === 2);
+		if (final_match_id?.id) {
+			launchMatch(final_match_id.id);
+		} else {
+			console.error("Finale non trouvee");
+		}
+	}
+}
+
 interface MatchmakingMessage {
 	action: string;
 	payload?: any;
 }
 
+//Message du back vers le front
 function broadcastTournamentState(tournament: Tournament) {
 	const message = JSON.stringify({
 		type: 'tournament_state_update',
@@ -149,27 +172,6 @@ function broadcastTournamentState(tournament: Tournament) {
 			socket.send(message);
 		}
 	}
-}
-
-function markPlayerAsReady(tournamentId: string, playerId: string): void {
-	if (!tournamentReadiness.has(tournamentId)) {
-		tournamentReadiness.set(tournamentId, new Set());
-	}
-
-	const readySet = tournamentReadiness.get(tournamentId)!;
-	readySet.add(playerId);
-
-	console.log(`[MM] ${playerId} est prêt pour le tournoi ${tournamentId}`);
-}
-
-function areAllPlayersReady(tournamentId: string) : boolean {
-	const tournament = getTournamentById(tournamentId);
-	if (!tournament) return false;
-
-	const readySet = tournamentReadiness.get(tournamentId);
-	if (!readySet) return false;
-
-	return readySet.size >= tournament.players.length;
 }
 
 export async function handleMatchmakingMessage(
@@ -193,16 +195,8 @@ export async function handleMatchmakingMessage(
 				broadcastTournamentState(tournament);
 			}
 			break;
-		case 'player_ready_for_tournament':
-			const tournamentId = msg.payload?.tournamentId;
-			markPlayerAsReady(tournamentId, playerId);
-			if (areAllPlayersReady(tournamentId)) {
-				const tournament.state = "semi_final_start";
-				broadcastTournamentState(tournament);
-				tournamentReadiness.delete(tournamentId);
-			}
-			console.log(`[MM] ${playerId} est pret pour le tournoi`);
-			break;
+		case 'semi_final_end':
+			
 		
 		case 'leave_tournament':
 			console.log(`[MM] ${playerId} quitte la file tournoi`);

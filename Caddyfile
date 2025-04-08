@@ -13,6 +13,7 @@
     root * /usr/share/caddy/frontend
     file_server
     encode gzip
+    tls internal
 }
 
 api.10.32.6.3:8443 {

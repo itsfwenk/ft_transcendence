@@ -1,7 +1,6 @@
 import Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 
-//connexion a la database game
 const db = new Database('/app/db/matchmaking.db');
 
 export interface Match {
@@ -12,15 +11,15 @@ export interface Match {
 	player1Score: number;
 	player2Score: number;
 	winner_Id?: string;
-	status: 'pending' | 'ready' | 'in_progress' | 'completed';
+	status: 'pending' | 'in_progress' | 'completed';
 	matchTime: Date;
 }
   
 export interface Tournament {
 	id: string;
 	status: 'scheduled' | 'in_progress' | 'completed';
-	state: 'tournament_launch' | 
-	players: string[]; // Liste des IDs des joueurs
+	state: 'tournament_launch' | 'final_prep' | 'final_end' | 'end_screen';
+	players: string[];
 	matches: Match[];
 	createdAt: Date;
 	updatedAt: Date;
@@ -46,7 +45,7 @@ db.exec(`
 		player1Score INTEGER,
 		player2Score INTEGER,
 		winnerId STRING NULL,
-		status TEXT,  -- pending, ready, in_progress, completed,
+		status TEXT,  -- pending, in_progress, completed,
 		matchTime DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (tournamentId) REFERENCES Tournament(id)
 	);
@@ -98,6 +97,7 @@ export function createTournament(players: string[]): Tournament {
 	const tournament: Tournament = {
 		id: tournamentId,
 		status: 'scheduled',
+		state: 'tournament_launch',
 		players,
 		matches: [match1, match2],
 		createdAt: new Date(),
@@ -109,9 +109,10 @@ export function createTournament(players: string[]): Tournament {
 interface TournamentRow {
     id: string;
     status: 'scheduled' | 'in_progress' | 'completed';
-    players: string; // JSON string of player IDs
-    createdAt: string; // Date stored as string in the database
-    updatedAt: string; // Date stored as string in the database
+	state: 'tournament_launch' | 'final_prep' | 'final_end' | 'end_screen'; 
+    players: string; 
+    createdAt: string;
+    updatedAt: string;
 }
 
 interface MatchRow {
@@ -122,7 +123,7 @@ interface MatchRow {
     player1Score: number;
     player2Score: number;
     winnerId: string;
-    status: 'pending' | 'ready' | 'in_progress' | 'completed';
+    status: 'pending' | 'in_progress' | 'completed';
 	matchTime: string;
 }
 
@@ -133,6 +134,7 @@ export function getTournamentById(tournamentId: string): Tournament | null {
     return {
         id: row.id,
         status: row.status,
+		state: row.state,
         players: JSON.parse(row.players),
         matches: matches.map((m: MatchRow) => ({
             id: m.id,

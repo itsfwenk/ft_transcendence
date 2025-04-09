@@ -29,7 +29,7 @@ export async function launchMatch(matchId: string): Promise<Match | undefined> {
 	if (!match) {
 		throw new Error("Aucun match avec cet id.");
 	}
-	if (match.status !== 'ready') {
+	if (match.status !== 'in_progress') {
 		throw new Error("Match deja lance");
 	}
 	console.log(match);
@@ -39,12 +39,27 @@ export async function launchMatch(matchId: string): Promise<Match | undefined> {
 		throw new Error("La session de jeu n'a pas pu être créée.");
 	}
 	if (gameSessionId) {
-		const message = JSON.stringify({
-			gameSessionId
+		const socket1 = websocketClients.get(match.player1_Id);
+		const socket2 = websocketClients.get(match.player2_Id);
+		const message1 = JSON.stringify({
+			type: 'match_start',
+			payload: {
+				gameSessionId,
+				matchId: match.id,
+				opponentId: match.player2_Id
+			}
 		});
-		websocketClients.forEach((socket) => {
-			socket.send(message);
-		})
+		const message2 = JSON.stringify({
+			type: 'match_start',
+			payload: {
+				gameSessionId,
+				matchId: match.id,
+				opponentId: match.player1_Id
+			}
+		});
+		socket1?.send(message1);
+		socket2?.send(message2);
+
 	}
 	console.log(` la game session est: ${gameSessionId}`)
 	match.status = 'in_progress';
@@ -147,6 +162,20 @@ export function onMatchCompleted(tournamentId: string, matchId: string): void {
 		} else {
 			console.error("Finale non trouvee");
 		}
+	} else {
+		const winnerId = match.winner_Id;
+		if (!winnerId) {
+			console.error("Winner ID is undefined");
+			return;
+		}
+		const socket = websocketClients.get(winnerId);
+		socket?.send(JSON.stringify({
+			type: 'tournament_state_update',
+			payload: {
+				state: 'final_wait',
+				tournament
+			}
+		}));
 	}
 }
 
@@ -191,8 +220,14 @@ export async function handleMatchmakingMessage(
 			joinTournamentQueue(playerId);
 			const tournament = await attemptTournament();
 			if (tournament) {
-				//tournament.state = 'tournament_queue';
+				tournament.state = 'tournament_launch';
 				broadcastTournamentState(tournament);
+				setTimeout(() => {
+					const semiFinals = tournament.matches.filter(m => m.round === 1);
+					for (const match of semiFinals) {
+						launchMatch(match.id);
+					}
+				}, 5000);
 			}
 			break;
 		case 'semi_final_end':

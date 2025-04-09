@@ -97,7 +97,7 @@ export async function getUserDashboard(req: AuthenticatedRequest, reply: Fastify
 				user: {
 					userName: user.userName,
 					email: user.email,
-					status:user.status,
+					status: user.status,
 					avatarUrl: user.avatarUrl
 				},
 				stats: {

@@ -9,14 +9,16 @@
     }
 }
 
-10.32.6.3:8443 {
+localhost:8443, 10.32.6.1:8443 {
     root * /usr/share/caddy/frontend
     file_server
     encode gzip
-    tls internal
+    tls internal {
+        on_demand
+    }
 }
 
-api.10.32.6.3:8443 {
+api.localhost:8443 {
     reverse_proxy user:4001
     log {
         output file /var/log/caddy/errors.log {
@@ -30,7 +32,7 @@ api.10.32.6.3:8443 {
     header Access-Control-Allow-Headers "Content-Type, Authorization"
 }
 
-game.10.32.6.3:8443 {
+game.localhost:8443 {
     reverse_proxy game:4002
     log {
         output file /var/log/caddy/errors.log {
@@ -41,7 +43,7 @@ game.10.32.6.3:8443 {
     }
 }
 
-matchmaking.10.32.6.3:8443 {
+matchmaking.localhost:8443 {
     reverse_proxy matchmaking:4003
     log {
         output file /var/log/caddy/errors.log {

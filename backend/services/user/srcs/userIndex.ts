@@ -87,7 +87,7 @@ app.register(googleAuthRoutes, { prefix: '/user' });
 
 app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	console.log('User Service running on http://localhost:4001');
-	console.log(process.env.CORS_ORIGIN);
+	// console.log(process.env.CORS_ORIGIN);
 });
 
 app.get('/avatars/:filename', (request, reply) => {

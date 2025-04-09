@@ -23,7 +23,7 @@ export default function Home() {
 		const password = (document.getElementById('password') as HTMLInputElement).value
         try {
 
-			const response = await fetch('https://api.10.32.6.3.com/api-user/login', {
+          const response = await fetch('http://localhost:4000/api-user/login', {
 			  method: 'POST',
 			  credentials: 'include',
 			  headers: {

@@ -74,8 +74,8 @@ services:
   caddy:
     image: caddy:latest
     ports:
-      - "8080:80"
-      - "8443:8443"
+      - "0.0.0.0:8080:80"
+      - "0.0.0.0:8443:8443"
       # - "${FRONTEND_PORT}"
       # - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
       # - "${GAME_SERVICE_PORT}:${GAME_SERVICE_PORT}"

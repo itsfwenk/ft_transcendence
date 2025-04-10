@@ -1,19 +1,43 @@
 {
-    email fli@student.42.fr
-    log {
-        output file /var/log/caddy/access.log {
-            roll_size 10MiB
-            roll_keep 10
-            roll_keep_for 720h
-        }
-    }
+	email fli@student.42.fr
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 10MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+	}
 }
 
 :8443 {
-    root * /usr/share/caddy/frontend
-    file_server
-    encode gzip
-    tls internal {
-        on_demand
-    }
+	encode gzip
+	tls internal {
+		on_demand
+	}
+
+	log {
+		output file /var/log/caddy/errors.log {
+			roll_size 10MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+	}
+
+	root * /usr/share/caddy/frontend
+	file_server
+
+	handle_path /user/* {
+		reverse_proxy user:4001
+		header Access-Control-Allow-Origin *
+		header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+		header Access-Control-Allow-Headers "Content-Type, Authorization"
+	}
+
+	handle_path /game/* {
+		reverse_proxy game:4002
+	}
+
+	handle_path /matchmaking/* {
+		reverse_proxy matchmaking:4003
+	}
 }

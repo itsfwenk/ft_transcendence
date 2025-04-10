@@ -1,8 +1,12 @@
-import { updateTournamentUI } from "./pages/tournament.ts";
+import { updateTournamentUI } from "./pages/tournament";
 import { TournamentState } from "./types";
+import { Tournament } from "./types";
+
 
 let userSocket: WebSocket | null = null;
 let matchmakingSocket: WebSocket | null = null;
+export let currentTournamentState: TournamentState | null = null;
+export let currentTournamentData: Tournament | null = null;
 
 export function userWebSocket(userId: string): WebSocket {
 	const ws = new WebSocket(`ws://localhost:4000/api-user/ws?playerId=${userId}`);
@@ -65,14 +69,20 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 					}
 					break;
 				case 'tournament_state_update':
-					const state = msg.payload.state as TournamentState;
-					//const tournament = msg.payload.tournament;
-					updateTournamentUI(state);
+					const {state, tournament} = msg.payload;
+					const tournamentId2 = tournament.id;
+					history.pushState(null, '', `/tournament?tournamentId=${tournamentId2}`);
+					window.dispatchEvent(new PopStateEvent('popstate'));
+					currentTournamentState = state;
+					currentTournamentData = tournament;
 					break;
 				case 'match_start':
-					history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
+					const {gameSessionId} = msg.payload;
+					console.log("gameSessionId", gameSessionId);
+					history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
 					window.dispatchEvent(new PopStateEvent('popstate'));
 					break;
+					
 				default:
 					break;
 			}

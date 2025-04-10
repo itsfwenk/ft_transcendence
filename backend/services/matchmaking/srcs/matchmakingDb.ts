@@ -91,8 +91,8 @@ export function createTournament(players: string[]): Tournament {
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 	`);
 	
-	insertMatchStmt.run(match1.id, tournamentId, match1.round, match1.player1_Id, match1.player2_Id, 0, 0, null, 'scheduled');
-	insertMatchStmt.run(match2.id, tournamentId, match2.round, match2.player1_Id, match2.player2_Id, 0, 0, null, 'scheduled');
+	insertMatchStmt.run(match1.id, tournamentId, match1.round, match1.player1_Id, match1.player2_Id, 0, 0, null, 'pending');
+	insertMatchStmt.run(match2.id, tournamentId, match2.round, match2.player1_Id, match2.player2_Id, 0, 0, null, 'pending');
 	
 	const tournament: Tournament = {
 		id: tournamentId,

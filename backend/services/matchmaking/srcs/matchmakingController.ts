@@ -29,7 +29,8 @@ export async function launchMatch(matchId: string): Promise<Match | undefined> {
 	if (!match) {
 		throw new Error("Aucun match avec cet id.");
 	}
-	if (match.status !== 'in_progress') {
+	console.log("match.status", match.status);
+	if (match.status !== 'pending') {
 		throw new Error("Match deja lance");
 	}
 	console.log(match);
@@ -224,7 +225,9 @@ export async function handleMatchmakingMessage(
 				broadcastTournamentState(tournament);
 				setTimeout(() => {
 					const semiFinals = tournament.matches.filter(m => m.round === 1);
+					console.log("voici les demis finales", semiFinals);
 					for (const match of semiFinals) {
+						console.log("match qui va etre lance", match.id);
 						launchMatch(match.id);
 					}
 				}, 5000);

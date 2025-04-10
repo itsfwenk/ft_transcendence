@@ -7,7 +7,7 @@ export interface Match {
 	player1Score: number;
 	player2Score: number;
 	winner_Id?: string;
-	status: 'pending' | 'ready' | 'in_progress' | 'completed';
+	status: 'pending' | 'in_progress' | 'completed';
 	matchTime: Date;
 }
   

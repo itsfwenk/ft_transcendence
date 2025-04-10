@@ -1,5 +1,5 @@
 import { fetchUserProfile } from "./menu";
-import { matchmakingWebSocket, userWebSocket } from "../wsClient";
+import { matchmakingWebSocket } from "../wsClient";
 
 // src/pages/Home.ts
 export default function Home() {

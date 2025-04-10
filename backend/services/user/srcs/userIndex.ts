@@ -27,6 +27,13 @@ app.register(fastifyCookie, {
 // 	credentials: true, // Allow sending/receiving cookies
 //   });
 
+// app.register(cors, {
+// 	origin: '*',  // Allow all origins (adjust for production)
+// 	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+// 	allowedHeaders: ['Content-Type', 'Authorization'],
+// 	credentials: true, // Allow cookies or authorization headers to be sent
+//   });
+
 // Configurer JWT
 //app.register(jwt, { secret: 'supersecretkey' });
 
@@ -83,7 +90,20 @@ app.decorate("authenticate", async function (req: FastifyRequest, reply: Fastify
 
 // Enregistrer les routes utilisateur et google
 app.register(userRoutes, { prefix: '/user' });
+
 app.register(googleAuthRoutes, { prefix: '/user' });
+
+// app.all('*', (req, reply) => {
+// 	console.log("Received:", req.method, req.url);
+// 	reply.code(404).send({ msg: 'Route not found', path: req.url });
+// });
+
+// Debug hook
+app.addHook('onRequest', (req, reply, done) => {
+    console.log('Global request log:', req.method, req.url);
+    done();
+});
+
 
 app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	console.log('User Service running on http://localhost:4001');

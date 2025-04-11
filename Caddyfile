@@ -28,17 +28,28 @@
 
 	handle /user/* {
 		reverse_proxy user:4001
-		header Access-Control-Allow-Origin "https://10.32.6.3:8443"
+		@origin header Origin *
+		header @origin Access-Control-Allow-Origin {http.request.header.Origin}
 		header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
 		header Access-Control-Allow-Headers "Content-Type, Authorization"
         header Access-Control-Allow-Credentials "true"
 	}
 
-	handle_path /game/* {
+	handle /game/* {
 		reverse_proxy game:4002
+		@origin header Origin *
+		header @origin Access-Control-Allow-Origin {http.request.header.Origin}
+		header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+		header Access-Control-Allow-Headers "Content-Type, Authorization"
+        header Access-Control-Allow-Credentials "true"
 	}
 
-	handle_path /matchmaking/* {
+	handle /matchmaking/* {
 		reverse_proxy matchmaking:4003
+		@origin header Origin *
+		header @origin Access-Control-Allow-Origin {http.request.header.Origin}
+		header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+		header Access-Control-Allow-Headers "Content-Type, Authorization"
+        header Access-Control-Allow-Credentials "true"
 	}
 }

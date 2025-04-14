@@ -198,7 +198,9 @@ export function onMatchCompleted(tournamentId: string, matchId: string): void {
 	const semiDone = semiFinals.every(m => m.status === 'completed');
 	const final_match = tournament.matches.find(m => m.round === 2);
 	const finalDone = final_match?.status === 'completed';
+	console.log("final Done ? ", finalDone);
 	if (finalDone) {
+		console.log("final Done ? ", finalDone);
 		setPlayerState(winnerId, 'winner');
 		const tournamentWinnerSocket = websocketClients.get(winnerId);
 		tournamentWinnerSocket?.send(JSON.stringify({

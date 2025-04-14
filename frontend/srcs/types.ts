@@ -42,3 +42,5 @@ export type TournamentState =
   | 'tournament_loser_screen'
   | 'tournament_victory_screen'
   | 'loser_to_menu';
+
+ 

@@ -1,10 +1,12 @@
-import { updateTournamentUI } from "./pages/tournament";
+import { updatePlayerStateUI} from "./pages/tournament";
 import { TournamentState } from "./types";
 import { Tournament } from "./types";
 
 
 let userSocket: WebSocket | null = null;
 let matchmakingSocket: WebSocket | null = null;
+let currentPlayerState: string | null = null;
+
 export let currentTournamentState: TournamentState | null = null;
 export let currentTournamentData: Tournament | null = null;
 
@@ -75,6 +77,7 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 					window.dispatchEvent(new PopStateEvent('popstate'));
 					currentTournamentState = state;
 					currentTournamentData = tournament;
+					console.log("tournament state", currentTournamentState);
 					break;
 				case 'match_start':
 					const {gameSessionId} = msg.payload;
@@ -82,7 +85,13 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 					history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
 					window.dispatchEvent(new PopStateEvent('popstate'));
 					break;
-					
+				case 'player_state_update':
+					const {state: playerState, tournament: playerTournament} = msg.payload;
+					history.pushState(null, '', `/tournament?tournamentId=${playerTournament.id}`);
+					window.dispatchEvent(new PopStateEvent('popstate'));
+					console.log("player_state", playerState);
+					handlePlayerStateUpdate(playerState);
+					break;
 				default:
 					break;
 			}
@@ -106,7 +115,13 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 export function getMatchmakingSocket(): WebSocket | null {
 	return matchmakingSocket;
 }
-  
-  export function getUserSocket(): WebSocket | null {
+export function getUserSocket(): WebSocket | null {
 	return userSocket;
-  }
+}
+
+function handlePlayerStateUpdate(playerState: string) {
+	currentPlayerState = playerState;
+	console.log("Nouveau playerState =", currentPlayerState);
+	updatePlayerStateUI(currentPlayerState);
+}
+  

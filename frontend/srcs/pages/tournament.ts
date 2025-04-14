@@ -79,3 +79,47 @@ export function updateTournamentUI(state: TournamentState) {
 			break;
 	}
 }
+
+
+
+export function updatePlayerStateUI(state: string) {
+	const app = document.getElementById('app');
+	if (!app) return;
+  
+	switch (state) {
+		case 'eliminated':
+		  app.innerHTML = `
+			<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+			  <h2 class="text-2xl font-bold mb-4">Dommage, vous êtes éliminé !</h2>
+			  <p class="text-gray-600">Vous pourrez retenter votre chance la prochaine fois.</p>
+			</div>
+		  `;
+		  break;
+	  
+		case 'waiting_next_round':
+		  app.innerHTML = `
+			<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+			  <h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
+			  <p class="text-gray-600">En attente du prochain tour...</p>
+			</div>
+		  `;
+		  break;
+	  
+		case 'winner':
+		  app.innerHTML = `
+			<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+			  <h2 class="text-2xl font-bold mb-4">Bravo, vous avez gagné le tournoi !</h2>
+			  <p class="text-gray-600">Vous êtes le champion. Félicitations&nbsp;!</p>
+			</div>
+		  `;
+		  break;
+	  
+		default:
+		  app.innerHTML = `
+			<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+			  <h2 class="text-2xl font-bold mb-4">Votre état joueur : ${state}</h2>
+			  <p class="text-gray-600">En attente d'informations supplémentaires.</p>
+			</div>
+		  `;
+	  }
+  }

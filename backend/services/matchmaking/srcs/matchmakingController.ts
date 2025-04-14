@@ -9,10 +9,28 @@ export const queue1v1: string[] = [];
 export const queueTournament: string[] = [];
 export const tournamentReadiness: Map<string, Set<string>> = new Map();
 
+export type PlayerTournamentState =
+| 'in_queue'
+| 'eliminated'
+| 'waiting_next_round'
+|	'winner';
 
+const playerStates = new Map<string, PlayerTournamentState>();
+
+export function setPlayerState(playerId: string, state:PlayerTournamentState) {
+	playerStates.set(playerId, state);
+}
+
+export function getPlayerState(playerId: string) {
+	return playerStates.get(playerId);
+}
 
 //join 1v1 queue
 export async function joinQueue1v1(playerId: string) {
+	if (queue1v1.includes(playerId)) {
+		console.warn(`Le joueur ${playerId} est déjà dans la queue 1v1`);
+		return;
+	}
 	queue1v1.push(playerId);
 	console.log(queue1v1);
 	attemptMatch();
@@ -20,7 +38,12 @@ export async function joinQueue1v1(playerId: string) {
 
 //join tournament 1
 export async function joinTournamentQueue(playerId: string) {
+	if (queueTournament.includes(playerId)) {
+		console.warn(`Le joueur ${playerId} est déjà dans la queue du tournoi`);
+		return;
+	}
 	queueTournament.push(playerId);
+	setPlayerState(playerId, 'in_queue');
 	console.log("queueTournament:", queueTournament);
 }
 
@@ -162,17 +185,30 @@ export function onMatchCompleted(tournamentId: string, matchId: string): void {
 		console.error("loser_id not defined");
 		return;
 	}
+	setPlayerState(loserId, 'eliminated');
 	const losersocket = websocketClients.get(loserId);
 	losersocket?.send(JSON.stringify({
-		type: 'tournament_state_update',
+		type: 'player_state_update',
 		payload: {
-			state: 'tournament_loser_screen',
+			state: 'eliminated',
 			tournament
 		}
 	}));
 	const semiFinals = tournament.matches.filter(m => m.round === 1);
-	const allDone = semiFinals.every(m => m.status === 'completed');
-	if (allDone) {
+	const semiDone = semiFinals.every(m => m.status === 'completed');
+	const final_match = tournament.matches.find(m => m.round === 2);
+	const finalDone = final_match?.status === 'completed';
+	if (finalDone) {
+		setPlayerState(winnerId, 'winner');
+		const tournamentWinnerSocket = websocketClients.get(winnerId);
+		tournamentWinnerSocket?.send(JSON.stringify({
+			type: 'player_state_update',
+			payload: {
+				state: 'winner',
+				tournament
+			}
+		}))
+	} else if (semiDone) {
 		console.log(`[MM] Demi-finales terminées, lancement de la finale`);
 		scheduleFinal(tournament.id);
 		const updatedtournament = getTournamentById(tournamentId);
@@ -186,11 +222,12 @@ export function onMatchCompleted(tournamentId: string, matchId: string): void {
 			console.error("Finale non trouvee");
 		}
 	} else {
+		setPlayerState(winnerId, 'waiting_next_round')
 		const winnersocket = websocketClients.get(winnerId);
 		winnersocket?.send(JSON.stringify({
-			type: 'tournament_state_update',
+			type: 'player_state_update',
 			payload: {
-				state: 'final_wait',
+				state: 'waiting_next_round',
 				tournament
 			}
 		}));

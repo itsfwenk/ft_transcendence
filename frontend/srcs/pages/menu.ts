@@ -2,11 +2,12 @@
 
 export async function fetchUserProfile() {
 	try {
-	  const response = await fetch('http://localhost:4000/api-user/getProfile', {
-		method: 'GET',
-		credentials: 'include',
-		headers: {
-		  'Content-Type': 'application/json'
+			const baseUrl = window.location.origin;
+			const response = await fetch(`${baseUrl}/user/getProfile`, {
+			method: 'GET',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json'
 		}
 	  });
 	  if (!response.ok) {
@@ -45,8 +46,8 @@ export default function menu() {
         e.preventDefault();
         console.log("local button...");
 		try {
-
-			const response = await fetch('http://localhost:4000/api-game/start', {
+			const baseUrl = window.location.origin;
+			const response = await fetch(`${baseUrl}/game/start`, {
 			  method: 'POST',
 			});
 	
@@ -79,7 +80,8 @@ export default function menu() {
 		const currentPlayerId = userProfile.userId;
 		console.log("currentPlayerId:", currentPlayerId)
 		try {
-			const response = await fetch('http://localhost:4000/api-matchmaking/join', {
+			const baseUrl = window.location.origin;
+			const response = await fetch(`${baseUrl}/matchmaking/join`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

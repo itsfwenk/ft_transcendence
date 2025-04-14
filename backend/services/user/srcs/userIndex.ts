@@ -12,16 +12,28 @@ import cors from '@fastify/cors';
 
 import websocket from '@fastify/websocket';
 import { handleWebSocketConnection } from './WebsocketHandler.js';
+dotenv.config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 
 const app = Fastify();
 
-dotenv.config();
+// dotenv.config();
 
-app.register(fastifyCookie);
+app.register(fastifyCookie, {
+	secret: process.env.COOKIE_SECRET,
+	// hook: 'onRequest', // set to false to disable cookie parsing on all requests
+	// parseOptions: {}     // options for parsing cookies
+  });
 
 // app.register(cors, {
-// 	origin: 'http://localhost:4002', // Allow requests from port 4002
+// 	origin:  process.env.CORS_ORIGIN,
 // 	credentials: true, // Allow sending/receiving cookies
+//   });
+
+// app.register(cors, {
+// 	origin: '*',  // Allow all origins (adjust for production)
+// 	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+// 	allowedHeaders: ['Content-Type', 'Authorization'],
+// 	credentials: true, // Allow cookies or authorization headers to be sent
 //   });
 
 // Configurer JWT
@@ -31,10 +43,9 @@ app.register(jwt, {
 	secret: process.env.JWT_SECRET!,
 	cookie: {
 	  cookieName: 'authToken',
-	  signed: false,
+	  signed: true,
 	}
 });
-
 
 // Configurer Swagger
 app.register(swagger, {
@@ -63,24 +74,25 @@ app.decorate("authenticate", async function (req: FastifyRequest, reply: Fastify
   }
 });
 
-interface IsAdminRequest extends FastifyRequest {
-	user: { role: string };
-}
+// interface IsAdminRequest extends FastifyRequest {
+// 	user: { role: string };
+// }
 
-// Middleware pour verif admin et jwt
-app.decorate("isAdmin", async function (req: IsAdminRequest, reply: FastifyReply) {
-	try {
-	  await req.jwtVerify();
-	  if (req.user.role !== 'admin') {
-		reply.status(403).send({ error: "Permission denied" });
-	  }
-	} catch (err) {
-	  reply.status(401).send({ error: "Unauthorized" });
-	}
-});
+// // Middleware pour verif admin et jwt
+// app.decorate("isAdmin", async function (req: IsAdminRequest, reply: FastifyReply) {
+// 	try {
+// 	  await req.jwtVerify();
+// 	  if (req.user.role !== 'admin') {
+// 		reply.status(403).send({ error: "Permission denied" });
+// 	  }
+// 	} catch (err) {
+// 	  reply.status(401).send({ error: "Unauthorized" });
+// 	}
+// });
 
 // Enregistrer les routes utilisateur et google
 app.register(userRoutes, { prefix: '/user' });
+
 app.register(googleAuthRoutes, { prefix: '/user' });
 
 app.register(websocket);
@@ -91,8 +103,21 @@ app.register(async function (fastify) {
 	});
 });
 
+// app.all('*', (req, reply) => {
+// 	console.log("Received:", req.method, req.url);
+// 	reply.code(404).send({ msg: 'Route not found', path: req.url });
+// });
+
+// Debug hook
+app.addHook('onRequest', (req, reply, done) => {
+    console.log('Global request log:', req.method, req.url);
+    done();
+});
+
+
 app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	console.log('User Service running on http://localhost:4001');
+	// console.log(process.env.CORS_ORIGIN);
 });
 
 app.get('/avatars/:filename', (request, reply) => {

@@ -22,8 +22,9 @@ export default function Home() {
         const email = (document.getElementById('email') as HTMLInputElement).value
 		const password = (document.getElementById('password') as HTMLInputElement).value
         try {
-
-			const response = await fetch('http://localhost:4000/api-user/login', {
+          const baseUrl = window.location.origin;
+          console.log(`${baseUrl}/user/login`);
+          const response = await fetch(`${baseUrl}/user/login`, {
 			  method: 'POST',
 			  credentials: 'include',
 			  headers: {

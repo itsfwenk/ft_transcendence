@@ -150,27 +150,44 @@ export function onMatchCompleted(tournamentId: string, matchId: string): void {
 
 	const match = tournament.matches.find(m => m.id === matchId);
 	if (!match) return;
-
+	const p1 = match.player1_Id;
+	const p2 = match.player2_Id;
+	const winnerId = match.winner_Id;
+	if (!winnerId) {
+		console.error("Winner ID is undefined");
+		return;
+	}
+	const loserId = (p1 === winnerId) ? p2 : p1;
+	if (!loserId) {
+		console.error("loser_id not defined");
+		return;
+	}
+	const losersocket = websocketClients.get(loserId);
+	losersocket?.send(JSON.stringify({
+		type: 'tournament_state_update',
+		payload: {
+			state: 'tournament_loser_screen',
+			tournament
+		}
+	}));
 	const semiFinals = tournament.matches.filter(m => m.round === 1);
 	const allDone = semiFinals.every(m => m.status === 'completed');
-
 	if (allDone) {
 		console.log(`[MM] Demi-finales terminées, lancement de la finale`);
 		scheduleFinal(tournament.id);
-		const final_match_id = tournament.matches.find(m => m.round === 2);
-		if (final_match_id?.id) {
-			launchMatch(final_match_id.id);
+		const updatedtournament = getTournamentById(tournamentId);
+		if (!updatedtournament) return;
+		console.log("updated_tournament_with_final", updatedtournament);
+		const final_match = updatedtournament.matches.find(m => m.round === 2);
+		console.log("final_match", final_match);
+		if (final_match?.id) {
+			launchMatch(final_match.id);
 		} else {
 			console.error("Finale non trouvee");
 		}
 	} else {
-		const winnerId = match.winner_Id;
-		if (!winnerId) {
-			console.error("Winner ID is undefined");
-			return;
-		}
-		const socket = websocketClients.get(winnerId);
-		socket?.send(JSON.stringify({
+		const winnersocket = websocketClients.get(winnerId);
+		winnersocket?.send(JSON.stringify({
 			type: 'tournament_state_update',
 			payload: {
 				state: 'final_wait',

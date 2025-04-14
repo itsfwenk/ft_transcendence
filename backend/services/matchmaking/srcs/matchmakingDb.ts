@@ -211,7 +211,7 @@ export function scheduleFinal(tournamentId: string): void {
 		INSERT INTO TournamentMatch (id, tournamentId, round, player1_Id, player2_Id, player1Score, player2Score, status, matchTime)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 	`);
-	insertMatchStmt.run(finalMatchId, tournamentId, 2, winner1_Id, winner2_Id, 0, 0, 'scheduled');
+	insertMatchStmt.run(finalMatchId, tournamentId, 2, winner1_Id, winner2_Id, 0, 0, 'pending');
 	
 	const updateTournamentStmt = db.prepare(`
 		UPDATE Tournament

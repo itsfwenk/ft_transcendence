@@ -26,6 +26,7 @@ export default function Tournament_mgt() {
         </div>
       `;
 	if (currentTournamentState !== null) {
+		console.log("currentState", currentTournamentState);
 		updateTournamentUI(currentTournamentState);
 	}
     }

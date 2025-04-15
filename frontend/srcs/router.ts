@@ -3,6 +3,7 @@ import Profile from './pages/profile';
 import Menu from './pages/menu';
 import Game from './pages/game';
 import Queue from './pages/queue';
+import Local from './pages/local';
 
 // Définir vos routes sous forme d'un objet
 const routes: { [key: string]: () => void } = {
@@ -10,6 +11,7 @@ const routes: { [key: string]: () => void } = {
   '/profile': Profile,
   '/menu': Menu,
   '/game': Game,
+  '/local': Local,
   '/queue': Queue,
 };
 

@@ -197,4 +197,4 @@ export function initGame(){
   loop()
 }
 
-initGame()
+// initGame()

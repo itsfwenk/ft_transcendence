@@ -41,28 +41,37 @@ export default function menu() {
 
 	
 		
-    const playLocalButton = document.getElementById('localBtn') as HTMLFormElement;
-    	playLocalButton.addEventListener('click', async(e) => {
-        e.preventDefault();
-        console.log("local button...");
-		try {
-			const baseUrl = window.location.origin;
-			const response = await fetch(`${baseUrl}/game/start`, {
-			  method: 'POST',
-			});
+    // const playLocalButton = document.getElementById('localBtn') as HTMLFormElement;
+    // 	playLocalButton.addEventListener('click', async(e) => {
+    //     e.preventDefault();
+    //     console.log("local button...");
+	// 	try {
+	// 		const baseUrl = window.location.origin;
+	// 		const response = await fetch(`${baseUrl}/game/start`, {
+	// 		  method: 'POST',
+	// 		});
 	
-			if (!response.ok) {
-			  throw new Error(`Erreur lors du lancement de la page: ${response.statusText}`);
-			}
+	// 		if (!response.ok) {
+	// 		  throw new Error(`Erreur lors du lancement de la page: ${response.statusText}`);
+	// 		}
 	
-			const data = await response.json();
-			console.log("Réponse de login:", data);
-			history.pushState(null, '', '/game');
-			window.dispatchEvent(new PopStateEvent('popstate'));
-		  } catch (error) {
-			console.error("Erreur de login:", error);
-		  }
-	});
+	// 		const data = await response.json();
+	// 		console.log("Réponse de login:", data);
+	// 		history.pushState(null, '', '/game');
+	// 		window.dispatchEvent(new PopStateEvent('popstate'));
+	// 	  } catch (error) {
+	// 		console.error("Erreur de login:", error);
+	// 	  }
+	// });
+
+	const playLocalButton = document.getElementById('localBtn') as HTMLButtonElement; // Changed to HTMLButtonElement
+        playLocalButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log("local button clicked, navigating to /local");
+			console.log("before history pushState");
+            history.pushState(null, '', '/local');
+            window.dispatchEvent(new PopStateEvent('popstate'));
+        });
 
 	const playOnlineButton = document.getElementById('onlineBtn') as HTMLFormElement;
 

@@ -76,13 +76,11 @@ export function saveGame(player1_id: string, player2_id: string, matchId?: strin
 		VALUES (?, ?, ?)
 	`);
 	const result = stmt.run(player1_id, player2_id, matchId || null);
-	// return { gameId: result.lastInsertRowid, player1_id, player2_id, score1: 0, score2: 0, status: 'ongoing' } as Game;
 	const stmt2 = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
 	return stmt2.get(result.lastInsertRowid) as Game;
 }
 
 export function getGamebyId(gameId: number): Game {
-	//return games.find(g => g.gameId === gameId);
 	const stmt = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
 	return stmt.get(gameId) as Game;
 }
@@ -133,14 +131,3 @@ async function updateBallPositionInDb(gameId: number, ball: Ball) {
 	}
 }
 
-// export async function updateBallPositionsInDb() {
-// 	const games = await db.prepare('SELECT * FROM games WHERE status = "ongoing"').all();
-// 	await db.all()
-// 	// for (const row of stmt.iterate()) {
-// 	// 	const game = row as Game;
-// 	// 	if (game.status === 'ongoing') {
-// 	// 		game.ball.x += game.ball.dx;
-// 	// 		game.ball.y += game.ball.dy;
-// 	// 	}
-// 	// }
-// }

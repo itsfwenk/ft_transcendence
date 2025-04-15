@@ -209,7 +209,7 @@ export function onMatchCompleted(tournamentId: string, matchId: string): void {
 				state: 'winner',
 				tournament
 			}
-		}))
+		}));
 	} else if (semiDone) {
 		console.log(`[MM] Demi-finales terminées, lancement de la finale`);
 		scheduleFinal(tournament.id);
@@ -294,7 +294,6 @@ export async function handleMatchmakingMessage(
 		
 		case 'leave_tournament':
 			console.log(`[MM] ${playerId} quitte la file tournoi`);
-			// tu peux faire queueTournament = queueTournament.filter(p => p !== playerId);
 			break;
   
 		default:

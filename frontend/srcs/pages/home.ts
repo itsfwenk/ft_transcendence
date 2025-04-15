@@ -1,7 +1,6 @@
 import { fetchUserProfile } from "./menu";
 import { matchmakingWebSocket } from "../wsClient";
 
-// src/pages/Home.ts
 export default function Home() {
     const app = document.getElementById('app');
 	console.log("Module Home recharge");
@@ -45,7 +44,6 @@ export default function Home() {
 				//recup du userId
 				const profile = await fetchUserProfile();
 				if (profile && profile.userId) {
-					//userWebSocket(profile.userId);
 					matchmakingWebSocket(profile.userId);
 				} else {
 					console.error ('Impossible de recuperer le profile du user');

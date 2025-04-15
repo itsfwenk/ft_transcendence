@@ -1,7 +1,7 @@
 all: up
 
 up: build
-	docker compose -f docker-compose.yml up -d
+	docker compose -f docker-compose.yml up
 
 down:
 	docker compose -f docker-compose.yml down
@@ -14,6 +14,9 @@ start:
 
 build:
 	docker compose -f docker-compose.yml build
+
+production:
+	docker compose -f docker-compose.production.yml up --build
 
 install-deps:
 	@echo "Installation des dépendances pour user..."

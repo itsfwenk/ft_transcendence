@@ -1,9 +1,11 @@
 import fastify, { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest, FastifySchema } from 'fastify';
-import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount, updateRole, updateStatus, getOnlineUsers, logoutUser } from './userController.js';
+import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount, updateRole, updateStatus, getOnlineUsers, logoutUser, checkUserConnectionStatus } from './userController.js';
 import jwt from '@fastify/jwt'
 import multipart from '@fastify/multipart';
 import { deleteAvatar, getAvatar, uplpoadAvatar } from './avatarController.js';
 import { addFriendController, checkFriendshipController, getFriendsController, getOnlineFriendsController, removeFriendController } from './friendController.js';
+import { getUserDashboard } from './userDashboardController.js';
+import { updateUserGameId } from './userDb.js';
 
 
 const User = {
@@ -174,6 +176,30 @@ export default async function userRoutes(fastify: any) {
 	handler: updateStatus
   });
 
+  fastify.get('/status/userId', {
+	schema: {
+		params: {
+			type:'object',
+			properties: {
+				userId: { type: 'string' }
+			},
+			required: ['userId']
+		},
+		response: {
+			200: {
+				type: 'object',
+				properties: {
+					userId: { type: 'string' },
+					userName: { type: 'string' },
+					isConnected: { type: 'boolean' },
+					status: { type: 'string' }
+				}
+			}
+		}
+	},
+	handler: checkUserConnectionStatus
+  });
+
   fastify.get('/online', {
 	preHandler: [fastify.authenticate],
 	handler: getOnlineUsers
@@ -249,43 +275,43 @@ export default async function userRoutes(fastify: any) {
     handler: getOnlineFriendsController
   });
 
-  fastify.post('/friends/:friendId', {
-    preHandler: [fastify.authenticate],
-    schema: {
-      headers: {
-        type: 'object',
-        properties: {
-          Authorization: { type: 'string', description: 'Bearer <token>' }
-        },
-        required: ['Authorization']
-      },
-      params: {
-        type: 'object',
-        properties: {
-          friendId: { type: 'string' }
-        },
-        required: ['friendId']
-      },
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' },
-            friend: {
-              type: 'object',
-              properties: {
-                userId: { type: 'string' },
-                userName: { type: 'string' },
-                status: { type: 'string' },
-                avatarUrl: { type: 'string' }
-              }
-            }
-          }
-        }
-      }
-    },
-    handler: addFriendController
+  fastify.post('/friends/:userName', {
+	preHandler: [fastify.authenticate],
+	schema: {
+	  headers: {
+		type: 'object',
+		properties: {
+		  Authorization: { type: 'string', description: 'Bearer <token>' }
+		},
+		required: ['Authorization']
+	  },
+	  params: {
+		type: 'object',
+		properties: {
+		  userName: { type: 'string' }
+		},
+		required: ['userName']
+	  },
+	  response: {
+		200: {
+		  type: 'object',
+		  properties: {
+			success: { type: 'boolean' },
+			message: { type: 'string' },
+			friend: {
+			  type: 'object',
+			  properties: {
+				userId: { type: 'string' },
+				userName: { type: 'string' },
+				status: { type: 'string' },
+				avatarUrl: { type: 'string' }
+			  }
+			}
+		  }
+		}
+	  }
+	},
+	handler: addFriendController
   });
 
   fastify.delete('/friends/:friendId', {
@@ -347,9 +373,11 @@ export default async function userRoutes(fastify: any) {
     },
     handler: checkFriendshipController
   });
+  
   interface JwtPayload {
 	userId: string;
   }
+
   fastify.get('/getProfile', async (req:FastifyRequest, reply:FastifyReply) => {
 	try {
 	  const payload = await req.jwtVerify<JwtPayload>();
@@ -361,4 +389,101 @@ export default async function userRoutes(fastify: any) {
 	}
   });
 
+
+  fastify.patch('/:userId', {
+    schema: {
+      params: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string' },
+        },
+        required: ['userId'],
+      },
+      body: {
+        type: 'object',
+        properties: {
+          gameId: { type: 'string' },
+        },
+        required: ['gameId'],
+      },
+    },
+  }, async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { userId: userId } = req.params as { userId: string };
+      const { gameId } = req.body as { gameId: string };
+  
+      const userUpdate = await updateUserGameId(userId, gameId);
+  
+      return reply.send({ success: true, user: userUpdate });
+    } catch (error) {
+      console.error("Error updating user game ID:", error);
+      return reply.status(500).send({ error: "Internal Server Error" });
+    }
+  });
+
+  fastify.get('/dashboard', {
+	  preHandler: [fastify.authenticate],
+	  schema: {
+	  headers: {
+		  type: 'object',
+		  properties: {
+		  Authorization: { type: 'string', description: 'Bearer <token>' }
+		  },
+		  required: ['Authorization']
+	  },
+	  response: {
+		  200: {
+		  type: 'object',
+		  properties: {
+			  user: {
+			  type: 'object',
+			  properties: {
+				  userId: { type: 'string' },
+				  userName: { type: 'string' },
+				  email: { type: 'string' },
+				  role: { type: 'string' },
+				  status: { type: 'string' },
+				  avatarUrl: { type: 'string' }
+			  }
+			  },
+			  stats: {
+			  type: 'object',
+			  properties: {
+				  totalGames: { type: 'number' },
+				  wins: { type: 'number' },
+				  losses: { type: 'number' },
+				  winRate: { type: 'number' }
+			  }
+			  },
+			  matchHistory: {
+			  type: 'array',
+			  items: {
+				  type: 'object',
+				  properties: {
+				  gameId: { type: 'string' },
+				  gameType: { type: 'string' },
+				  opponent: {
+					  type: 'object',
+					  properties: {
+					  userId: { type: 'string' },
+					  userName: { type: 'string' }
+					  }
+				  },
+				  result: { type: 'string', enum: ['win', 'loss'] },
+				  score: {
+					  type: 'object',
+					  properties: {
+					  player: { type: 'number' },
+					  opponent: { type: 'number' }
+					  }
+				  },
+				  date: { type: 'string' }
+				  }
+			  }
+			  }
+		  }
+		  }
+	  }
+	  }
+  }, getUserDashboard);
 }

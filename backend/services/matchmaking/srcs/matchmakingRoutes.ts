@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply, FastifySchema } from 'fastify';
 import { queue1v1, queueTournament, attemptTournament, launchMatch, joinQueue1v1, joinTournamentQueue } from './matchmakingController.js';
-import {  updateMatch, getMatchbyId, getTournamentById, scheduleFinal, finishTournament} from './matchmakingDb.js'
+import {  updateMatch, getMatchbyId, getTournamentById, scheduleFinal, finishTournament, getMatchHistoryByUserId} from './matchmakingDb.js'
 import { request } from 'axios';
 import { WebSocket } from "ws";
 //import WebSocket from '@fastify/websocket';
@@ -66,6 +66,18 @@ const queueStatusSchema: FastifySchema = {
 	  additionalProperties: false
 	},
 };
+
+// YOYO
+const userIdParamSchema: FastifySchema = {
+	params: {
+		type: 'object',
+		properties: {
+			userId: { type: 'string' }
+		},
+		required: ['userId']
+	}
+};
+// END - YOYO
 
 export default async function matchmakingRoutes(fastify: any) {
 	fastify.post('/join', { schema: playerIdSchema }, async (request:FastifyRequest, reply:FastifyReply) => {
@@ -136,6 +148,19 @@ export default async function matchmakingRoutes(fastify: any) {
 		finishTournament(tournamentId);
   		reply.send({ success: true});
 	})
+// YOYO
+	fastify.get('/history/:userId', { schema: userIdParamSchema }, async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
+		const { userId } = req.params;
+
+		try {
+			const matchHistory = getMatchHistoryByUserId(userId);
+			reply.send(matchHistory);
+		} catch (error) {
+			console.error('Error fetching match history:', error);
+			reply.status(500).send({ error: 'Failed to fetch match history '});
+		}
+	});
+// END - YOYO
 	fastify.get('/ws', { websocket: true }, (connection: WebSocket, request: FastifyRequest) => {
 		const { playerId } = request.query as { playerId?: string };
 		console.log('Query params:', request.query);

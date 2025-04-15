@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y sqlite3 curl net-tools
+RUN apt-get update && apt-get install -y sqlite3 curl net-tools --fix-missing
 
 RUN mkdir -p /app/public/avatars
 

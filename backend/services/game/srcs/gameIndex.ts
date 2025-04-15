@@ -1,12 +1,21 @@
-import Fastify from 'fastify';
+import Fastify, { FastifyInstance } from 'fastify';
 import gameRoutes from './gameRoutes.js';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import fastifyWebsocket from "@fastify/websocket";
-import { endGameInDb, getGamebyId, saveGame, updateGameScore } from './gameDb.js'
-import Database from 'better-sqlite3';
+import { updateGames } from './gameController.js'
+import fastifyCookie from '@fastify/cookie';
+import cors from '@fastify/cors';
 
-const app = Fastify();
+// import Database from 'better-sqlite3';
+
+const app: FastifyInstance = Fastify( {
+	logger: true,
+});
+
+const activeUsers = new Map<number, WebSocket>(); // userId -> WebSocket
+export default activeUsers;
+
 
 app.register(swagger, {
 	swagger: {
@@ -20,6 +29,15 @@ app.register(swagger, {
 
 app.register(fastifyWebsocket);
 
+app.register(fastifyCookie);
+
+// app.register(cors, {
+// 	origin: 'http://localhost:4001',
+// 	credentials: true,
+//   });
+
+
+
 app.register(swaggerUI, {
   routePrefix: '/docs',
   staticCSP: true
@@ -28,11 +46,7 @@ app.register(swaggerUI, {
 //enregistrer les routes
 app.register(gameRoutes, { prefix: '/game' });
 
-let intervalId: ReturnType<typeof setInterval> = setInterval(() => {
-
-
-
-}, 16);
+let intervalId: ReturnType<typeof setInterval> = setInterval(updateGames, 16);
 
 process.on("SIGINT", () => {
 	console.log("Shutting down server...");

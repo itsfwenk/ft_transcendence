@@ -1,19 +1,19 @@
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      target: ${FRONTEND_TARGET}
-    ports:
-      - "${FRONTEND_PORT}"
-      - "5173:5173" # dev
-    networks:
-      - app-network
-    volumes: 
-      - ${FRONTEND_VOLUMES}
-    working_dir: ${FRONTEND_WORKDIR}
-    restart: always
-    env_file: .env.development
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #     target: ${FRONTEND_TARGET}
+  #   ports:
+  #     - "${FRONTEND_PORT}"
+  #     - "5173:5173" # dev
+  #   networks:
+  #     - app-network
+  #   volumes: 
+  #     - ${FRONTEND_VOLUMES}
+  #   working_dir: ${FRONTEND_WORKDIR}
+  #   restart: always
+  #   env_file: .env.production
 
   user:
     build: 
@@ -27,7 +27,7 @@ services:
     restart: always
     networks:
       - app-network
-    env_file: .env.development
+    env_file: .env.production
 
   game:
     build:
@@ -41,7 +41,7 @@ services:
     restart: always
     networks:
       - app-network
-    env_file: .env.development
+    env_file: .env.production
 
   matchmaking:
     build:
@@ -55,7 +55,7 @@ services:
     restart: always
     networks:
     - app-network
-    env_file: .env.development
+    env_file: .env.production
 
   # gateway:
   #   build:
@@ -70,12 +70,12 @@ services:
   #     - matchmaking
   #   networks:
   #     - app-network
-  #   env_file: .env.development
+  #   env_file: .env.production
   caddy:
-    image: caddy:2
+    image: caddy:latest
     ports:
-      - "8080:80"
-      - "8443:443"
+      - "0.0.0.0:8080:80"
+      - "0.0.0.0:8443:8443"
       # - "${FRONTEND_PORT}"
       # - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
       # - "${GAME_SERVICE_PORT}:${GAME_SERVICE_PORT}"
@@ -84,8 +84,14 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data #Persist certificates
       - caddy_config:/config #Persist caddy config
+      - ./frontend/dist:/usr/share/caddy/frontend:ro
     networks:
       - app-network
+    depends_on:
+      - user
+      - game
+      - matchmaking
+      # - frontend
     restart: always
 
 volumes:

@@ -4,22 +4,23 @@ import { getMatchmakingSocket } from "../wsClient";
 
 export async function fetchUserProfile() {
 	try {
-	  const response = await fetch('http://localhost:4000/api-user/getProfile', {
+		const baseUrl = window.location.origin;
+		const response = await fetch(`${baseUrl}/user/getProfile`, {
 		method: 'GET',
 		credentials: 'include',
 		headers: {
-		  'Content-Type': 'application/json'
+			'Content-Type': 'application/json'
 		}
-	  });
-	  if (!response.ok) {
-		throw new Error(`Erreur lors de la récupération du profil: ${response.statusText}`);
-	  }
-	  const data = await response.json();
-	  console.log("Profil utilisateur:", data);
-	  return data;
+		});
+		if (!response.ok) {
+			throw new Error(`Erreur lors de la récupération du profil: ${response.statusText}`);
+		}
+		const data = await response.json();
+		console.log("Profil utilisateur:", data);
+		return data;
 	} catch (error) {
-	  console.error("Erreur de récupération du profil:", error);
-	  return null;
+		console.error("Erreur de récupération du profil:", error);
+		return null;
 	}
 }
 
@@ -47,8 +48,8 @@ export default function menu() {
         e.preventDefault();
         console.log("local button...");
 		try {
-
-			const response = await fetch('http://localhost:4000/api-game/start', {
+			const baseUrl = window.location.origin;
+			const response = await fetch(`${baseUrl}/game/start`, {
 			  method: 'POST',
 			});
 	

@@ -8,6 +8,10 @@ import loginSuccess from './pages/googleSuccess';
 import menu from './pages/menu';
 import mode from './pages/mode';
 
+import Queuetournament from './pages/queue_tournament';
+import Tournament_mgt from './pages/tournament';
+
+// Définir vos routes sous forme d'un objet
 const routes: { [key: string]: () => void } = {
   '/': login,
   '/profile': Profile,
@@ -15,6 +19,8 @@ const routes: { [key: string]: () => void } = {
   '/mode': mode,
   '/game': Game,
   '/queue': Queue,
+  '/queue_tournament': Queuetournament,
+  '/tournament': Tournament_mgt,
   '/create_account': createAccount,
   '/login_error': loginError,
   '/login_success': loginSuccess,

@@ -1,0 +1,55 @@
+{
+	email fli@student.42.fr
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 10MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+	}
+}
+
+:8443 {
+	encode gzip
+	tls internal {
+		on_demand
+	}
+
+	log {
+		output file /var/log/caddy/errors.log {
+			roll_size 10MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+	}
+
+	root * /usr/share/caddy/frontend
+	file_server
+
+	handle /user/* {
+		reverse_proxy user:4001
+		@origin header Origin *
+		header @origin Access-Control-Allow-Origin {http.request.header.Origin}
+		header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+		header Access-Control-Allow-Headers "Content-Type, Authorization"
+        header Access-Control-Allow-Credentials "true"
+	}
+
+	handle /game/* {
+		reverse_proxy game:4002
+		@origin header Origin *
+		header @origin Access-Control-Allow-Origin {http.request.header.Origin}
+		header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+		header Access-Control-Allow-Headers "Content-Type, Authorization"
+        header Access-Control-Allow-Credentials "true"
+	}
+
+	handle /matchmaking/* {
+		reverse_proxy matchmaking:4003
+		@origin header Origin *
+		header @origin Access-Control-Allow-Origin {http.request.header.Origin}
+		header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+		header Access-Control-Allow-Headers "Content-Type, Authorization"
+        header Access-Control-Allow-Credentials "true"
+	}
+}

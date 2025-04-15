@@ -1,7 +1,6 @@
 import Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 
-//connexion a la database game
 const db = new Database('/app/db/matchmaking.db');
 
 export interface Match {
@@ -12,14 +11,15 @@ export interface Match {
 	player1Score: number;
 	player2Score: number;
 	winner_Id?: string;
-	status: 'scheduled' | 'in_progress' | 'completed';
+	status: 'pending' | 'in_progress' | 'completed';
 	matchTime: Date;
 }
   
 export interface Tournament {
 	id: string;
-	status: 'scheduled' | 'ongoing' | 'completed';
-	players: string[]; // Liste des IDs des joueurs
+	status: 'scheduled' | 'in_progress' | 'completed';
+	state: 'tournament_launch' | 'final_prep' | 'final_end' | 'end_screen';
+	players: string[];
 	matches: Match[];
 	createdAt: Date;
 	updatedAt: Date;
@@ -45,7 +45,7 @@ db.exec(`
 		player1Score INTEGER,
 		player2Score INTEGER,
 		winnerId STRING NULL,
-		status TEXT,  -- scheduled, in_progress, completed,
+		status TEXT,  -- pending, in_progress, completed,
 		matchTime DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (tournamentId) REFERENCES Tournament(id)
 	);
@@ -72,7 +72,7 @@ export function createTournament(players: string[]): Tournament {
 		player2_Id: players[1],
 		player1Score: 0,
 		player2Score: 0,
-		status: 'scheduled',
+		status: 'pending',
 		matchTime: new Date()
 	};
 	const match2: Match = {
@@ -82,7 +82,7 @@ export function createTournament(players: string[]): Tournament {
 		player2_Id: players[3],
 		player1Score: 0,
 		player2Score: 0,
-		status: 'scheduled',
+		status: 'pending',
 		matchTime: new Date()
 	};
 
@@ -91,12 +91,13 @@ export function createTournament(players: string[]): Tournament {
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 	`);
 	
-	insertMatchStmt.run(match1.id, tournamentId, match1.round, match1.player1_Id, match1.player2_Id, 0, 0, null, 'scheduled');
-	insertMatchStmt.run(match2.id, tournamentId, match2.round, match2.player1_Id, match2.player2_Id, 0, 0, null, 'scheduled');
+	insertMatchStmt.run(match1.id, tournamentId, match1.round, match1.player1_Id, match1.player2_Id, 0, 0, null, 'pending');
+	insertMatchStmt.run(match2.id, tournamentId, match2.round, match2.player1_Id, match2.player2_Id, 0, 0, null, 'pending');
 	
 	const tournament: Tournament = {
 		id: tournamentId,
 		status: 'scheduled',
+		state: 'tournament_launch',
 		players,
 		matches: [match1, match2],
 		createdAt: new Date(),
@@ -107,10 +108,11 @@ export function createTournament(players: string[]): Tournament {
 
 interface TournamentRow {
     id: string;
-    status: 'scheduled' | 'ongoing' | 'completed';
-    players: string; // JSON string of player IDs
-    createdAt: string; // Date stored as string in the database
-    updatedAt: string; // Date stored as string in the database
+    status: 'scheduled' | 'in_progress' | 'completed';
+	state: 'tournament_launch' | 'final_prep' | 'final_end' | 'end_screen'; 
+    players: string; 
+    createdAt: string;
+    updatedAt: string;
 }
 
 interface MatchRow {
@@ -121,7 +123,7 @@ interface MatchRow {
     player1Score: number;
     player2Score: number;
     winnerId: string;
-    status: 'scheduled' | 'in_progress' | 'completed';
+    status: 'pending' | 'in_progress' | 'completed';
 	matchTime: string;
 }
 
@@ -132,6 +134,7 @@ export function getTournamentById(tournamentId: string): Tournament | null {
     return {
         id: row.id,
         status: row.status,
+		state: row.state,
         players: JSON.parse(row.players),
         matches: matches.map((m: MatchRow) => ({
             id: m.id,
@@ -208,7 +211,7 @@ export function scheduleFinal(tournamentId: string): void {
 		INSERT INTO TournamentMatch (id, tournamentId, round, player1_Id, player2_Id, player1Score, player2Score, status, matchTime)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 	`);
-	insertMatchStmt.run(finalMatchId, tournamentId, 2, winner1_Id, winner2_Id, 0, 0, 'scheduled');
+	insertMatchStmt.run(finalMatchId, tournamentId, 2, winner1_Id, winner2_Id, 0, 0, 'pending');
 	
 	const updateTournamentStmt = db.prepare(`
 		UPDATE Tournament

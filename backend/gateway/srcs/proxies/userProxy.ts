@@ -5,6 +5,6 @@ export default async function userProxy(fastify:FastifyInstance) {
 	fastify.register(fastifyHttpProxy, {
 		upstream: 'http://user:4001',
 		prefix: '/api-user',
-		rewritePrefix: '/user',
+		rewritePrefix: '/user'
 	})
 };

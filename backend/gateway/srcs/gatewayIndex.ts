@@ -1,12 +1,17 @@
 import Fastify from 'fastify';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
-import userProxy from './userProxy.js';
-import gameProxy from './gameProxy.js';
-import matchmakingProxy from './matchmakingProxy.js';
+import userProxy from './proxies/userProxy.js';
+import gameProxy from './proxies/gameProxy.js';
+import matchmakingProxy from './proxies/matchmakingProxy.js';
 import cors from '@fastify/cors';
+import fastifyWebsocket from '@fastify/websocket';
+import { createProxyServer } from 'http-proxy';
+
+
 
 const app = Fastify();
+
 
 //Configurer Swagger UI
 app.register(swagger,{
@@ -25,6 +30,13 @@ app.register(cors, {
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 	allowedHeaders: ['Content-Type', 'Authorization'],
 	
+});
+
+app.addHook('onRequest', (req, reply, done) => {
+	if (req.headers.upgrade === 'websocket') {
+		console.log('[Gateway] Requête WS vers :', req.url);
+	}
+	done();
 });
 
 app.register(swaggerUI, {

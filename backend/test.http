@@ -21,7 +21,7 @@ Content-Type: application/json
 
 ### Accéder au profil (JWT requis)
 GET http://localhost:4001/user/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmYjBkNTA2Yy0wMTViLTRhODYtYmUyNS1iZmVhMjAxMTQyNjUiLCJpYXQiOjE3NDI4MjY3NTksImV4cCI6MTc0MjkxMzE1OX0.YqGhjB98o_NoipX_rfg2kadOnPMd7hmw6m9D2EVP5WA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkMWFkNjM2OC0zMGEzLTQ0NGYtOWM5ZC1lMmI3Zjk2NmE2NmEiLCJpYXQiOjE3NDQ3MTY5NzMsImV4cCI6MTc0NDgwMzM3M30.eVAFcvqJSGu0EtHpgptI5HMrgB61jv7TViKv8ntOdyM
 
 ### 🔍 Voir un utilisateur
 GET http://localhost:4001/user/c0653c47-b385-4af6-af01-d14f5a1b9931

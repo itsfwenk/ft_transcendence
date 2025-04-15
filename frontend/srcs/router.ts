@@ -1,16 +1,18 @@
 import Profile from './pages/profile';
-import Menu from './pages/menu';
 import Game from './pages/game';
 import Queue from './pages/queue';
 import login from './pages/login';
 import createAccount from './pages/createAccount';
 import loginError from './pages/googleError';
 import loginSuccess from './pages/googleSuccess';
+import menu from './pages/menu';
+import mode from './pages/mode';
 
 const routes: { [key: string]: () => void } = {
   '/': login,
   '/profile': Profile,
-  '/menu': Menu,
+  '/menu': menu,
+  '/mode': mode,
   '/game': Game,
   '/queue': Queue,
   '/create_account': createAccount,

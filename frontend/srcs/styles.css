@@ -15,6 +15,8 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inria+Sans:wght@300;400;700&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Jockey+One&display=swap');
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -84,9 +86,9 @@ button {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
+  /* font-size: 1em; */
+  /* font-weight: 500; */
+  /* font-family: inherit; */
   /* background-color: #1a1a1a; */
   cursor: pointer;
   transition: border-color 0.25s;
@@ -103,6 +105,12 @@ button:focus-visible {
 
 .font-inria {
 	font-family: 'Inria Sans', sans-serif !important;
+}
+
+.font-jockey {
+	font-family: 'Jockey One', sans-serif;
+	font-weight: 400;
+	font-style: bold;
 }
 
 /* @media (prefers-color-scheme: light) {

@@ -207,7 +207,6 @@ interface LogoutUserRequest extends FastifyRequest {
 }
 
 export async function logoutUser(req: LogoutUserRequest, reply: FastifyReply) {
-	// delete cookies plus tard (a voir)
 	try {
 		console.log(req.user.userId);
 		updateUserStatus(req.user.userId, 'offline');

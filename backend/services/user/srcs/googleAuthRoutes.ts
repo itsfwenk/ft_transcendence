@@ -16,6 +16,8 @@ declare module 'fastify' {
   };
 
 export default async function googleAuthRoutes(fastify: FastifyInstance) {
+	// const baseUrl = window.location.origin;
+	// console.log(`${baseUrl}/user/auth/google/callback`);
 	fastify.register(oauthPlugin, {
 		name: 'googleOAuth2',
 		credentials: {
@@ -26,7 +28,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
 			auth: oauthPlugin.GOOGLE_CONFIGURATION
 		},
 		startRedirectPath: '/auth/google',
-		callbackUri: 'http://localhost:4001/user/auth/google/callback',
+		callbackUri: 'http://localhost:4000/api-user/auth/google/callback',
 		scope: ['profile', 'email']
 	});
 
@@ -120,7 +122,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
 		  });
 		});
 
-		fastify.get('/login-success', (request, reply) => {
+		fastify.get('/login_success', (request, reply) => {
 			const { token, new: isNewUser } = request.query as any;
 			reply.type('text/html').send(`
 			  <html>
@@ -139,7 +141,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
 			`);
 		  });
 		
-		  fastify.get('/login-error', (request, reply) => {
+		  fastify.get('/login_error', (request, reply) => {
 			reply.type('text/html').send(`
 			  <html>
 				<body>

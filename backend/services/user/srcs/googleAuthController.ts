@@ -22,7 +22,7 @@ export async function handlerGoogleCallback(this: GoogleOAuthContext, req: Fasti
 		
 		if (!accessToken) {
 		  console.error("Impossible de trouver l'access_token dans la réponse");
-		  return reply.redirect('/login-error?reason=missing_access_token');
+		  return reply.redirect('/login_error?reason=missing_access_token');
 		}
 		
 		const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{
@@ -33,7 +33,7 @@ export async function handlerGoogleCallback(this: GoogleOAuthContext, req: Fasti
 
 		if (!userInfoResponse.ok) {
 			console.error("Erreur API Google");
-			return reply.redirect('/login-error?reason=api_error');
+			return reply.redirect('/login_error?reason=api_error');
 		}
 
 		const googleUser = await userInfoResponse.json();
@@ -41,7 +41,7 @@ export async function handlerGoogleCallback(this: GoogleOAuthContext, req: Fasti
 
 		if (!googleUser.email) {
 			console.error("Email manquant dans les données utilisateur Google");
-			return reply.redirect('/login-error?reason=missing_email');
+			return reply.redirect('/login_error?reason=missing_email');
 		}
 
 		let user = getUserByEmail(googleUser.email);
@@ -74,13 +74,13 @@ export async function handlerGoogleCallback(this: GoogleOAuthContext, req: Fasti
 				{ userId: user.userId },
 				{ expiresIn: '24h' }
 			);
-			reply.redirect(`/login-success?token=${jwt}&new=${isNewUser}`);
+			reply.redirect(`http://localhost:5173/login_success?token=${jwt}&new=${isNewUser}`);
 		} else {
-			reply.redirect('/login-error?reason=user_creation_failed');
+			reply.redirect('http://localhost:5173/login_error?reason=user_creation_failed');
 		}
 	} catch (error) {
 		console.error('OAuth callback error:', error);
-		reply.redirect('/login-error');
+		reply.redirect('/login_error');
 	}
 }
 

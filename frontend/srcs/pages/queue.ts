@@ -1,4 +1,4 @@
-import { fetchUserProfile } from "./menu";
+import { fetchUserProfile } from "./mode";
 
 export default async function Queue() {
 	const app = document.getElementById('app');

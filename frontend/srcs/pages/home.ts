@@ -25,7 +25,7 @@ export default function Home() {
 		const password = (document.getElementById('password') as HTMLInputElement).value
         try {
           const baseUrl = window.location.origin;
-          console.log(`${baseUrl}/user/login`);
+          // console.log(`${baseUrl}/user/login`);
           const response = await fetch(`${baseUrl}/user/login`, {
 			  method: 'POST',
 			  credentials: 'include',

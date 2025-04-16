@@ -27,7 +27,8 @@ export default function login() {
 		const password = (document.getElementById('password') as HTMLInputElement).value;
         
         try {
-			const response = await fetch('http://localhost:4000/api-user/login', {
+			const baseUrl = window.location.origin;
+			const response = await fetch(`${baseUrl}/user/login`, {
 			  method: 'POST',
 			  credentials: 'include',
 			  headers: {

@@ -40,8 +40,8 @@ export default function createAccount() {
 		registerStatus.innerHTML = `
 		  <p class="text-blue-600">Creating account...</p>
 		`;
-		
-		const response = await fetch('http://localhost:4000/api-user/register', {
+		const baseUrl = window.location.origin;
+		const response = await fetch(`${baseUrl}/user/register`, {
 		  method: 'POST',
 		  headers: {
 			'Content-Type': 'application/json'

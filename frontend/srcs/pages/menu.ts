@@ -1,30 +1,9 @@
-// src/pages/Home.ts
-
 import { getMatchmakingSocket } from "../wsClient";
+import { fetchUserProfile } from "./mode";
 
-export async function fetchUserProfile() {
-	try {
-		const baseUrl = window.location.origin;
-		const response = await fetch(`${baseUrl}/user/getProfile`, {
-		method: 'GET',
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json'
-		}
-		});
-		if (!response.ok) {
-			throw new Error(`Erreur lors de la récupération du profil: ${response.statusText}`);
-		}
-		const data = await response.json();
-		console.log("Profil utilisateur:", data);
-		return data;
-	} catch (error) {
-		console.error("Erreur de récupération du profil:", error);
-		return null;
-	}
-}
 
-export default function mode() {
+
+export default function menu() {
 	const app = document.getElementById('app');
 	if (app) {
 	  app.innerHTML = /*html*/`
@@ -114,7 +93,5 @@ export default function mode() {
 		history.pushState(null, '', '/queue_tournament');
 		window.dispatchEvent(new PopStateEvent('popstate'));
 	});
-
-
     }
 }

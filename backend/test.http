@@ -15,16 +15,16 @@ POST http://localhost:4001/user/login
 Content-Type: application/json
 
 {
-	"email": "test@email.com",
-	"password": "123456"
+	"email": "test4@email.com",
+	"password": "mypassword"
 }
 
 ### Accéder au profil (JWT requis)
 GET http://localhost:4001/user/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkMWFkNjM2OC0zMGEzLTQ0NGYtOWM5ZC1lMmI3Zjk2NmE2NmEiLCJpYXQiOjE3NDQ3MTY5NzMsImV4cCI6MTc0NDgwMzM3M30.eVAFcvqJSGu0EtHpgptI5HMrgB61jv7TViKv8ntOdyM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyZmRhYTEzYS02ZDMxLTQ2YWQtYjdiMy03MzkzMDFhM2FmZTEiLCJpYXQiOjE3NDQ4MDg3NDcsImV4cCI6MTc0NDg5NTE0N30.UT3OmFhr__8lldraE-stLQqy-m5ES-NiNZwNRosRIs8
 
 ### 🔍 Voir un utilisateur
-GET http://localhost:4001/user/b4daeed4-4e9f-4687-9fe6-af59d1867093
+GET http://localhost:4001/user/2fdaa13a-6d31-46ad-b7b3-739301a3afe1
 
 ### Update info user
 PUT http://localhost:4001/user/profile
@@ -74,7 +74,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlZjk0M
 ### Voir tous les users Online
 GET http://localhost:4001/user/online
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiNGRhZWVkNC00ZTlmLTQ2ODctOWZlNi1hZjU5ZDE4NjcwOTMiLCJpYXQiOjE3NDQ2MzU2MzUsImV4cCI6MTc0NDcyMjAzNX0.u4CD25DOP5xFSLJVDsa8QYFSbVdrAxXTsMCzWQJWVF8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyZmRhYTEzYS02ZDMxLTQ2YWQtYjdiMy03MzkzMDFhM2FmZTEiLCJpYXQiOjE3NDQ4MDg3NDcsImV4cCI6MTc0NDg5NTE0N30.UT3OmFhr__8lldraE-stLQqy-m5ES-NiNZwNRosRIs8
 
 ### Obtenir le dashboard utilisateur
 GET http://localhost:4001/user/dashboard

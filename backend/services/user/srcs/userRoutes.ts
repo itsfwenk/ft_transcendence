@@ -382,8 +382,7 @@ export default async function userRoutes(fastify: any) {
 	fastify.get('/getProfile', async (req:FastifyRequest, reply:FastifyReply) => {
 		try {
 			console.log("Cookies:", req.cookies)
-    const token = req.cookies["authToken"] as string;
-			const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+			const payload = await req.jwtVerify<JwtPayload>();
 			console.log("JWT payload:", payload)
 			return reply.send({
 			userId: payload.userId,

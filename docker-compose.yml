@@ -13,7 +13,7 @@ services:
       - ${FRONTEND_VOLUMES}
     working_dir: ${FRONTEND_WORKDIR}
     restart: always
-    env_file: .env.development
+    env_file: .env
 
   user:
     build: 
@@ -27,7 +27,7 @@ services:
     restart: always
     networks:
       - app-network
-    env_file: .env.development
+    env_file: .env
 
   game:
     build:
@@ -41,7 +41,7 @@ services:
     restart: always
     networks:
       - app-network
-    env_file: .env.development
+    env_file: .env
 
   matchmaking:
     build:
@@ -55,7 +55,7 @@ services:
     restart: always
     networks:
     - app-network
-    env_file: .env.development
+    env_file: .env
 
   # gateway:
   #   build:
@@ -70,7 +70,7 @@ services:
   #     - matchmaking
   #   networks:
   #     - app-network
-  #   env_file: .env.development
+  #   env_file: .env
   caddy:
     image: caddy:2
     ports:

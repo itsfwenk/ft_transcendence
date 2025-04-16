@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@fastify/redis": "^7.0.2",
     "@tailwindcss/vite": "^4.0.14",
     "tailwindcss": "^4.0.14"
   },

@@ -78,6 +78,7 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 			);
 
 			reply.setCookie('authToken', token, {
+				signed: true,
 				httpOnly: true,
 				secure: process.env.NODE_ENV === 'production',  // en production, utilisez HTTPS
 				sameSite: 'lax',

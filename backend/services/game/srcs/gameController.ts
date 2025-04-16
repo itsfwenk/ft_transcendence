@@ -119,11 +119,11 @@ async function getUserById(userId: string) {
 		return response.data;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
-			console.error(`❌ Erreur Axios lors de la récupération de l'utilisateur ${userId}:`, error.response?.data || error.message);
+			console.error(`Erreur Axios lors de la récupération de l'utilisateur ${userId}:`, error.response?.data || error.message);
 		} else if (error instanceof Error) {
-			console.error(`❌ Erreur générique lors de la récupération de l'utilisateur ${userId}:`, error.message);
+			console.error(`Erreur générique lors de la récupération de l'utilisateur ${userId}:`, error.message);
 		} else {
-			console.error(`❌ Une erreur inconnue est survenue`);
+			console.error(`Une erreur inconnue est survenue`);
 		}
 	  return null;
 	}

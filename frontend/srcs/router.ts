@@ -3,6 +3,8 @@ import Profile from './pages/profile';
 import Menu from './pages/menu';
 import Game from './pages/game';
 import Queue from './pages/queue';
+import Queuetournament from './pages/queue_tournament';
+import Tournament_mgt from './pages/tournament';
 import Local from './pages/local';
 
 // Définir vos routes sous forme d'un objet
@@ -13,6 +15,8 @@ const routes: { [key: string]: () => void } = {
   '/game': Game,
   '/local': Local,
   '/queue': Queue,
+  '/queue_tournament': Queuetournament,
+  '/tournament': Tournament_mgt,
 };
 
 export function initRouter() {

@@ -1,5 +1,5 @@
 export function initOnlineGame(){
-    const socket = new WebSocket("ws://localhost:3000/ws");
+    const socket = new WebSocket("wss://localhost:3000/ws");
 	// // When the connection opens
 	// socket.onopen = () => {
 	// 	console.log('Connected to the Pong server');

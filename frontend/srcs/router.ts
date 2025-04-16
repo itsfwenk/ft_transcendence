@@ -7,7 +7,6 @@ import loginError from './pages/googleError';
 import loginSuccess from './pages/googleSuccess';
 import menu from './pages/menu';
 import mode from './pages/mode';
-
 import Queuetournament from './pages/queue_tournament';
 import Tournament_mgt from './pages/tournament';
 

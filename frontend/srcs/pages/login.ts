@@ -1,3 +1,6 @@
+import { matchmakingWebSocket } from "../wsClient";
+import { fetchUserProfile } from "./mode";
+
 export default function login() {
 	const app = document.getElementById('app');
 	if (app) {
@@ -43,6 +46,13 @@ export default function login() {
 	
 			const data = await response.json();
 			console.log("Réponse de login:", data);
+			//recup du userId
+			const profile = await fetchUserProfile();
+			if (profile && profile.userId) {
+				matchmakingWebSocket(profile.userId);
+			} else {
+				console.error ('Impossible de recuperer le profile du user');
+			}
 			history.pushState(null, '', '/menu');
 			window.dispatchEvent(new PopStateEvent('popstate'));
 		} catch (error) {

@@ -25,28 +25,16 @@ export default function menu() {
       const disconnectBtn = document.getElementById('disconnectBtn');
       disconnectBtn?.addEventListener('click', async () => {
         try {
-          const token = localStorage.getItem('authToken'); // a voir avec franck
-          if (token) {
-            const response = await fetch('http://localhost:4000/api-user/logout', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
-            });
-            
+            const response = await fetch('http://localhost:4000/api-user/logout');
             if (!response.ok) {
               console.error('Erreur lors de la déconnexion:', response.statusText);
             } else {
               console.log('Statut utilisateur mis à offline');
             }
-          }
-          localStorage.removeItem('authToken'); // a voir avec franck
           history.pushState(null, '', '/');
           window.dispatchEvent(new PopStateEvent('popstate'));
         } catch (error) {
           console.error('Erreur lors de la déconnexion:', error);
-          localStorage.removeItem('authToken'); // a voir avec franck
           history.pushState(null, '', '/');
           window.dispatchEvent(new PopStateEvent('popstate'));
         }

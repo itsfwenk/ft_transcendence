@@ -11,7 +11,7 @@ export let currentTournamentState: TournamentState | null = null;
 export let currentTournamentData: Tournament | null = null;
 
 export function userWebSocket(userId: string): WebSocket {
-	const baseUrl = window.location.origin;
+	const baseUrl = window.location.origin.replace(/^https?:\/\//, '');
 	const ws = new WebSocket(`wss://${baseUrl}/user/ws?playerId=${userId}`);
 	ws.onopen = () => {
 		console.log('Connexion WebSocket vers le service user établie');
@@ -48,8 +48,8 @@ export function userWebSocket(userId: string): WebSocket {
 
 export function matchmakingWebSocket(userId: string): WebSocket {
 	console.log("test_websocket", userId);
-	const baseUrl = window.location.origin;
-	const ws = new WebSocket(`ws://${baseUrl}/matchmaking/ws?playerId=${userId}`);
+	const baseUrl = window.location.origin.replace(/^https?:\/\//, '');
+	const ws = new WebSocket(`wss://${baseUrl}/matchmaking/ws?playerId=${userId}`);
 	ws.onopen = () => {
 		console.log('Connexion WebSocket matchmaking établie');
 	};

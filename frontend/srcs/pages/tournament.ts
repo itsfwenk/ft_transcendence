@@ -102,7 +102,6 @@ export function updatePlayerStateUI(state: string) {
 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
 					<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
 					<p class="text-gray-600">En attente du prochain tour...</p>
-					<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
 				</div>
 			`;
 		  break;

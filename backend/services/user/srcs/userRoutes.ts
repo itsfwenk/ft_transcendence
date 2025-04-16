@@ -378,16 +378,19 @@ export default async function userRoutes(fastify: any) {
 	userId: string;
   }
 
-  fastify.get('/getProfile', async (req:FastifyRequest, reply:FastifyReply) => {
-	try {
-	  const payload = await req.jwtVerify<JwtPayload>();
-	  return reply.send({
-		userId: payload.userId,
-	  });
-	} catch (err) {
-	  reply.code(401).send({ error: 'Non autorisé' });
-	}
-  });
+	fastify.get('/getProfile', async (req:FastifyRequest, reply:FastifyReply) => {
+		try {
+			console.log("Cookies:", req.cookies)
+			const payload = await req.jwtVerify<JwtPayload>();
+			console.log("JWT payload:", payload)
+			return reply.send({
+			userId: payload.userId,
+			});
+		} catch (err) {
+			console.log("Erreur JWT:", err);
+			reply.code(401).send({ error: 'Non autorisé' });
+		}
+	});
 
 
   fastify.patch('/:userId', {

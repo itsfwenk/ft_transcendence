@@ -94,7 +94,7 @@ export async function launchMatch(matchId: string): Promise<Match | undefined> {
 
 export async function createGameSession(player1_id:string, player2_id:string, matchId?:string): Promise<string | undefined> {
 	try {
-		const baseUrl = window.location.origin;
+		const baseUrl = process.env.GAME_SERVICE_BASE_URL || 'http://game:4002';
 		let response;
 		if (matchId) {
 			console.log(matchId);

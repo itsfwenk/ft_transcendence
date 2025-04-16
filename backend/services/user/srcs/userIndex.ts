@@ -22,7 +22,7 @@ app.register(fastifyCookie, {
 	secret: process.env.COOKIE_SECRET,
 	// hook: 'onRequest', // set to false to disable cookie parsing on all requests
 	// parseOptions: {}     // options for parsing cookies
-  });
+});
 
 // app.register(cors, {
 // 	origin:  process.env.CORS_ORIGIN,

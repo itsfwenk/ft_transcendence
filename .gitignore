@@ -2,3 +2,5 @@
 .env
 .env.*
 *.db
+frontend/dist/*
+frontend/dist/index.html

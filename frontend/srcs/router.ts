@@ -9,6 +9,7 @@ import menu from './pages/menu';
 import mode from './pages/mode';
 import Queuetournament from './pages/queue_tournament';
 import Tournament_mgt from './pages/tournament';
+import Local from './pages/local';
 
 // Définir vos routes sous forme d'un objet
 const routes: { [key: string]: () => void } = {
@@ -17,6 +18,7 @@ const routes: { [key: string]: () => void } = {
   '/menu': menu,
   '/mode': mode,
   '/game': Game,
+  '/local': Local,
   '/queue': Queue,
   '/queue_tournament': Queuetournament,
   '/tournament': Tournament_mgt,

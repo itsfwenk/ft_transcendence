@@ -77,7 +77,6 @@ export async function getGame(req: FastifyRequest<{ Params: { gameId: string } }
 export async function updateScore(req: FastifyRequest<{ Params: { gameId: string }; Body: { score1: number; score2: number } }>, reply: FastifyReply) {
 	const { gameId } = req.params as {gameId: string};
 	const { score1, score2 } = req.body as { score1: number, score2:number }
-
 	const game = await getGamebyId(gameId);
 	if (!game) return reply.status(404).send({error: "Game not found"});
 	// Vérifier que les scores sont bien des nombres
@@ -92,22 +91,21 @@ export async function updateScore(req: FastifyRequest<{ Params: { gameId: string
 //terminer une partie
 export async function endGame(req:FastifyRequest<{ Params: { gameId: string } }>, reply:FastifyReply) {
 	const { gameId } = req.params
-	const updatedGame = endGameInDb(parseInt(gameId));
+	const updatedGame = endGameInDb(gameId);
 	if (!updatedGame) return reply.status(404).send({error: "Game not found"});
 	reply.send({success: true, updatedGame});
 	//mise a jour du service matchmaking
-	if (updatedGame.matchId) {
-		try {
-			const baseUrl = process.env.MATCHMAKING_SERVICE_BASE_URL || 'http://matchmaking:4003';
-			const response = await axios.post(`${baseUrl}/matchmaking/match/update/${updatedGame.matchId}`, {
-				matchId: updatedGame.matchId,
-				score1: updatedGame.score1,
-				score2: updatedGame.score2,
-				winner_id: updatedGame.winner_id
-			});
-		} catch (error) {
-			console.error('Erreur lors de la mise à jour du matchmaking:', error);
-		}
+	console.log("EndGame", updatedGame);
+	try {
+		const baseUrl = process.env.MATCHMAKING_SERVICE_BASE_URL || 'http://matchmaking:4003';
+		const response = await axios.post(`${baseUrl}/matchmaking/match/update/${updatedGame.matchId}`, {
+			matchId: updatedGame.matchId,
+			score1: updatedGame.score1,
+			score2: updatedGame.score2,
+			winner_id: updatedGame.winner_id
+		});
+	} catch (error) {
+		console.error('Erreur lors de la mise à jour du matchmaking:', error);
 	}
 }
 

@@ -11,7 +11,7 @@ export default function LocalGamePage() {
         <canvas id="gameCanvas" width="800" height="400" class="mx-auto block border-8 border-gray-500 bg-white-700"></canvas>
         <div class="mt-4 space-x-2">
           <button id="pauseLocalBtn" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Pause</button>
-          <a href="/" data-link class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Home</a>
+          <a href="/menu" data-link class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Home</a>
         </div>
       </div>
     `;

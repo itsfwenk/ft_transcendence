@@ -13,6 +13,7 @@ export interface Match {
 	winner_Id?: string;
 	status: 'pending' | 'in_progress' | 'completed';
 	matchTime: Date;
+	tournament_Id?: string;
 }
   
 export interface Tournament {
@@ -36,66 +37,62 @@ db.exec(`
 `);
 
 db.exec(`
-	CREATE TABLE IF NOT EXISTS TournamentMatch (
+	CREATE TABLE IF NOT EXISTS Match (
 		id TEXT PRIMARY KEY,
-		tournamentId TEXT, -- Clé étrangère vers Tournament.id
+		tournament_Id TEXT, -- Clé étrangère vers Tournament.id
 		round INTEGER,
 		player1_Id STRING,
 		player2_Id STRING,
 		player1Score INTEGER,
 		player2Score INTEGER,
-		winnerId STRING NULL,
+		winner_Id STRING NULL,
 		status TEXT,  -- pending, in_progress, completed,
 		matchTime DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (tournamentId) REFERENCES Tournament(id)
+		FOREIGN KEY (tournament_Id) REFERENCES Tournament(id)
 	);
 `);
+
+export function createMatch(player1: string, player2: string, round: number, tournament_Id?: string, ): Match {
+	const match: Match = {
+		id: uuidv4(),
+		tournament_Id: tournament_Id,
+		round: round,
+		player1_Id: player1,
+		player2_Id: player2,
+		player1Score: 0,
+		player2Score: 0,
+		status: 'pending',
+		matchTime: new Date()
+	}
+
+	const insertMatchStmt = db.prepare(`
+		INSERT INTO Match(id, tournament_Id, round, player1_Id, player2_Id, player1Score, player2Score, winner_Id, status, matchTime)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+	`);
+	
+	insertMatchStmt.run(match.id, match.tournament_Id, match.round, match.player1_Id, match.player2_Id, 0, 0, null, 'pending');
+	return match;
+}
 
 export function createTournament(players: string[]): Tournament {
 
 	if (players.length !== 4) {
 		throw new Error("Pas assez de joueurs.");
 	}
-	const tournamentId = uuidv4();
+	const tournament_Id = uuidv4();
 
 	const insertTournamentStmt = db.prepare(`
 		INSERT INTO Tournament (id, status, players, createdAt, updatedAt)
 		VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 	  `);
 
-	insertTournamentStmt.run(tournamentId, 'scheduled', JSON.stringify(players));
+	insertTournamentStmt.run(tournament_Id, 'scheduled', JSON.stringify(players));
 
-	const match1: Match = {
-		id: uuidv4(),
-		round: 1,
-		player1_Id: players[0],
-		player2_Id: players[1],
-		player1Score: 0,
-		player2Score: 0,
-		status: 'pending',
-		matchTime: new Date()
-	};
-	const match2: Match = {
-		id: uuidv4(),
-		round: 1,
-		player1_Id: players[2],
-		player2_Id: players[3],
-		player1Score: 0,
-		player2Score: 0,
-		status: 'pending',
-		matchTime: new Date()
-	};
-
-	const insertMatchStmt = db.prepare(`
-		INSERT INTO TournamentMatch(id, tournamentId, round, player1_Id, player2_Id, player1Score, player2Score, winnerId, status, matchTime)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-	`);
-	
-	insertMatchStmt.run(match1.id, tournamentId, match1.round, match1.player1_Id, match1.player2_Id, 0, 0, null, 'pending');
-	insertMatchStmt.run(match2.id, tournamentId, match2.round, match2.player1_Id, match2.player2_Id, 0, 0, null, 'pending');
+	const match1: Match = createMatch(players[0], players[1], 1, tournament_Id);
+	const match2: Match = createMatch(players[2], players[3], 1, tournament_Id);
 	
 	const tournament: Tournament = {
-		id: tournamentId,
+		id: tournament_Id,
 		status: 'scheduled',
 		state: 'tournament_launch',
 		players,
@@ -117,20 +114,21 @@ interface TournamentRow {
 
 interface MatchRow {
     id: string;
+	tournament_Id: string;
     round: number;
     player1_Id: string;
     player2_Id: string;
     player1Score: number;
     player2Score: number;
-    winnerId: string;
+    winner_Id: string;
     status: 'pending' | 'in_progress' | 'completed';
 	matchTime: string;
 }
 
-export function getTournamentById(tournamentId: string): Tournament | null {
-    const row = db.prepare('SELECT * FROM Tournament WHERE id = ?').get(tournamentId) as TournamentRow | undefined;
+export function getTournamentById(tournament_Id: string): Tournament | null {
+    const row = db.prepare('SELECT * FROM Tournament WHERE id = ?').get(tournament_Id) as TournamentRow | undefined;
     if (!row) return null;
-    const matches = db.prepare('SELECT * FROM TournamentMatch WHERE tournamentId = ?').all(tournamentId) as MatchRow[];
+    const matches = db.prepare('SELECT * FROM Match WHERE tournament_Id = ?').all(tournament_Id) as MatchRow[];
     return {
         id: row.id,
         status: row.status,
@@ -138,12 +136,13 @@ export function getTournamentById(tournamentId: string): Tournament | null {
         players: JSON.parse(row.players),
         matches: matches.map((m: MatchRow) => ({
             id: m.id,
+			tournament_Id: m.tournament_Id,
             round: m.round,
             player1_Id: m.player1_Id,
             player2_Id: m.player2_Id,
             player1Score: m.player1Score,
             player2Score: m.player2Score,
-            winner_Id: m.winnerId,
+            winner_Id: m.winner_Id,
             status: m.status,
 			matchTime: new Date(m.matchTime)
         })),
@@ -152,17 +151,17 @@ export function getTournamentById(tournamentId: string): Tournament | null {
     };
 }
 
-export function updateMatch(matchId: string, score1: number, score2: number, winnerId: string): any {
+export function updateMatch(matchId: string, score1: number, score2: number, winner_Id: string): any {
 	const stmt = db.prepare(`
-		UPDATE TournamentMatch
-		SET player1Score = ?, player2Score = ?, winnerId = ?, status = 'completed', matchTime = CURRENT_TIMESTAMP
+		UPDATE Match
+		SET player1Score = ?, player2Score = ?, winner_Id = ?, status = 'completed', matchTime = CURRENT_TIMESTAMP
 		WHERE id = ?
 		RETURNING *
 	  `);
 	const updatedMatch = stmt.get(
 		score1, 
 		score2, 
-		winnerId, 
+		winner_Id, 
 		matchId
 	);
   	return updatedMatch;
@@ -170,8 +169,8 @@ export function updateMatch(matchId: string, score1: number, score2: number, win
 
 export function updateMatchv2(match: Match): any {
 	const stmt = db.prepare(`
-		UPDATE TournamentMatch
-		SET player1Score = ?, player2Score = ?, winnerId = ?, status = ?, matchTime = CURRENT_TIMESTAMP
+		UPDATE Match
+		SET player1Score = ?, player2Score = ?, winner_Id = ?, status = ?, matchTime = CURRENT_TIMESTAMP
 		WHERE id = ?
 		RETURNING *
 	  `);
@@ -185,8 +184,8 @@ export function updateMatchv2(match: Match): any {
   	return updatedMatch;
 }
 
-export function scheduleFinal(tournamentId: string): void {
-	const tournament = getTournamentById(tournamentId);
+export function scheduleFinal(tournament_Id: string): void {
+	const tournament = getTournamentById(tournament_Id);
 	if (!tournament) {
 		throw new Error("Aucun tournoi en cours.");
 	}
@@ -208,21 +207,21 @@ export function scheduleFinal(tournamentId: string): void {
 	const finalMatchId = uuidv4();
   
 	const insertMatchStmt = db.prepare(`
-		INSERT INTO TournamentMatch (id, tournamentId, round, player1_Id, player2_Id, player1Score, player2Score, status, matchTime)
+		INSERT INTO Match (id, tournament_Id, round, player1_Id, player2_Id, player1Score, player2Score, status, matchTime)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 	`);
-	insertMatchStmt.run(finalMatchId, tournamentId, 2, winner1_Id, winner2_Id, 0, 0, 'pending');
+	insertMatchStmt.run(finalMatchId, tournament_Id, 2, winner1_Id, winner2_Id, 0, 0, 'pending');
 	
 	const updateTournamentStmt = db.prepare(`
 		UPDATE Tournament
 		SET status = 'ongoing', updatedAt = CURRENT_TIMESTAMP
 		WHERE id = ?
 	`);
-	updateTournamentStmt.run(tournamentId);
+	updateTournamentStmt.run(tournament_Id);
 }
 
 export function getMatchbyId(matchId: string): Match {
-	const stmt = db.prepare(`SELECT * FROM TournamentMatch WHERE id = ?`);
+	const stmt = db.prepare(`SELECT * FROM Match WHERE id = ?`);
 	console.log(matchId);
 	const result = stmt.get(matchId);
 	if (!result) {
@@ -232,8 +231,8 @@ export function getMatchbyId(matchId: string): Match {
 	return result as Match;
 }
 
-export function finishTournament(tournamentId: string):void {
-	const tournament = getTournamentById(tournamentId);
+export function finishTournament(tournament_Id: string):void {
+	const tournament = getTournamentById(tournament_Id);
 	if (!tournament) {
 		throw Error ("Aucun tournoi avec ce Tournament Id");
 	}
@@ -249,7 +248,7 @@ export function finishTournament(tournamentId: string):void {
 		SET status = 'completed', updatedAt = CURRENT_TIMESTAMP
 		WHERE id = ?
 	`);
-	updateTournamentStmt.run(tournamentId);
+	updateTournamentStmt.run(tournament_Id);
 }
 
 // YOYO
@@ -257,10 +256,10 @@ export function finishTournament(tournamentId: string):void {
 export function getMatchHistoryByUserId(userId: string) {
 	const stmt = db.prepare(`
 		SELECT tm.*, t.status as tournamentStatus
-		FROM TournamentMatch tm
-		LEFT JOIN Tournament t ON tm.tournamentId = t.id
-		WHERE (tm.player1_Id = ? OR tm.player2_Id = ?) AND tm.status = 'completed'
-		ORDER BY tm.matchTimne DESC
+		FROM Match m
+		LEFT JOIN Tournament t ON m.tournament_Id = t.id
+		WHERE (m.player1_Id = ? OR m.player2_Id = ?) AND m.status = 'completed'
+		ORDER BY m.matchTimne DESC
 	`);
 
 	const matches = stmt.all(userId, userId) as any[];
@@ -270,17 +269,17 @@ export function getMatchHistoryByUserId(userId: string) {
 
 		return {
 			gameId: match.id,
-			gameType: match.tournamentId ? (match.round === 2 ? 'tournament-final' : 'tournament-semifinal') : '1v1',
+			gameType: match.tournament_Id ? (match.round === 2 ? 'tournament-final' : 'tournament-semifinal') : '1v1',
 			opponent: {
 				userId: isPlayer1 ? match.player2_Id : match.player1_Id
 			},
-			result: match.winnerId === userId ? 'win' : 'loss',
+			result: match.winner_Id === userId ? 'win' : 'loss',
 			score: {
 				player: isPlayer1 ? match.player1Score : match.player2Score,
 				opponent: isPlayer1 ? match.player2Score : match.player1Score
 			},
 			date: match.matchTime,
-			tournamentId: match.tournamentId || null
+			tournament_Id: match.tournament_Id || null
 		};
 	});
 }

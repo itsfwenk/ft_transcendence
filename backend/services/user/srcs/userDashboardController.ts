@@ -14,7 +14,7 @@ interface MatchHistoryItem {
 	  opponent: number;
 	};
 	date: string;
-	tournamentId: string | null;
+	tournament_Id: string | null;
 }
 
 interface UserDashboard {

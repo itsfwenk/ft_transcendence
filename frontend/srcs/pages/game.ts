@@ -1,11 +1,11 @@
 // src/pages/Home.ts
-import { Ball, Paddle, Game } from "../../../backend/services/game/srcs/gameDb"
+import { Game } from "../../../backend/services/game/srcs/gameDb"
 
-let gameState : Game;
+// let gameState : Game;
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 const host = window.location.hostname;
 const port = window.location.port;
-const path = '/ws';
+// const path = '/ws';
 
 export default function game() {
     const app = document.getElementById('app');
@@ -67,7 +67,7 @@ export default function game() {
     }
 
     // const token = document.cookie.split('; ').find(row => row.startsWith('authToken='))?.split('=')[1];
-    let   wsUrl = `${protocol}//${host}:${port}`;
+    let   wsUrl = `${protocol}//${host}:${port}/game/ws`;
     console.log(`wsUrl :`, wsUrl);
     const socket = new WebSocket(wsUrl);
 

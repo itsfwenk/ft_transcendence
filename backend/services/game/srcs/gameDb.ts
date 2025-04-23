@@ -10,7 +10,7 @@ if (!process.env.CANVAS_WIDTH
 
 const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
 const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
-const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
+// const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
 const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
 const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
 const paddleBasePosition = canvasHeight / 2 - paddleHeight / 2;
@@ -38,7 +38,7 @@ export interface Game {
 	leftPaddle: Paddle;
 	rightPaddle: Paddle;
 	ball: Ball;
-	status: 'ongoing' | 'finished';
+	status: 'waiting' | 'ongoing' | 'finished';
 	winner_id?: string | null;
 	matchId?: string | null;
 }
@@ -62,7 +62,7 @@ db.exec(`
 	  leftPaddle TEXT NOT NULL DEFAULT '{"x": 0, "y": ${paddleBasePosition}, "dy": 0}',
 	  rightPaddle TEXT NOT NULL DEFAULT '{"x": ${canvasWidth - 10}, "y": ${paddleBasePosition}, "dy": 0}',
 	  ball TEXT NOT NULL DEFAULT '{"x": ${canvasWidth / 2}, "y": ${canvasHeight / 2}, "radius": ${ballRadius}, "dx": ${Math.random() > 0.5 ? 3 : -3}, "dy": ${Math.random() > 0.5 ? 3 : -3}}',
-	  status TEXT CHECK(status IN ('ongoing', 'finished')) DEFAULT 'ongoing',
+	  status TEXT CHECK(status IN ('waiting', 'ongoing', 'finished')) DEFAULT 'waiting',
 	  winner_id STRING NULL,
 	  matchId TEXT NULL
 	);
@@ -102,7 +102,7 @@ export async function getGamebyId(gameId: string): Promise<Game | null> {
 			leftPaddle: JSON.parse(row.leftPaddle),
 			rightPaddle: JSON.parse(row.rightPaddle),
 			ball: JSON.parse(row.ball),
-			status: row.status as 'ongoing' | 'finished',
+			status: row.status as 'waiting' | 'ongoing' | 'finished',
 			winner_id: row.winner_id,
 			matchId: row.matchId
 		};
@@ -164,13 +164,26 @@ export async function updateBallPositionInDb(gameId: string, ball: Ball) {
 
 export async function getAllGamesId() : Promise<{ gameId: string }[]> {
 	try {
-		const stmt = db.prepare('SELECT gameId FROM games');
-		const allIds : { gameId: string }[] = stmt.all() as { gameId: string }[];
+		const stmt = db.prepare('SELECT gameId FROM games WHERE status = ?');
+		const allIds : { gameId: string }[] = stmt.all('ongoing') as { gameId: string }[];
 		return allIds;
 	  } catch (error) {
 		console.error('Error fetching game Ids:', error);
 		return [];
 	  }
+}
+
+export async function updateGameStatusInDb(gameId: string, status: string) {
+	try {
+		const stmt = db.prepare (`
+			UPDATE games
+			SET status = ?
+			WHERE gameId = ?
+		`)
+		stmt.run(status, gameId);
+	} catch (err) {
+	console.error('Error updating game status in the database:', err);
+	}
 }
 
 export async function updatePaddlesInDb(gameId: string) {

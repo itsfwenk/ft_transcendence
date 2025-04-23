@@ -1,9 +1,9 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId, updatePaddleDelta, updatePaddlesInDb } from './gameDb.js'
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId, updatePaddleDelta, updatePaddlesInDb, updateGameStatusInDb } from './gameDb.js'
 import { Ball, Paddle, Game } from './gameDb.js'
 import axios from 'axios';
 import { WebSocket } from "ws";
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
 const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
@@ -15,6 +15,7 @@ const speedIncrease = parseFloat(process.env.SPEED_INCREASE as string);
 
 const activeUsers = new Map<string, WebSocket>(); // userId -> WebSocket
 export default activeUsers;
+const gameReadyPlayers = new Map<string, Set<string>>(); // gameId -> Set of userIds who are ready
 
 /*
 // Interface pour le body de startGame
@@ -269,13 +270,16 @@ export async function updateGames() {
 
 // const JWT_SECRET = "secret_key";
 
-export async function websocketHandshake(connection: WebSocket, req: FastifyRequest) {
+export async function websocketHandshake(fastify: FastifyInstance, connection: WebSocket, req: FastifyRequest) {
 	console.log('websocketHandshake called');
 
-	const token = req.cookies["authToken"] as string;
-	console.log(token);
-
-	const decoded = websocketAuthMiddleware(token);
+	// const token = req.unsignCookie["authToken"] as string;
+	const { value: unsignedToken, valid } = req.unsignCookie(req.cookies["authToken"] as string);
+	console.log(`token:`, unsignedToken);
+	if (!unsignedToken)
+		return
+	const decoded = websocketAuthMiddleware(fastify, unsignedToken);
+	// const decoded = fastify.jwt.verify(token) as JwtPayload;
 	if (!decoded) {
 		console.error('Error in websocketAuthMiddleware');
 		connection.close(1003, 'Invalid message format');
@@ -286,29 +290,56 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
 
 	activeUsers.set(userId, connection);
 	console.log(`User ${userId} connected via WebSocket`);
-	
-    connection.on('message', (message) => {
+
+	const gameId = user.inGameId;
+	if (!gameReadyPlayers.has(gameId)) {
+        gameReadyPlayers.set(gameId, new Set<string>());
+    }
+
+    connection.on('message', async (message) => {
         try {
-            const { key, type } = JSON.parse(message.toString());
-			console.log(key, type);
-            if (!key || !type) {
-                console.warn("Invalid message received:", message.toString());
-                return;
+            // const { key, type } = JSON.parse(message.toString());
+			// console.log(key, type);
+            // if (!key || !type) {
+            //     console.warn("Invalid message received:", message.toString());
+            //     return;
+            // }
+			const parsedMessage = JSON.parse(message.toString());
+            const { type, key, state } = parsedMessage;
+
+			if (type === 'ready_to_start') {
+                console.log(`User ${userId} is ready to start game ${gameId}`);
+                const readyPlayers = gameReadyPlayers.get(gameId)!;
+                readyPlayers.add(userId);
+
+                const game = await getGamebyId(gameId);
+                if (game && readyPlayers.size === 2 && game.status !== 'ongoing') {
+                    console.log(`Both players ready for game ${gameId}. Starting game.`);
+                    await updateGameStatusInDb(gameId, 'ongoing');
+                    for (const playerId of [game.player1_id, game.player2_id]) {
+                        const playerSocket = activeUsers.get(playerId);
+                        playerSocket?.send(JSON.stringify({ type: 'game_start' }));
+                    }
+                }
             }
 
-            if (key === 'ArrowUp') {
-                if (type === "keydown") {
-                    updatePaddleDelta(user.inGameId, userId, -paddleSpeed);
-                } else if (type === "keyup") {
-                    updatePaddleDelta(user.inGameId, userId, 0);
-                }
-            } else if (key === 'ArrowDown') {
-                if (type === "keydown") {
-                    updatePaddleDelta(user.inGameId, userId, paddleSpeed);
-                } else if (type === "keyup") {
-                    updatePaddleDelta(user.inGameId, userId, 0);
-                }
-            }
+            // if (key === 'ArrowUp') {
+            //     if (type === "keydown") {
+            //         updatePaddleDelta(user.inGameId, userId, -paddleSpeed);
+            //     } else if (type === "keyup") {
+            //         updatePaddleDelta(user.inGameId, userId, 0);
+            //     }
+            // } else if (key === 'ArrowDown') {
+            //     if (type === "keydown") {
+            //         updatePaddleDelta(user.inGameId, userId, paddleSpeed);
+            //     } else if (type === "keyup") {
+            //         updatePaddleDelta(user.inGameId, userId, 0);
+            //     }
+            // }
+			else if (type === 'input' && key) {
+                const delta = (key === 'ArrowUp') ? -paddleSpeed : (key === 'ArrowDown') ? paddleSpeed : 0;
+                updatePaddleDelta(gameId, userId, state === 'keydown' ? delta : 0);
+			}
         } catch (err) {
             console.error("Error processing WebSocket message:", err);
             connection.close(1003, 'Invalid message format'); // Close with unsupported data error
@@ -318,6 +349,8 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
 	// Handle socket close
 	connection.on('close', () => {
 		activeUsers.delete(userId);
+		const readyPlayers = gameReadyPlayers.get(gameId);
+		readyPlayers?.delete(userId);
 		console.log(`User ${userId} disconnected`);
 		connection.close(1003, 'Invalid message format');
 
@@ -331,7 +364,7 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
 
 async function broadcastGameToPlayers(gameId: string) {
 	const game = await getGamebyId(gameId);
-	if (!game) return;
+	if (!game || game.status !== 'ongoing') return;
 
 	[game.player1_id, game.player2_id].forEach(userId => {
 		const socket = activeUsers.get(userId);
@@ -340,21 +373,26 @@ async function broadcastGameToPlayers(gameId: string) {
 		}
 	});
 }
-  
-export function websocketAuthMiddleware(token: string) {
+
+interface JwtPayload {
+	userId: string;
+}
+
+export function websocketAuthMiddleware(fastify: FastifyInstance, token: string) {
 	try {
 		// const token : string = req.query.token;
 
 		if (!token)
 			throw new Error("No token provided");
 
-		const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-		if (decoded && typeof decoded === 'object' && 'userId' in decoded) {
-			const { userId, gameId } = decoded;
-			return { userId, gameId };
-		}
-		else
-			throw new Error("Invalid token payload");
+		const decoded = fastify.jwt.verify(token) as JwtPayload;
+		return decoded;
+		// if (decoded && typeof decoded === 'object' && 'userId' in decoded) {
+		// 	const { userId, gameId } = decoded;
+		// 	return { userId, gameId };
+		// }
+		// else
+		// 	throw new Error("Invalid token payload");
 	} catch (err) {
 		console.error("Token verification failed:", err);
 		return null;

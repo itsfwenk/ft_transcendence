@@ -4,11 +4,20 @@ export default async function Queue() {
 	const app = document.getElementById('app');
 	if (!app) return;
   
-	app.innerHTML = `
-	  <div class="flex flex-col items-center justify-center min-h-screen">
-		<h1 class="text-3xl font-bold mb-4">Lobby Matchmaking</h1>
-		<p class="text-gray-700">Recherche d'un adversaire...</p>
-	  </div>
+	app.innerHTML = /*html*/`
+	<div class="text-black font-jaro text-9xl mt-16 mb-36">Pong Game</div>
+	<div class="flex items-center justify-center">
+		<div class="flex flex-col items-center justify-center w-1/2 bg-blue-700 ronded-mg">
+			<h1 class="text-6xl mb-9 pt-2 font-jaro">Tournament</h1>
+			<div class="flex items-center justify-center gap-3">
+				<div class="w-15 h-15 bg-white ronded-mg"></div>
+				<div class="w-15 h-15 bg-white ronded-mg"></div>
+				<div class="w-15 h-15 bg-white ronded-mg"></div>
+				<div class="w-15 h-15 bg-white ronded-mg"></div>
+			</div>
+			<p class="text-white font-inria pt-5 m-5">search players ...</p>
+		</div>
+	</div>
 	`;
   
 	// Appel à la fonction qui rejoint la queue 1v1

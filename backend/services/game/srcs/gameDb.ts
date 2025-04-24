@@ -41,6 +41,8 @@ export interface Game {
 	status: 'waiting' | 'ongoing' | 'finished';
 	winner_id?: string | null;
 	matchId?: string | null;
+	canvasWidth: number;
+	canvasHeight: number;
 }
 
 //const games: Game[] = [];
@@ -64,7 +66,9 @@ db.exec(`
 	  ball TEXT NOT NULL DEFAULT '{"x": ${canvasWidth / 2}, "y": ${canvasHeight / 2}, "radius": ${ballRadius}, "dx": ${Math.random() > 0.5 ? 3 : -3}, "dy": ${Math.random() > 0.5 ? 3 : -3}}',
 	  status TEXT CHECK(status IN ('waiting', 'ongoing', 'finished')) DEFAULT 'waiting',
 	  winner_id STRING NULL,
-	  matchId TEXT NULL
+	  matchId TEXT NULL,
+	  canvasWidth INTEGER DEFAULT ${canvasWidth},
+	  canvasHeight INTEGER DEFAULT ${canvasHeight}
 	);
 `);
 
@@ -104,7 +108,9 @@ export async function getGamebyId(gameId: string): Promise<Game | null> {
 			ball: JSON.parse(row.ball),
 			status: row.status as 'waiting' | 'ongoing' | 'finished',
 			winner_id: row.winner_id,
-			matchId: row.matchId
+			matchId: row.matchId,
+			canvasWidth: row.canvasWidth, 
+			canvasHeight: row.canvasHeight
 		};
 
 		return game;
@@ -128,6 +134,20 @@ export function updateGameScore(gameId: string, score1: number, score2: number) 
 		return updatedStmt.get(gameId);
 	}
 	return null;
+}
+
+export function updateGameCanvas(gameId: string, canvasWidth: number, canvasHeight: number) {
+	try {
+		const stmt = db.prepare (`
+			UPDATE games
+			SET canvasWidth = ?, canvasHeight = ?
+			WHERE gameId = ?
+		`);
+		stmt.run(canvasWidth, canvasHeight, gameId);
+	}
+	catch (err) {
+		console.error('Error updating game canvas in the database:', err);
+	}
 }
 
 export function endGameInDb(gameId: number): Game | null {
@@ -195,8 +215,8 @@ export async function updatePaddlesInDb(gameId: string) {
 				leftPaddle.y = leftPaddle.y + leftPaddle.dy;
 				rightPaddle.y = rightPaddle.y + rightPaddle.dy;
 
-				leftPaddle.y = Math.max(0, Math.min(canvasHeight - paddleHeight, leftPaddle.y));
-				rightPaddle.y = Math.max(0, Math.min(canvasHeight - paddleHeight, rightPaddle.y));
+				leftPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, leftPaddle.y));
+				rightPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, rightPaddle.y));
 			}
 			const stmt = db.prepare (`
 				UPDATE games

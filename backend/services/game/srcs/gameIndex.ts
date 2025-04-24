@@ -27,13 +27,13 @@ app.register(fastifyJwt, {
 	}
 });
 
-app.decorate("authenticate", async function (req: FastifyRequest, reply: FastifyReply) {
-	try {
-	  await req.jwtVerify();
-	} catch (err) {
-	  reply.status(401).send({ error: "Unauthorized" });
-	}
-  });
+// app.decorate("authenticate", async function (req: FastifyRequest, reply: FastifyReply) {
+// 	try {
+// 	  await req.jwtVerify();
+// 	} catch (err) {
+// 	  reply.status(401).send({ error: "Unauthorized" });
+// 	}
+//   });
 
 app.register(swagger, {
 	swagger: {

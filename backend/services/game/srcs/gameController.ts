@@ -1,12 +1,12 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId, updatePaddleDelta, updatePaddlesInDb, updateGameStatusInDb } from './gameDb.js'
+import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId, updatePaddleDelta, updatePaddlesInDb, updateGameStatusInDb, updateGameCanvas } from './gameDb.js'
 import { Ball, Paddle, Game } from './gameDb.js'
 import axios from 'axios';
 import { WebSocket } from "ws";
 import jwt from 'jsonwebtoken';
 
-const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
-const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
+// const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
+// const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
 const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
 const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
 const paddleSpeed = parseInt(process.env.PADDLE_SPEED as string, 10);
@@ -166,7 +166,7 @@ export async function updateBallPosition(gameId: string) {
 			ball.dy *= -1;
 			ball.y += 3;
 		}
-		else if (ball.y  + ball.radius >= canvasHeight) {
+		else if (ball.y  + ball.radius >= game.canvasHeight) {
 			ball.dy *= -1;
 			ball.y -= 3;
 		}
@@ -216,17 +216,19 @@ export async function updateBallPosition(gameId: string) {
 			// game.score2++;
 			resetBall();
 		  } 
-		else if (ball.x > canvasWidth) {
+		else if (ball.x > game.canvasWidth) {
 			await updateGameScore(gameId, game.score1 + 1, game.score2);
 			// game.score1++;
 			resetBall();
 		  }
 		function resetBall() {
 			// console.log(`call resestBall`);
-			ball.x = canvasWidth / 2;
-			ball.y = canvasHeight / 2;
-			ball.dx = Math.random() > 0.5 ? 3 : -3;
-			ball.dy = Math.random() > 0.5 ? 3 : -3;
+			if (game) {
+				ball.x = game.canvasWidth / 2;
+				ball.y = game.canvasHeight / 2;
+				ball.dx = Math.random() > 0.5 ? 3 : -3;
+				ball.dy = Math.random() > 0.5 ? 3 : -3;
+			}
 		  }
 		// console.log(ball.x, ball.y, ball.dx, ball.dy);
 		await updateBallPositionInDb(gameId, ball);
@@ -307,7 +309,11 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 			const parsedMessage = JSON.parse(message.toString());
             const { type, key, state } = parsedMessage;
 
-			if (type === 'ready_to_start') {
+			if (type === 'canvas_size') {
+				const { width, height } = parsedMessage;
+				updateGameCanvas(gameId, width, height);
+				  console.log(`Game ${gameId} canvas size updated: ${width} x ${height}`);
+			  } else if (type === 'ready_to_start') {
                 console.log(`User ${userId} is ready to start game ${gameId}`);
                 const readyPlayers = gameReadyPlayers.get(gameId)!;
                 readyPlayers.add(userId);

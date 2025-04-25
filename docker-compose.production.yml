@@ -14,6 +14,16 @@ services:
   #   working_dir: ${FRONTEND_WORKDIR}
   #   restart: always
   #   env_file: .env
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend/dist:/app/dist
+    restart: always
+    tty: true
+    env_file: .env
+    command: /bin/bash
 
   user:
     build: 

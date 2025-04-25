@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId, updatePaddleDelta, updatePaddlesInDb, updateGameStatusInDb, updateGameCanvas } from './gameDb.js'
+import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId, updatePaddleDelta, updatePaddlesInDb, updateGameStatusInDb } from './gameDb.js'
 import { Ball, Paddle, Game } from './gameDb.js'
 import axios from 'axios';
 import { WebSocket } from "ws";
@@ -107,7 +107,7 @@ export async function endGame(req:FastifyRequest<{ Params: { gameId: string } }>
 				winner_id: updatedGame.winner_id
 			});
 		} catch (error) {
-			console.error('Erreur lors de la mise à jour du matchmaking:', error);
+			console.error('Error while ending game in database', error);
 		}
 	}
 }
@@ -173,11 +173,12 @@ export async function updateBallPosition(gameId: string) {
 
 		// Check collision with paddles
 
-		let leftPaddle : Paddle | null | undefined = await getPaddle(gameId, `left`);
-		if (leftPaddle === null || leftPaddle === undefined)
-			console.error(`Error with left paddle`)
+		// let leftPaddle : Paddle | null | undefined = await getPaddle(gameId, `left`);
+		// if (leftPaddle === null || leftPaddle === undefined)
+		// 	console.error(`Error with left paddle`)
+		let leftPaddle = game.leftPaddle;
 
-		else if (
+		if (
 			ball.x - ball.radius <= leftPaddle.x + paddleWidth &&
 			ball.y >= leftPaddle.y && ball.y <= leftPaddle.y + paddleHeight
 		) {
@@ -192,11 +193,11 @@ export async function updateBallPosition(gameId: string) {
 			ball.dy *= speedIncrease;
 		}
 
-		let rightPaddle : Paddle | null | undefined = await getPaddle(gameId, `right`);
-		if (rightPaddle === null || rightPaddle === undefined)
-			console.error(`Error with right paddle`)
-
-		else if (
+		// let rightPaddle : Paddle | null | undefined = await getPaddle(gameId, `right`);
+		// if (rightPaddle === null || rightPaddle === undefined)
+		// 	console.error(`Error with right paddle`)
+		let rightPaddle = game.rightPaddle;
+		if (
 			ball.x + ball.radius >= rightPaddle.x &&
 			ball.y >= rightPaddle.y && ball.y <= rightPaddle.y + paddleHeight
 		) {
@@ -238,22 +239,22 @@ export async function updateBallPosition(gameId: string) {
 	}
 }
 
-async function getPaddle(gameId: string, side: string) {
-	try {
-		const game = await getGamebyId(gameId);
-		if (!game) {
-			console.error(`Game ${gameId} not found`);
-			return;
-		}
-		if (side === `left`)
-			return (game.leftPaddle);
-		else (side === `right`)
-			return (game.rightPaddle);
-	} catch (error) {
-		console.error(`❌ Error while retrieving paddle`);
-		}
-	  return null;
-}
+// async function getPaddle(gameId: string, side: string) {
+// 	try {
+// 		const game = await getGamebyId(gameId);
+// 		if (!game) {
+// 			console.error(`Game ${gameId} not found`);
+// 			return;
+// 		}
+// 		if (side === `left`)
+// 			return (game.leftPaddle);
+// 		else (side === `right`)
+// 			return (game.rightPaddle);
+// 	} catch (error) {
+// 		console.error(`❌ Error while retrieving paddle`);
+// 		}
+// 	  return null;
+// }
 
 export async function updateGames() {
 	try {
@@ -309,11 +310,12 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 			const parsedMessage = JSON.parse(message.toString());
             const { type, key, state } = parsedMessage;
 
-			if (type === 'canvas_size') {
-				const { width, height } = parsedMessage;
-				updateGameCanvas(gameId, width, height);
-				  console.log(`Game ${gameId} canvas size updated: ${width} x ${height}`);
-			  } else if (type === 'ready_to_start') {
+			// if (type === 'canvas_size') {
+			// 	const { width, height } = parsedMessage;
+			// 	updateGameCanvas(gameId, width, height);
+			// 	  console.log(`Game ${gameId} canvas size updated: ${width} x ${height}`);
+			// 	updatePaddlesInDb(gameId);
+			  if (type === 'ready_to_start') {
                 console.log(`User ${userId} is ready to start game ${gameId}`);
                 const readyPlayers = gameReadyPlayers.get(gameId)!;
                 readyPlayers.add(userId);
@@ -357,6 +359,12 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 		activeUsers.delete(userId);
 		const readyPlayers = gameReadyPlayers.get(gameId);
 		readyPlayers?.delete(userId);
+		if (readyPlayers?.size === 0)
+		{
+			endGameInDb(gameId);
+			console.log("Game", gameId, "has finished.");
+			gameReadyPlayers.delete(gameId);
+		}
 		console.log(`User ${userId} disconnected`);
 		connection.close(1003, 'Invalid message format');
 
@@ -373,9 +381,12 @@ async function broadcastGameToPlayers(gameId: string) {
 	if (!game || game.status !== 'ongoing') return;
 
 	[game.player1_id, game.player2_id].forEach(userId => {
-		const socket = activeUsers.get(userId);
-		if (socket) {
-		socket.send(JSON.stringify(game));
+		const gameSet = gameReadyPlayers.get(gameId);
+		if (gameSet?.has(userId)) {
+			const socket = activeUsers.get(userId);
+			if (socket) {
+				socket.send(JSON.stringify(game));
+			}
 		}
 	});
 }

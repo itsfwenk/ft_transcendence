@@ -15,35 +15,35 @@ const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
 const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
 const paddleBasePosition = canvasHeight / 2 - paddleHeight / 2;
 
-export interface Ball {
-	x: number;
-	y: number;
-	radius: number;
-	dx: number;
-	dy: number
-}
+// export interface Ball {
+// 	x: number;
+// 	y: number;
+// 	radius: number;
+// 	dx: number;
+// 	dy: number
+// }
 
-export interface Paddle {
-	x: number;
-	y: number;
-	dy: number
-}
+// export interface Paddle {
+// 	x: number;
+// 	y: number;
+// 	dy: number
+// }
 
-export interface Game {
-	gameId: string;
-	player1_id: string;
-	player2_id: string;
-	score1: number;
-	score2: number;
-	leftPaddle: Paddle;
-	rightPaddle: Paddle;
-	ball: Ball;
-	status: 'waiting' | 'ongoing' | 'finished';
-	winner_id?: string | null;
-	matchId?: string | null;
-	canvasWidth: number;
-	canvasHeight: number;
-}
+// export interface Game {
+// 	gameId: string;
+// 	player1_id: string;
+// 	player2_id: string;
+// 	score1: number;
+// 	score2: number;
+// 	leftPaddle: Paddle;
+// 	rightPaddle: Paddle;
+// 	ball: Ball;
+// 	status: 'waiting' | 'ongoing' | 'finished';
+// 	winner_id?: string | null;
+// 	matchId?: string | null;
+// 	canvasWidth: number;
+// 	canvasHeight: number;
+// }
 
 //const games: Game[] = [];
 
@@ -136,19 +136,19 @@ export function updateGameScore(gameId: string, score1: number, score2: number) 
 	return null;
 }
 
-export function updateGameCanvas(gameId: string, canvasWidth: number, canvasHeight: number) {
-	try {
-		const stmt = db.prepare (`
-			UPDATE games
-			SET canvasWidth = ?, canvasHeight = ?
-			WHERE gameId = ?
-		`);
-		stmt.run(canvasWidth, canvasHeight, gameId);
-	}
-	catch (err) {
-		console.error('Error updating game canvas in the database:', err);
-	}
-}
+// export function updateGameCanvas(gameId: string, canvasWidth: number, canvasHeight: number) {
+// 	try {
+// 		const stmt = db.prepare (`
+// 			UPDATE games
+// 			SET canvasWidth = ?, canvasHeight = ?
+// 			WHERE gameId = ?
+// 		`);
+// 		stmt.run(canvasWidth, canvasHeight, gameId);
+// 	}
+// 	catch (err) {
+// 		console.error('Error updating game canvas in the database:', err);
+// 	}
+// }
 
 export function endGameInDb(gameId: number): Game | null {
 	const game = db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | undefined;
@@ -217,6 +217,8 @@ export async function updatePaddlesInDb(gameId: string) {
 
 				leftPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, leftPaddle.y));
 				rightPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, rightPaddle.y));
+
+				rightPaddle.x = game.canvasWidth - 10;
 			}
 			const stmt = db.prepare (`
 				UPDATE games

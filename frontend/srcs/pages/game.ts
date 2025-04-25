@@ -17,7 +17,9 @@ export default function game() {
     app.innerHTML = '';
 
     const canvas = document.createElement('canvas');
-    canvas.id = 'dynamicGameCanvas';
+    canvas.id = 'GameCanvas';
+    canvas.width = parseInt(process.env.CANVAS_WIDTH as string, 10);
+    canvas.height = parseInt(process.env.CANVAS_HEIGHT as string, 10);
     canvas.classList.add('border-2', 'border-gray-400', 'bg-white');
 
     app.appendChild(canvas);
@@ -28,25 +30,25 @@ export default function game() {
         return;
     }
 
-    function resizeCanvas() {
-        canvas.width = window.innerWidth * 0.8;
-        canvas.height = window.innerHeight * 0.7;
+    // function resizeCanvas() {
+    //     canvas.width = window.innerWidth * 0.8;
+    //     canvas.height = window.innerHeight * 0.7;
 
-        if (gameStarted && currentGameState) {
-            renderGame(currentGameState);
-        }
+    //     if (gameStarted && currentGameState) {
+    //         renderGame(currentGameState);
+    //     }
 
-        if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({
-                type: 'canvas_size',
-                width: canvas.width,
-                height: canvas.height,
-            }));
-        }
-    }
+    //     if (socket && socket.readyState === WebSocket.OPEN) {
+    //         socket.send(JSON.stringify({
+    //             type: 'canvas_size',
+    //             width: canvas.width,
+    //             height: canvas.height,
+    //         }));
+    //     }
+    // }
 
     // resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    // window.addEventListener('resize', resizeCanvas);
 
 
     const scoreDisplay = document.createElement('div');
@@ -72,7 +74,7 @@ export default function game() {
     const gameStateLabel = document.getElementById('gameState');
 
     let gameStarted = false;
-    let currentGameState: Game;
+    // let currentGameState: Game;
 
     let wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:${window.location.port}/game/ws`;
 
@@ -103,10 +105,10 @@ export default function game() {
                     lancerBtn.style.display = 'none'; // Hide the button once the game starts
                 }
             } else if (gameStarted && data.ball) {
-                currentGameState = data;
+                // currentGameState = data;
                 renderGame(data as Game); //  Call renderGame
             } else if (data.status === 'finished') {
-                currentGameState = data;
+                // currentGameState = data;
                 renderGame(data as Game);
                 if (gameStateLabel) {
                     gameStateLabel.textContent = "Partie terminée!";
@@ -168,17 +170,17 @@ export default function game() {
         function renderGame(state: Game) {
             if (!ctx || !state || !gameStarted) return;
             console.log("game id:", state.gameId);
-            const canvasWidth = canvas.width;  // Use dynamic width
-            const canvasHeight = canvas.height; // Use dynamic height
-            const paddleWidth = parseInt(process.env.PADDLE_WIDTH || '10', 10);
-            const paddleHeight = parseInt(process.env.PADDLE_HEIGHT || '60', 10);
-            const ballRadius = parseInt(process.env.BALL_RADIUS || '10', 10);
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
+            const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
+            const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
     
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     
             ctx.fillStyle = 'black';
-            ctx.fillRect(20, state.leftPaddle.y, paddleWidth, paddleHeight);
-            ctx.fillRect(canvasWidth - 20 - paddleWidth, state.rightPaddle.y, paddleWidth, paddleHeight);
+            ctx.fillRect(10, state.leftPaddle.y, paddleWidth, paddleHeight);
+            ctx.fillRect(canvasWidth - 10 - paddleWidth, state.rightPaddle.y, paddleWidth, paddleHeight);
     
             ctx.beginPath();
             ctx.arc(state.ball.x, state.ball.y, ballRadius, 0, Math.PI * 2);

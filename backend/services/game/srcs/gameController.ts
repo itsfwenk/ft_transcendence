@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId, updatePaddleDelta, updatePaddlesInDb, updateGameStatusInDb } from './gameDb.js'
-import { Ball, Paddle, Game } from './gameDb.js'
+import { Ball } from '../gameInterfaces'
 import axios from 'axios';
 import { WebSocket } from "ws";
 import jwt from 'jsonwebtoken';

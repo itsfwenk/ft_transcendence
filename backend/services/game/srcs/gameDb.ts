@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3';
+import { Game, Ball, Paddle } from '../gameInterfaces'
 
 if (!process.env.CANVAS_WIDTH
 		|| !process.env.CANVAS_HEIGHT

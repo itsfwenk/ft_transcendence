@@ -1,5 +1,5 @@
 // src/pages/Home.ts
-import { Game } from "../../../backend/services/game/srcs/gameDb"
+import { Game } from '../../gameInterfaces'
 
 // let gameState : Game;
 // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -20,6 +20,9 @@ export default function game() {
     canvas.id = 'GameCanvas';
     canvas.width = parseInt(process.env.CANVAS_WIDTH as string, 10);
     canvas.height = parseInt(process.env.CANVAS_HEIGHT as string, 10);
+    console.log("canvas width:", canvas.width, "canvas height:", canvas.height);
+    console.log('CANVAS_WIDTH:', process.env.CANVAS_WIDTH);
+    console.log('CANVAS_HEIGHT:', process.env.CANVAS_HEIGHT);
     canvas.classList.add('border-2', 'border-gray-400', 'bg-white');
 
     app.appendChild(canvas);

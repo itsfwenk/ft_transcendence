@@ -16,14 +16,15 @@ services:
   #   env_file: .env
   frontend:
     build: 
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./frontend/Dockerfile
     volumes:
       - ./frontend/dist:/app/dist
-    restart: always
-    tty: true
     env_file: .env
-    command: /bin/bash
+    command: sh -c "npm install && npm run build && /bin/bash"
+    tty: true
+    # command: /bin/bash
+    restart: no
 
   user:
     build: 
@@ -41,8 +42,8 @@ services:
 
   game:
     build:
-      context: ./backend
-      dockerfile: services/game/Dockerfile
+      context: ./
+      dockerfile: ./backend/services/game/Dockerfile
     ports:
       - "${GAME_SERVICE_PORT}:4002"
       - "9232:9232"

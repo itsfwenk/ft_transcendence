@@ -2,16 +2,20 @@ FROM node:20-bullseye-slim
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY ./frontend/package*.json ./
 RUN npm install
-COPY . .
+RUN npm cache clean --force
+RUN npm install dotenv
+COPY ./frontend .
+COPY gameInterfaces.ts ./
 RUN npm install --save-dev @types/node
 
+# RUN npm run build
+# CMD ["npm", "run", "build"]
 # CMD ["tail", "-f", "/dev/null"]
 
-# RUN npm run build
 
-
+###########################################################
 # FROM node:20-bullseye AS base
 # WORKDIR /app
 # COPY ./package*.json ./

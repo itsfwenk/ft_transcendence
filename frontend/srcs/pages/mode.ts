@@ -28,13 +28,46 @@ export default function mode() {
 	const app = document.getElementById('app');
 	if (app) {
 		app.innerHTML = /*html*/`
-		<div class="flex flex-col items-center justify-center min-h-screen">
-			<h1 class="text-3xl font-bold text-blue-600 mb-4">Bienvenue sur Pong Game</h1>
-			<form id="loginForm" class="space-y-4">
-			<button type="button" id="localBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Play 1v1 local</button>
-			<button type="button" id="onlineBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Play 1v1 online</button>
-			<button type="button" id="tournamentBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Play tournament</button>
-			</form>
+		<!-- component -->
+
+
+		<div class="text-black font-jaro text-9xl mt-16 mb-36">Pong Game</div>
+		<div class="flex justify-center items-center gap-9">
+			<div id="localBtn"class='button h-36 w-80 bg-red-600 rounded-lg cursor-pointer select-none
+			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
+			hover:border-b-[0px]
+			transition-all duration-150 [box-shadow:0_10px_0_0_#c7181f,0_15px_0_0_#1b70f841]
+			border-b-[1px] border-red-400'>
+				<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-5xl '>1v1 local</span>
+			</div>
+			<!-- <button type="button" id="localBtn" class="text-5xl h-36 font-jaro w-80 bg-red-600  hover:bg-red-700  hover:outline-none focus:outline-none text-white px-4 py-2 rounded">1v1 local</button> -->
+			<div id="onlineBtn"class='button h-36 w-80 bg-red-600 rounded-lg cursor-pointer select-none
+			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
+			hover:border-b-[0px]
+			transition-all duration-150 [box-shadow:0_10px_0_0_#c7181f,0_15px_0_0_#1b70f841]
+			border-b-[1px] border-red-400'>
+				<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-5xl '>1v1 online</span>
+			</div>
+			<!-- <button type="button" id="onlineBtn" class="text-5xl h-36 font-jaro w-80 bg-red-600  hover:bg-red-700  hover:outline-none focus:outline-none text-white px-4 py-2 rounded">1v1 online</button> -->
+		</div>
+		<div class="flex flex-col justify-center items-center">
+			<div id="tournamentBtn" class='button mt-6 h-36 w-170 bg-blue-700 rounded-lg cursor-pointer select-none
+			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
+			hover:border-b-[0px]
+			transition-all duration-150 [box-shadow:0_10px_0_0_#193cb8,0_15px_0_0_#1b70f841]
+			border-b-[1px] border-blue-400'>
+				<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-5xl'>Tournament</span>
+			</div>
+			<!-- <button type="button" id="tournamentBtn" class="text-6xl h-36 font-jaro w-170 mt-6 bg-blue-700 hover:bg-blue-800 hover:outline-none focus:outline-none text-white px-4 py-2 rounded">Tournament</button> -->
+
+			<div id="backBtn" class='button w-24 h-13 mt-10 bg-gray-700 rounded-full cursor-pointer select-none
+			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
+			hover:border-b-[0px]
+			transition-all duration-150 [box-shadow:0_10px_0_0_#181818,0_15px_0_0_#1b70f841]
+			border-b-[1px] border-gray-400'>
+				<span class='flex flex-col justify-center items-center h-full text-white font-jaro'>Back</span>
+			</div>
+			<!-- <button id="disconnectBtn" type="button" class="font-jaro w-24 h-13 mt-10 border border-black rounded-md font-medium text-white bg-black hover:bg-gray-900 focus:outline-none">back</button> -->
 		</div>
 		`;
 
@@ -123,5 +156,12 @@ export default function mode() {
 		history.pushState(null, '', '/queue_tournament');
 		window.dispatchEvent(new PopStateEvent('popstate'));
 	});
+
+	const backBtn = document.getElementById('backBtn');
+	backBtn?.addEventListener('click', () => {
+		history.pushState(null, '', '/menu');
+		window.dispatchEvent(new PopStateEvent('popstate'));
+	});
+
     }
 }

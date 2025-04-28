@@ -281,7 +281,7 @@ interface MatchmakingMessage {
 	payload?: any;
 }
 
-//Message du back vers le front
+//diffusion d'un etat a tous les joueurs
 function broadcastTournamentState(tournament: Tournament) {
 	const message = JSON.stringify({
 		type: 'tournament_state_update',
@@ -300,12 +300,13 @@ function broadcastTournamentState(tournament: Tournament) {
 	}
 }
 
+// message provenant du front vers le back
 export async function handleMatchmakingMessage(
 	msg: MatchmakingMessage,
 	playerId: string,
 	clients: Map<string, WebSocket>
   ) {
-	// message provenant du front vers le back
+
 	switch (msg.action) {
 		case 'join_1v1':
 			console.log(`[MM] ${playerId} rejoint la file 1v1`);
@@ -332,9 +333,7 @@ export async function handleMatchmakingMessage(
 					}
 				}, 5000);
 			}
-			break;
-		case 'semi_final_end':
-			
+			break;		
 		
 		case 'leave_tournament':
 			console.log(`[MM] ${playerId} quitte la file tournoi`);

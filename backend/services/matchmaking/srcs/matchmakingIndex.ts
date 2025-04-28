@@ -4,7 +4,7 @@ import swaggerUI from '@fastify/swagger-ui';
 import matchmakingRoutes from './matchmakingRoutes.js';
 import { WebSocket } from "ws";
 import websocket from '@fastify/websocket';
-import { handleMatchmakingMessage } from './matchmakingController';
+
 
 
 

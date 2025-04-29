@@ -5,7 +5,7 @@ export default function login() {
 	const app = document.getElementById('app');
 	if (app) {
 	  app.innerHTML = /*html*/`
-		<div class="text-black font-jaro text-9xl mt-16">Pong Game</div>
+		<div class="text-black font-jaro text-9xl mt-16 select-none">Pong Game</div>
 		<form id="loginForm" class="flex">
 			<input type="email" id="email" name="email" placeholder="email" required class="mt-44 ml-78 block px-3 py-2 bg-white border border-black text-black rounded-md focus:outline-none">
 			<input type="password" id="password" name="password" placeholder="password" required class="mt-44 ml-6 block px-3 py-2 bg-white border border-black text-black rounded-md focus:outline-none">
@@ -20,7 +20,7 @@ export default function login() {
 
       const loginForm = document.getElementById('loginForm') as HTMLFormElement;
       const errorMessage = document.getElementById('errorMessage') as HTMLDivElement;
-      
+
       loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         

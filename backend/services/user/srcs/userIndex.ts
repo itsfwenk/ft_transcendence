@@ -12,6 +12,8 @@ import cors from '@fastify/cors';
 
 import websocket from '@fastify/websocket';
 import { handleWebSocketConnection } from './WebsocketHandler.js';
+import fastifyStatic from '@fastify/static';
+
 dotenv.config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 
 const app = Fastify();
@@ -38,6 +40,12 @@ app.register(fastifyCookie, {
 
 // Configurer JWT
 //app.register(jwt, { secret: 'supersecretkey' });
+
+app.register(fastifyStatic, {
+	root: '/app/public/avatars',
+	prefix: '/avatars/',
+	decorateReply: false
+});
 
 app.register(jwt, {
 	secret: process.env.JWT_SECRET!,
@@ -120,16 +128,16 @@ app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	// console.log(process.env.CORS_ORIGIN);
 });
 
-app.get('/avatars/:filename', (request, reply) => {
-	const { filename } = request.params as { filename: string };
-	const avatarsDir = '/app/public/avatars';
-	const filePath = path.join(avatarsDir, filename);
+// app.get('/avatars/:filename', (request, reply) => {
+// 	const { filename } = request.params as { filename: string };
+// 	const avatarsDir = '/app/public/avatars';
+// 	const filePath = path.join(avatarsDir, filename);
 
-	fs.access(filePath, fs.constants.F_OK, (err) => {
-		if (err) {
-			return (reply as any).sendFile('default.png', avatarsDir);
-		}
-		(reply as any).sendFile(filename, avatarsDir);
-	});
-});
+// 	fs.access(filePath, fs.constants.F_OK, (err) => {
+// 		if (err) {
+// 			return (reply as any).sendFile('default.png', avatarsDir);
+// 		}
+// 		(reply as any).sendFile(filename, avatarsDir);
+// 	});
+// });
 

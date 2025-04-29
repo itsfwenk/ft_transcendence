@@ -8,7 +8,7 @@ import { pipeline } from "stream";
 const pump = util.promisify(pipeline);
 
 const AVATARS_STORAGE_DIR = '/app/public/avatars';
-const AVATARS_URL_PREFIX = '/avatars';
+const AVATARS_URL_PREFIX = 'http://localhost:4000/avatars';
 const DEFAULT_AVATAR_URL = `${AVATARS_URL_PREFIX}/default.png`;
 
 interface UploadAvatarRequest extends FastifyRequest {

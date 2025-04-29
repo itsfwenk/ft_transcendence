@@ -2,7 +2,7 @@ export default function createAccount() {
 	const app = document.getElementById('app');
 	if (app) {
 	  app.innerHTML = /*html*/`
-		<div class="text-black font-jaro text-9xl mt-16 mb-28">Pong Game</div>
+		<div class="text-black font-jaro text-9xl mt-16 mb-28 select-none">Pong Game</div>
 		<form id="registerForm" class="flex flex-col gap-6 justify-center items-center">
 			<input id="username" type="username" id="username" name="username" placeholder="username" required class="h-10 pl-2 w-1/3 bg-white border border-black text-black rounded-md focus:outline-none">
 			<input id="email" type="email" id="email" name="email" placeholder="email" required class="h-10 pl-2 w-1/3 bg-white border border-black text-black rounded-md focus:outline-none">

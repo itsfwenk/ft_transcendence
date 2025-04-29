@@ -31,7 +31,7 @@ export default function mode() {
 		<!-- component -->
 
 
-		<div class="text-black font-jaro text-9xl mt-16 mb-36">Pong Game</div>
+		<div class="text-black font-jaro text-9xl mt-16 mb-36 select-none">Pong Game</div>
 		<div class="flex justify-center items-center gap-9">
 			<div id="localBtn"class='button h-36 w-80 bg-red-600 rounded-lg cursor-pointer select-none
 			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]

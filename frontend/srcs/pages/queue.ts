@@ -4,7 +4,7 @@ export default async function Queue() {
 	const app = document.getElementById('app');
 	if (!app) return;
   
-	app.innerHTML = `
+	app.innerHTML = /*html*/`
 	  <div class="flex flex-col items-center justify-center min-h-screen">
 		<h1 class="text-3xl font-bold mb-4">Lobby Matchmaking</h1>
 		<p class="text-gray-700">Recherche d'un adversaire...</p>

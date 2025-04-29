@@ -6,7 +6,7 @@ console.log('[Tournament] Module chargé');
 export default function Tournament_mgt() {
     const app = document.getElementById('app');
     if (app) {
-      app.innerHTML = `
+      app.innerHTML = /*html*/`
         <div class="flex flex-col items-center justify-center min-h-screen">
 			<h1 class="text-3xl font-bold text-blue-600 mb-4">Lancer le tournoi</h1>
           <form id="loginForm" class="space-y-4">
@@ -30,7 +30,7 @@ export function updateTournamentUI(state: TournamentState) {
 
 	switch (state) {
 		case 'tournament_launch':
-			app.innerHTML = `
+			app.innerHTML = /*html*/`
 				<h2>Tournoi pret dans... 5, 4, 3,1, 1</h2>`;
 			break;
 		default:
@@ -47,7 +47,7 @@ export function updatePlayerStateUI(state: string) {
   
 	switch (state) {
 		case 'eliminated':
-			app.innerHTML = `
+			app.innerHTML = /*html*/`
 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
 					<h2 class="text-2xl font-bold mb-4">Dommage, vous êtes éliminé !</h2>
 					<p class="text-gray-600">Vous pourrez retenter votre chance la prochaine fois.</p>
@@ -66,7 +66,7 @@ export function updatePlayerStateUI(state: string) {
 		  break;
 	  
 		case 'winner':
-			app.innerHTML = `
+			app.innerHTML = /*html*/`
 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
 					<h2 class="text-2xl font-bold mb-4">Bravo, vous avez gagné le tournoi !</h2>
 					<p class="text-gray-600">Vous êtes le champion. Félicitations&nbsp;!</p>
@@ -76,7 +76,7 @@ export function updatePlayerStateUI(state: string) {
 		  break;
 	  
 		default:
-			app.innerHTML = `
+			app.innerHTML = /*html*/`
 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
 					<h2 class="text-2xl font-bold mb-4">Votre état joueur : ${state}</h2>
 					<p class="text-gray-600">En attente d'informations supplémentaires.</p>

@@ -41,7 +41,8 @@ export default function login() {
 			});
 	
 			if (!response.ok) {
-			  throw new Error('Échec de connexion');
+			  const errorBody = await response.json();
+			  throw new Error(errorBody.error);
 			}
 	
 			const data = await response.json();
@@ -57,7 +58,7 @@ export default function login() {
 			window.dispatchEvent(new PopStateEvent('popstate'));
 		} catch (error) {
 			console.error("Erreur de login:", error);
-			
+			errorMessage.textContent = error as string;
 			errorMessage.classList.remove('hidden');
 		}
       });

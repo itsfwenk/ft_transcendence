@@ -105,6 +105,18 @@ export default async function Queue() {
     return;
   }
 
+function cleanupMatchmaking() {
+if (ws && ws.readyState === WebSocket.OPEN) {
+	console.log("Envoi du message de départ de la file d'attente");
+	ws.send(JSON.stringify({
+	action: "leave_1v1",
+	payload: {}
+	}));
+	
+	ws.removeEventListener('message', handleMessage);
+	}
+}
+
   async function handleMessage(event: MessageEvent) {
     try {
       const data = JSON.parse(event.data);
@@ -126,6 +138,7 @@ export default async function Queue() {
       }
       
       if (data.type === 'launch_1v1' && data.gameSessionId) {
+		cleanupMatchmaking();
         history.pushState(null, '', `/game?gameSessionId=${data.gameSessionId}`);
         window.dispatchEvent(new PopStateEvent('popstate'));
       }
@@ -133,6 +146,12 @@ export default async function Queue() {
       console.error("Erreur lors du traitement du message:", error);
     }
   }
+
+  const handlePageUnload = () => {
+	cleanupMatchmaking();
+  }
+
+  window.addEventListener('beforeunload', handlePageUnload);
 
   ws.addEventListener('message', handleMessage);
   
@@ -143,16 +162,8 @@ export default async function Queue() {
 
   const backBtn = document.getElementById('backBtn');
   backBtn?.addEventListener('click', () => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-        action: "leave_1v1",
-        payload: {}
-      }));
-      
-      ws.removeEventListener('message', handleMessage);
-    }
-    
-    history.pushState(null, '', '/mode');
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  });
+	  cleanupMatchmaking();
+	  history.pushState(null, '', '/mode');
+	  window.dispatchEvent(new PopStateEvent('popstate'));
+    });
 }

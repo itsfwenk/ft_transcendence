@@ -1,4 +1,6 @@
 import { fetchUserProfile } from "./mode";
+import { fetchUserAvatar } from "./queue";
+import { getMatchmakingSocket } from "../wsClient";
 
 export default async function Queuetournament() {
 	const app = document.getElementById('app');
@@ -19,4 +21,24 @@ export default async function Queuetournament() {
 	}
 	const currentPlayerId = userProfile.userId;
 	console.log("currentPlayerId:", currentPlayerId);
+
+	const currentPlayerAvatar = await fetchUserAvatar(currentPlayerId);
+	console.log("Avatar de l'utilisateur actuel:", currentPlayerAvatar);
+
+	const ws = getMatchmakingSocket();
+		if (!ws || ws.readyState !== WebSocket.OPEN) {
+			console.error("Pas de connexion WebSocket disponible");
+			return;
+		}
+	
+		function cleanupMatchmaking() {
+			if (ws && ws.readyState === WebSocket.OPEN) {
+				console.log("Envoi du message de départ de la file d'attente");
+				ws.send(JSON.stringify({
+					action: 'leave_tournament_queue',
+					payload: {playerId: currentPlayerId}
+				}));
+				ws.removeEventListener('message', handleMessage);
+			}
+		}
 }

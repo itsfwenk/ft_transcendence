@@ -34,6 +34,17 @@ export async function joinQueue1v1(playerId: string) {
 	console.log(queue1v1);
 }
 
+export async function leaveQueue1v1(playerId: string) {
+	const idx = queue1v1.indexOf(playerId);
+	if (idx === -1) {
+	  console.warn(`Le joueur ${playerId} n’est pas dans la queue 1v1`);
+	  return;
+	}
+	queue1v1.splice(idx, 1);
+	console.log(`Joueur ${playerId} retiré de la queue 1v1`);
+	console.log('Queue 1v1 actuelle :', queue1v1);
+}
+
 //join tournament 1
 export async function joinTournamentQueue(playerId: string) {
 	if (queueTournament.includes(playerId)) {
@@ -43,6 +54,17 @@ export async function joinTournamentQueue(playerId: string) {
 	queueTournament.push(playerId);
 	setPlayerState(playerId, 'in_queue');
 	console.log("queueTournament:", queueTournament);
+}
+
+export async function leaveTournamentQueue(playerId: string) {
+	const idx = queueTournament.indexOf(playerId);
+	if (idx === -1) {
+	  console.warn(`Le joueur ${playerId} n’est pas dans la queue Tournament`);
+	  return;
+	}
+	queueTournament.splice(idx, 1);
+	console.log(`Joueur ${playerId} retiré de la queue Tournament`);
+	console.log('Queue Tournament actuelle :', queueTournament);
 }
 
 export async function  launchMatch(matchId: string): Promise<Match | undefined> {
@@ -306,8 +328,10 @@ export async function handleMatchmakingMessage(
 	playerId: string,
 	clients: Map<string, WebSocket>
   ) {
-
-	switch (msg.action) {
+	
+	const action = msg.action.trim();
+	console.log('ACTION =', JSON.stringify(action));
+	switch (action) {
 		case 'join_1v1':
 			console.log(`[MM] ${playerId} rejoint la file 1v1`);
 			joinQueue1v1(playerId);
@@ -334,11 +358,14 @@ export async function handleMatchmakingMessage(
 				}, 5000);
 			}
 			break;		
-		
 		case 'leave_tournament':
 			console.log(`[MM] ${playerId} quitte la file tournoi`);
 			break;
-  
+		case 'leave_1v1_queue':
+			leaveQueue1v1(msg.payload.playerId);
+		case 'leave_tournament_queue':
+			leaveTournamentQueue(msg.payload.playerId);
+			break;
 		default:
 			console.warn(`[MM] Action inconnue : ${msg.action}`);
 			const ws = clients.get(playerId);

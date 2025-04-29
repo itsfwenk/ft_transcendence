@@ -385,7 +385,12 @@ async function broadcastGameToPlayers(gameId: string) {
 		if (gameSet?.has(userId)) {
 			const socket = activeUsers.get(userId);
 			if (socket) {
-				socket.send(JSON.stringify(game));
+				const message = {
+                    type: 'game_update',
+                    game_state: game,
+                };
+				// console.log("from broadcastGameToPlayers :", JSON.stringify(message));
+				socket.send(JSON.stringify(message));
 			}
 		}
 	});

@@ -18,11 +18,11 @@ export default function game() {
 
     const canvas = document.createElement('canvas');
     canvas.id = 'GameCanvas';
-    canvas.width = parseInt(process.env.CANVAS_WIDTH as string, 10);
-    canvas.height = parseInt(process.env.CANVAS_HEIGHT as string, 10);
-    console.log("canvas width:", canvas.width, "canvas height:", canvas.height);
-    console.log('CANVAS_WIDTH:', process.env.CANVAS_WIDTH);
-    console.log('CANVAS_HEIGHT:', process.env.CANVAS_HEIGHT);
+    canvas.width = parseInt(import.meta.env.VITE_CANVAS_WIDTH as string, 10);
+    canvas.height = parseInt(import.meta.env.VITE_CANVAS_HEIGHT as string, 10);
+    // console.log("canvas width:", canvas.width, "canvas height:", canvas.height);
+    // console.log('CANVAS_WIDTH:', process.env.CANVAS_WIDTH);
+    // console.log('CANVAS_HEIGHT:', process.env.CANVAS_HEIGHT);
     canvas.classList.add('border-2', 'border-gray-400', 'bg-white');
 
     app.appendChild(canvas);
@@ -98,6 +98,7 @@ export default function game() {
         try {
             const data = JSON.parse(event.data);
             console.log("datatype =", data.type);
+            console.log("data :", data);
             if (data.type === 'game_start') {
                 console.log("Le jeu a démarré!");
                 gameStarted = true;
@@ -107,12 +108,12 @@ export default function game() {
                 if (lancerBtn) {
                     lancerBtn.style.display = 'none'; // Hide the button once the game starts
                 }
-            } else if (gameStarted && data.ball) {
+            } else if (gameStarted && data.type === 'game_update' && data.game_state.ball) {
                 // currentGameState = data;
-                renderGame(data as Game); //  Call renderGame
-            } else if (data.status === 'finished') {
+                renderGame(data.game_state as Game); //  Call renderGame
+            } else if (data.type === 'game_update' && data.game_state.status === 'finished') {
                 // currentGameState = data;
-                renderGame(data as Game);
+                renderGame(data.game_state as Game);
                 if (gameStateLabel) {
                     gameStateLabel.textContent = "Partie terminée!";
                 }
@@ -175,10 +176,10 @@ export default function game() {
             console.log("game id:", state.gameId);
             const canvasWidth = canvas.width;
             const canvasHeight = canvas.height;
-            const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
-            const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
-            const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
-    
+            const paddleWidth = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
+            const paddleHeight = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
+            const ballRadius = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
+            console.log("paddleWidth :", paddleWidth, "paddleHeight :", paddleHeight, "ballRadius :", ballRadius);
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     
             ctx.fillStyle = 'black';

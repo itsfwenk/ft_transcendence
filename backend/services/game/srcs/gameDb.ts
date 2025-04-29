@@ -151,7 +151,7 @@ export function updateGameScore(gameId: string, score1: number, score2: number) 
 // 	}
 // }
 
-export function endGameInDb(gameId: number): Game | null {
+export function endGameInDb(gameId: string): Game | null {
 	const game = db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | undefined;
 	if (!game) return null;
 

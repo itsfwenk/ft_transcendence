@@ -21,9 +21,9 @@ const playerIdSchema: FastifySchema = {
 const tournamentIdSchema: FastifySchema = {
 	params: {
 	  type: 'object',
-	  required: ['tournamentId'],
+	  required: ['tournament_Id'],
 	  properties: {
-		tournamentId: { type: 'string' },
+		tournament_Id: { type: 'string' },
 	  }
 	}
 };
@@ -106,8 +106,10 @@ export default async function matchmakingRoutes(fastify: any) {
 		  score2: number;
 		  winner_id: string;
 		};
+		console.log("matchId, score1, score2, winner_id", matchId, score1, score2, winner_id);
 		const updatedMatch = updateMatch(matchId, score1, score2, winner_id);
-		onMatchCompleted(updatedMatch.tournamentId, matchId);
+		console.log("updated Match", updatedMatch);
+		onMatchCompleted(matchId);
 		reply.send({ success: true, updatedMatch });
 	})
 	fastify.get('/tournament/match/:matchId', { schema: matchIdSchema }, async (request:FastifyRequest<{ Params: { matchId: string } }>, reply:FastifyReply) => {
@@ -127,25 +129,26 @@ export default async function matchmakingRoutes(fastify: any) {
 		const startTournament = await attemptTournament();
   		reply.send({ success: true, tournament: startTournament });
 	})
-	fastify.get('/tournament/:tournamentId', { schema: tournamentIdSchema }, async (request:FastifyRequest<{ Params: { tournamentId: string } }>, reply:FastifyReply) => {
-		const { tournamentId } = request.params as {tournamentId: string};
-		const tournament = getTournamentById(tournamentId);
-		if (!tournament) return reply.status(404).send({ error: 'Tournament not found' });
-		reply.send(tournament);
-	})
+	fastify.get('/tournament/:tournament_Id', { schema: tournamentIdSchema },
+		async (request: FastifyRequest<{ Params: { tournament_Id: string } }>, reply: FastifyReply) => {
+		  const { tournament_Id } = request.params;
+		  const tournament = getTournamentById(tournament_Id);
+		  if (!tournament) return reply.status(404).send({ error: 'Tournament not found' });
+		  reply.send(tournament);
+	  });
 	fastify.post('/tournament/match/start/:matchId', { schema: matchIdSchema }, async (request:FastifyRequest<{ Params: { matchId: string } }>, reply:FastifyReply) => {
 		const { matchId } = request.params as { matchId: string;};
 		const match = await launchMatch(matchId); //revoir pourquoi await
   		reply.send({ success: true, Match: match });
 	})
-	fastify.post('/tournament/final/prepare/:tournamentId', { schema: tournamentIdSchema }, async (request:FastifyRequest, reply:FastifyReply) => {
-		const { tournamentId } = request.params as { tournamentId: string};
-		const prepare = scheduleFinal(tournamentId);
+	fastify.post('/tournament/final/prepare/:tournament_Id', { schema: tournamentIdSchema }, async (request:FastifyRequest, reply:FastifyReply) => {
+		const { tournament_Id } = request.params as { tournament_Id: string};
+		const prepare = scheduleFinal(tournament_Id);
   		reply.send({ success: true, prepare });
 	})
-	fastify.post('/tournament/end/:tournamentId', { schema: tournamentIdSchema }, async (request:FastifyRequest, reply:FastifyReply) => {
-		const { tournamentId } = request.params as {tournamentId: string};
-		finishTournament(tournamentId);
+	fastify.post('/tournament/end/:tournament_Id', { schema: tournamentIdSchema }, async (request:FastifyRequest, reply:FastifyReply) => {
+		const { tournament_Id } = request.params as {tournament_Id: string};
+		finishTournament(tournament_Id);
   		reply.send({ success: true});
 	})
 // YOYO

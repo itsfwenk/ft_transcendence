@@ -162,11 +162,11 @@ export async function updateBallPosition(gameId: string) {
 		ball.x += ball.dx;
 		ball.y += ball.dy;
 		// Check top-bottom collisions
-		if (ball.y - ball.radius <= 0) {
+		if (ball.y - ballRadius <= 0) {
 			ball.dy *= -1;
 			ball.y += 3;
 		}
-		else if (ball.y  + ball.radius >= game.canvasHeight) {
+		else if (ball.y  + ballRadius >= game.canvasHeight) {
 			ball.dy *= -1;
 			ball.y -= 3;
 		}
@@ -179,7 +179,7 @@ export async function updateBallPosition(gameId: string) {
 		let leftPaddle = game.leftPaddle;
 
 		if (
-			ball.x - ball.radius <= leftPaddle.x + paddleWidth &&
+			ball.x - ballRadius <= leftPaddle.x + paddleWidth &&
 			ball.y >= leftPaddle.y && ball.y <= leftPaddle.y + paddleHeight
 		) {
 			let relativeIntersectY = ball.y - (leftPaddle.y + paddleHeight / 2);
@@ -198,7 +198,7 @@ export async function updateBallPosition(gameId: string) {
 		// 	console.error(`Error with right paddle`)
 		let rightPaddle = game.rightPaddle;
 		if (
-			ball.x + ball.radius >= rightPaddle.x &&
+			ball.x + ballRadius >= rightPaddle.x &&
 			ball.y >= rightPaddle.y && ball.y <= rightPaddle.y + paddleHeight
 		) {
 			let relativeIntersectY = ball.y - (rightPaddle.y + paddleHeight / 2);

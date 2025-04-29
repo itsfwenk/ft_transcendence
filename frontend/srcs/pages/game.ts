@@ -182,13 +182,14 @@ export default function game() {
             console.log("paddleWidth :", paddleWidth, "paddleHeight :", paddleHeight, "ballRadius :", ballRadius);
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     
-            ctx.fillStyle = 'black';
-            ctx.fillRect(10, state.leftPaddle.y, paddleWidth, paddleHeight);
-            ctx.fillRect(canvasWidth - 10 - paddleWidth, state.rightPaddle.y, paddleWidth, paddleHeight);
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(0, state.leftPaddle.y, paddleWidth, paddleHeight);
+            ctx.fillStyle = 'red';
+            ctx.fillRect(canvasWidth - paddleWidth, state.rightPaddle.y, paddleWidth, paddleHeight);
     
             ctx.beginPath();
             ctx.arc(state.ball.x, state.ball.y, ballRadius, 0, Math.PI * 2);
-            ctx.fillStyle = 'red';
+            ctx.fillStyle = 'black';
             ctx.fill();
             ctx.closePath();
     

@@ -40,8 +40,8 @@ export default async function gameRoutes(fastify: FastifyInstance, options: Fast
 	fastify.get('/:gameId', getGame );
 	fastify.put('/:gameId/score', { schema: updateScoreSchema }, updateScore);
 	fastify.post('/:gameId/end', endGame);
-	fastify.get('/ws', { websocket: true }, (connection, req) => {
-		console.log("Websocket route triggered");
-		websocketHandshake(connection, req)
-	});
+	// fastify.get('/ws', { websocket: true }, (connection, req) => {
+	// 	console.log("Websocket route triggered");
+	// 	websocketHandshake(connection, req)
+	// });
 }

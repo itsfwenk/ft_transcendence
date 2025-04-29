@@ -28,8 +28,10 @@ const routes: { [key: string]: () => void } = {
 };
 
 export function initRouter() {
+  console.log("INIT ROUTER CALLED");
   function router() {
     const path = window.location.pathname;
+    console.log("path :", path);
     const pageRenderer = routes[path];
     const app = document.getElementById('app');
     if (app && pageRenderer) {
@@ -46,6 +48,7 @@ export function initRouter() {
       e.preventDefault();
       const url = new URL(target.href);
       history.pushState(null, '', url.pathname);
+      console.log("ROUTER url.pathname :", url.pathname);
       router();
     }
   });

@@ -65,17 +65,17 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 					window.dispatchEvent(new PopStateEvent('popstate'));
 					break;
 				case 'launch_tournament':
-					const tournamentId = msg.payload?.tournament?.id;
-					if (tournamentId) {
-						console.log("Tournoi lancé avec ID :", tournamentId);
-						history.pushState(null, '', `/tournament?tournamentId=${tournamentId}`);
+					const tournament_Id = msg.payload?.tournament?.id;
+					if (tournament_Id) {
+						console.log("Tournoi lancé avec ID :", tournament_Id);
+						history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
 						window.dispatchEvent(new PopStateEvent('popstate'));
 					}
 					break;
 				case 'tournament_state_update':
 					const {state, tournament} = msg.payload;
-					const tournamentId2 = tournament.id;
-					history.pushState(null, '', `/tournament?tournamentId=${tournamentId2}`);
+					const tournament_Id2 = tournament.id;
+					history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id2}`);
 					window.dispatchEvent(new PopStateEvent('popstate'));
 					currentTournamentState = state;
 					currentTournamentData = tournament;
@@ -89,10 +89,15 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 					break;
 				case 'player_state_update':
 					const {state: playerState, tournament: playerTournament} = msg.payload;
-					history.pushState(null, '', `/tournament?tournamentId=${playerTournament.id}`);
+					history.pushState(null, '', `/tournament?tournament_Id=${playerTournament.id}`);
 					window.dispatchEvent(new PopStateEvent('popstate'));
 					console.log("player_state", playerState);
 					handlePlayerStateUpdate(playerState);
+					break;
+				case 'match_end':
+					const {winner_Id, score1, score2} = msg.payload;
+					const isWinner = winner_Id === userId;
+					show1v1ResultScreen(isWinner, {score1, score2});
 					break;
 				default:
 					break;
@@ -126,4 +131,32 @@ function handlePlayerStateUpdate(playerState: string) {
 	console.log("Nouveau playerState =", currentPlayerState);
 	updatePlayerStateUI(currentPlayerState);
 }
+
+function show1v1ResultScreen(
+	isWinner: boolean,
+	scores: { score1: number; score2: number }
+  ) {
+	const app = document.getElementById('app');
+	if (!app) return;
+  
+	app.innerHTML = `
+	  <div class="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
+		<h2 class="text-3xl font-bold mb-4">
+		  ${isWinner ? '🎉 Victoire !' : '😢 Défaite'}
+		</h2>
+  
+		<p class="mb-6 text-lg">Score : ${scores.score1} – ${scores.score2}</p>
+  
+		<button id="backBtn"
+				class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">
+		  Retour au menu
+		</button>
+	  </div>
+	`;
+  
+	document.getElementById('backBtn')?.addEventListener('click', () => {
+		history.pushState(null, '', '/menu');
+		window.dispatchEvent(new PopStateEvent('popstate'));
+	});
+  }
   

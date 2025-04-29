@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3';
+import { Game, Ball, Paddle } from '../gameInterfaces'
 
 if (!process.env.CANVAS_WIDTH
 		|| !process.env.CANVAS_HEIGHT
@@ -10,38 +11,40 @@ if (!process.env.CANVAS_WIDTH
 
 const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
 const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
-const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
+// const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
 const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
 const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
 const paddleBasePosition = canvasHeight / 2 - paddleHeight / 2;
 
-export interface Ball {
-	x: number;
-	y: number;
-	radius: number;
-	dx: number;
-	dy: number
-}
+// export interface Ball {
+// 	x: number;
+// 	y: number;
+// 	radius: number;
+// 	dx: number;
+// 	dy: number
+// }
 
-export interface Paddle {
-	x: number;
-	y: number;
-	dy: number
-}
+// export interface Paddle {
+// 	x: number;
+// 	y: number;
+// 	dy: number
+// }
 
-export interface Game {
-	gameId: string;
-	player1_id: string;
-	player2_id: string;
-	score1: number;
-	score2: number;
-	leftPaddle: Paddle;
-	rightPaddle: Paddle;
-	ball: Ball;
-	status: 'ongoing' | 'finished';
-	winner_id?: string | null;
-	matchId?: string | null;
-}
+// export interface Game {
+// 	gameId: string;
+// 	player1_id: string;
+// 	player2_id: string;
+// 	score1: number;
+// 	score2: number;
+// 	leftPaddle: Paddle;
+// 	rightPaddle: Paddle;
+// 	ball: Ball;
+// 	status: 'waiting' | 'ongoing' | 'finished';
+// 	winner_id?: string | null;
+// 	matchId?: string | null;
+// 	canvasWidth: number;
+// 	canvasHeight: number;
+// }
 
 //const games: Game[] = [];
 
@@ -62,9 +65,11 @@ db.exec(`
 	  leftPaddle TEXT NOT NULL DEFAULT '{"x": 0, "y": ${paddleBasePosition}, "dy": 0}',
 	  rightPaddle TEXT NOT NULL DEFAULT '{"x": ${canvasWidth - 10}, "y": ${paddleBasePosition}, "dy": 0}',
 	  ball TEXT NOT NULL DEFAULT '{"x": ${canvasWidth / 2}, "y": ${canvasHeight / 2}, "radius": ${ballRadius}, "dx": ${Math.random() > 0.5 ? 3 : -3}, "dy": ${Math.random() > 0.5 ? 3 : -3}}',
-	  status TEXT CHECK(status IN ('ongoing', 'finished')) DEFAULT 'ongoing',
+	  status TEXT CHECK(status IN ('waiting', 'ongoing', 'finished')) DEFAULT 'waiting',
 	  winner_id STRING NULL,
-	  matchId TEXT NULL
+	  matchId TEXT NULL,
+	  canvasWidth INTEGER DEFAULT ${canvasWidth},
+	  canvasHeight INTEGER DEFAULT ${canvasHeight}
 	);
 `);
 
@@ -102,9 +107,11 @@ export async function getGamebyId(gameId: string): Promise<Game | null> {
 			leftPaddle: JSON.parse(row.leftPaddle),
 			rightPaddle: JSON.parse(row.rightPaddle),
 			ball: JSON.parse(row.ball),
-			status: row.status as 'ongoing' | 'finished',
+			status: row.status as 'waiting' | 'ongoing' | 'finished',
 			winner_id: row.winner_id,
-			matchId: row.matchId
+			matchId: row.matchId,
+			canvasWidth: row.canvasWidth, 
+			canvasHeight: row.canvasHeight
 		};
 
 		return game;
@@ -130,7 +137,21 @@ export function updateGameScore(gameId: string, score1: number, score2: number) 
 	return null;
 }
 
-export function endGameInDb(gameId: number): Game | null {
+// export function updateGameCanvas(gameId: string, canvasWidth: number, canvasHeight: number) {
+// 	try {
+// 		const stmt = db.prepare (`
+// 			UPDATE games
+// 			SET canvasWidth = ?, canvasHeight = ?
+// 			WHERE gameId = ?
+// 		`);
+// 		stmt.run(canvasWidth, canvasHeight, gameId);
+// 	}
+// 	catch (err) {
+// 		console.error('Error updating game canvas in the database:', err);
+// 	}
+// }
+
+export function endGameInDb(gameId: string): Game | null {
 	const game = db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | undefined;
 	if (!game) return null;
 
@@ -164,13 +185,26 @@ export async function updateBallPositionInDb(gameId: string, ball: Ball) {
 
 export async function getAllGamesId() : Promise<{ gameId: string }[]> {
 	try {
-		const stmt = db.prepare('SELECT gameId FROM games');
-		const allIds : { gameId: string }[] = stmt.all() as { gameId: string }[];
+		const stmt = db.prepare('SELECT gameId FROM games WHERE status = ?');
+		const allIds : { gameId: string }[] = stmt.all('ongoing') as { gameId: string }[];
 		return allIds;
 	  } catch (error) {
 		console.error('Error fetching game Ids:', error);
 		return [];
 	  }
+}
+
+export async function updateGameStatusInDb(gameId: string, status: string) {
+	try {
+		const stmt = db.prepare (`
+			UPDATE games
+			SET status = ?
+			WHERE gameId = ?
+		`)
+		stmt.run(status, gameId);
+	} catch (err) {
+	console.error('Error updating game status in the database:', err);
+	}
 }
 
 export async function updatePaddlesInDb(gameId: string) {
@@ -182,8 +216,10 @@ export async function updatePaddlesInDb(gameId: string) {
 				leftPaddle.y = leftPaddle.y + leftPaddle.dy;
 				rightPaddle.y = rightPaddle.y + rightPaddle.dy;
 
-				leftPaddle.y = Math.max(0, Math.min(canvasHeight - paddleHeight, leftPaddle.y));
-				rightPaddle.y = Math.max(0, Math.min(canvasHeight - paddleHeight, rightPaddle.y));
+				leftPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, leftPaddle.y));
+				rightPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, rightPaddle.y));
+
+				rightPaddle.x = game.canvasWidth - 10;
 			}
 			const stmt = db.prepare (`
 				UPDATE games

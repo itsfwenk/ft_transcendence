@@ -9,8 +9,9 @@ RUN apt-get update && apt-get install -y curl net-tools sqlite3
 
 WORKDIR /app
 
-COPY services/game/package*.json ./
-COPY services/game/tsconfig.json ./
+COPY backend/services/game/package*.json ./
+COPY backend/services/game/tsconfig.json ./
+COPY ./gameInterfaces.ts ./
 
 ENV npm_config_build_from_source=true
 ENV npm_config_prebuild_install=false
@@ -19,11 +20,11 @@ RUN rm -rf node_modules package-lock.json
 
 #RUN npm cache clean --force
 
-RUN npm install
+RUN npm install || npm install || npm install
 
 RUN npm rebuild better-sqlite3 --build-from-source
 
-COPY services/game ./
+COPY backend/services/game ./
 
 RUN npm run build
 

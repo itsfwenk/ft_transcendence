@@ -10,10 +10,7 @@ export default async function Queuetournament() {
 		<p class="text-gray-700">Recherche des adversaires pour le tournoi...</p>
 	  </div>
 	`;
-  
-	// Appel à la fonction qui rejoint la queue 1v1
-	// Supposons que joinQueue1v1 prenne l'id du joueur courant, par exemple récupéré via un token ou stocké globalement
-	 
+  	 
 	const userProfile = await fetchUserProfile();
 	console.log(userProfile);
 	if (!userProfile) {

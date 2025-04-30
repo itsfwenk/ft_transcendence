@@ -60,10 +60,6 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 			const msg = JSON.parse(event.data);
 			console.log('Notification WebSocket matchmaking reçue:', msg);
 			switch(msg.type) {
-				case 'launch_1v1':
-					history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
-					window.dispatchEvent(new PopStateEvent('popstate'));
-					break;
 				case 'launch_tournament':
 					const tournament_Id = msg.payload?.tournament?.id;
 					if (tournament_Id) {

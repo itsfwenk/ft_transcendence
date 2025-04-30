@@ -4,8 +4,9 @@ import {createMatch, createTournament, getTournamentById, Tournament, getMatchby
 import { websocketClients } from './matchmakingRoutes';
 import WebSocket from 'ws';
 
-export const queue1v1: string[] = [];
-export const queueTournament: string[] = [];
+export const queue1v1 = new Set<string>();
+export const queueTournament = new Set<string>();
+
 export const tournamentReadiness: Map<string, Set<string>> = new Map();
 
 export type PlayerTournamentState =
@@ -26,45 +27,57 @@ export function getPlayerState(playerId: string) {
 
 //join 1v1 queue
 export async function joinQueue1v1(playerId: string) {
-	if (queue1v1.includes(playerId)) {
-		console.warn(`Le joueur ${playerId} est déjà dans la queue 1v1`);
-		return;
-	}
-	queue1v1.push(playerId);
+	if (queue1v1.has(playerId)) return;
+	queue1v1.add(playerId);
+	broadcastToQueue(queue1v1, {
+		type: 'join_1v1_queue',
+		playerId
+	});
+	console.log(`Joueur ${playerId} a rejoint de la queue 1v1`)
 	console.log(queue1v1);
 }
 
 export async function leaveQueue1v1(playerId: string) {
-	const idx = queue1v1.indexOf(playerId);
-	if (idx === -1) {
-	  console.warn(`Le joueur ${playerId} n’est pas dans la queue 1v1`);
-	  return;
-	}
-	queue1v1.splice(idx, 1);
+	if (!queue1v1.delete(playerId)) return;
+	broadcastToQueue(queue1v1, {
+		type     : 'leave_1v1_queue',
+		playerId
+	  });
 	console.log(`Joueur ${playerId} retiré de la queue 1v1`);
 	console.log('Queue 1v1 actuelle :', queue1v1);
 }
 
+
+
 //join tournament 1
 export async function joinTournamentQueue(playerId: string) {
-	if (queueTournament.includes(playerId)) {
-		console.warn(`Le joueur ${playerId} est déjà dans la queue du tournoi`);
-		return;
-	}
-	queueTournament.push(playerId);
-	setPlayerState(playerId, 'in_queue');
-	console.log("queueTournament:", queueTournament);
+	if (queueTournament.has(playerId)) return;
+	queueTournament.add(playerId);
+	broadcastToQueue(queueTournament, {
+		type: 'join_tournament_queue',
+		playerId
+	});
+	console.log(`Joueur ${playerId} a rejoint de la queue Tournament`)
+	console.log(queueTournament);
 }
 
 export async function leaveTournamentQueue(playerId: string) {
-	const idx = queueTournament.indexOf(playerId);
-	if (idx === -1) {
-	  console.warn(`Le joueur ${playerId} n’est pas dans la queue Tournament`);
-	  return;
-	}
-	queueTournament.splice(idx, 1);
-	console.log(`Joueur ${playerId} retiré de la queue Tournament`);
+	if (!queueTournament.delete(playerId)) return;
+	broadcastToQueue(queueTournament, {
+		type     : 'leave_tournament_queue',
+		playerId
+	  });
+	console.log(`Joueur ${playerId} retiré de la queue tournament`);
 	console.log('Queue Tournament actuelle :', queueTournament);
+}
+
+function broadcastToQueue(setQueue: Set<string>, msg: unknown) {
+	const str = JSON.stringify(msg);
+  
+	setQueue.forEach(playerId => {
+	  const ws = websocketClients.get(playerId);
+	  if (ws && ws.readyState === WebSocket.OPEN) ws.send(str);
+	});
 }
 
 export async function  launchMatch(matchId: string): Promise<Match | undefined> {
@@ -332,7 +345,7 @@ export async function handleMatchmakingMessage(
 	const action = msg.action.trim();
 	console.log('ACTION =', JSON.stringify(action));
 	switch (action) {
-		case 'join_1v1':
+		case 'join_queue_1v1':
 			console.log(`[MM] ${playerId} rejoint la file 1v1`);
 			joinQueue1v1(playerId);
 			const match = await attemptMatchv2();
@@ -341,7 +354,7 @@ export async function handleMatchmakingMessage(
 			}
 			break;
 	  
-		case 'join_tournament':
+		case 'join_queue_tournament':
 			console.log(`[MM] ${playerId} rejoint la file tournoi`);
 			joinTournamentQueue(playerId);
 			const tournament = await attemptTournament();
@@ -357,7 +370,10 @@ export async function handleMatchmakingMessage(
 					}
 				}, 5000);
 			}
-			break;		
+			break;
+		case 'leave_queue_1v1':
+			break;
+		case 'leave_queue_tournament':
 		case 'leave_tournament':
 			console.log(`[MM] ${playerId} quitte la file tournoi`);
 			break;

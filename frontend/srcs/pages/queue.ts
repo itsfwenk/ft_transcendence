@@ -121,7 +121,7 @@ export default async function Queue() {
 			const data = JSON.parse(event.data);
 			console.log("Message reçu:", data);
 			
-			if (data.type === 'player_joined' && data.player && data.player.userId) {
+			if (data.type === 'join_1v1' && data.player && data.player.userId) {
 				const playerId = data.player.userId;
 				if (playerId !== currentPlayerId) {
 					const playerAvatar = await fetchUserAvatar(playerId);

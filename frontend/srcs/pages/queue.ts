@@ -136,7 +136,7 @@ if (ws && ws.readyState === WebSocket.OPEN) {
           }
         }
       }
-      
+
       if (data.type === 'launch_1v1' && data.gameSessionId) {
 		cleanupMatchmaking();
         history.pushState(null, '', `/game?gameSessionId=${data.gameSessionId}`);

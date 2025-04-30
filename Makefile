@@ -17,7 +17,7 @@ build:
 
 production:
 	docker compose -f docker-compose.production.yml build --no-cache frontend
-	docker compose -f docker-compose.production.yml up
+	docker compose -f docker-compose.production.yml up --build
 
 install-deps:
 	@echo "Installation des dépendances pour user..."

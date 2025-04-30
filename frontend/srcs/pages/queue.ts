@@ -118,14 +118,14 @@ export default async function Queue() {
 
 	async function handleMessage(event: MessageEvent) {
 		try {
-			const data = JSON.parse(event.data);
-			console.log("Message reçu:", data);
+			const msg = JSON.parse(event.data);
+			console.log("Message reçu:", msg);
 			
-			if (data.type === 'join_1v1' && data.player && data.player.userId) {
-				const playerId = data.player.userId;
+			if (msg.type === 'join_queueq_1v1' && msg.player && msg.player.userId) {
+				const playerId = msg.player.userId;
 				if (playerId !== currentPlayerId) {
 					const playerAvatar = await fetchUserAvatar(playerId);
-					const playerName = data.player.userName || "Opponent";
+					const playerName = msg.player.userName || "Opponent";
 					console.log("Avatar du joueur rejoint:", playerAvatar);
 					
 					const player2Container = document.getElementById('player2-container');
@@ -134,9 +134,9 @@ export default async function Queue() {
 					}
 				}
 			}
-			if (data.type === 'launch_1v1' && data.gameSessionId) {
+			if (msg.type === 'launch_1v1' && msg.gameSessionId) {
 				cleanupMatchmaking();
-				history.pushState(null, '', `/game?gameSessionId=${data.gameSessionId}`);
+				history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
 				window.dispatchEvent(new PopStateEvent('popstate'));
 			}
 		} catch (error) {

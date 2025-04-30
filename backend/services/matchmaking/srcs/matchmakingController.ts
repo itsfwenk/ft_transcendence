@@ -372,8 +372,11 @@ export async function handleMatchmakingMessage(
 			}
 			break;
 		case 'leave_queue_1v1':
+			leaveQueue1v1(playerId);
 			break;
 		case 'leave_queue_tournament':
+			leaveTournamentQueue(playerId);
+			break;
 		case 'leave_tournament':
 			console.log(`[MM] ${playerId} quitte la file tournoi`);
 			break;

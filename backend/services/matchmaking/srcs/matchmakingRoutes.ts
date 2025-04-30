@@ -90,12 +90,12 @@ export default async function matchmakingRoutes(fastify: any) {
 		if (type === 'tournament') {
 			return reply.send({
 				queueType: 'tournament',
-				count: queueTournament.length,
+				count: queueTournament.size,
 			});
 		} else if (type === '1v1') {
 			return reply.send({
 				queueType: '1v1',
-				count: queue1v1.length,
+				count: queue1v1.size,
 			});
 		}
 	})

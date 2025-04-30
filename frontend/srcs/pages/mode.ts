@@ -123,7 +123,7 @@ export default function mode() {
 			return;
 		}
 		socket.send(JSON.stringify({
-			action: "join_1v1",
+			action: "join_queue_1v1",
 			payload: {}
 		}));
 		history.pushState(null, '', '/queue');
@@ -150,7 +150,7 @@ export default function mode() {
 			return;
 		}
 		socket.send(JSON.stringify({
-			action: "join_tournament",
+			action: "join_queue_tournament",
 			payload: {}
 		}));
 		history.pushState(null, '', '/queue_tournament');

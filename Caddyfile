@@ -52,4 +52,9 @@
 		header Access-Control-Allow-Headers "Content-Type, Authorization"
         header Access-Control-Allow-Credentials "true"
 	}
+
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
 }

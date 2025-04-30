@@ -1,5 +1,5 @@
 # backend/Dockerfile
-FROM node:18
+FROM node:20-bullseye-slim
 
 WORKDIR /app
 COPY ./pong-fastify/package.json ./pong-fastify/package-lock.json /app/

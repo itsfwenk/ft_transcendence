@@ -109,7 +109,7 @@ export default async function Queue() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
 			console.log("Envoi du message de départ de la file d'attente");
 			ws.send(JSON.stringify({
-				action: 'leave_1v1_queue',
+				action: 'QUEUE_LEAVE_1V1',
 				payload: {playerId: currentPlayerId}
 			}));
 			ws.removeEventListener('message', handleMessage);
@@ -121,7 +121,7 @@ export default async function Queue() {
 			const msg = JSON.parse(event.data);
 			console.log("Message reçu:", msg);
 			
-			if (msg.type === 'join_queueq_1v1' && msg.player && msg.player.userId) {
+			if (msg.type === 'QUEUE_1V1_PLAYER_JOINED' && msg.player && msg.player.userId) {
 				const playerId = msg.player.userId;
 				if (playerId !== currentPlayerId) {
 					const playerAvatar = await fetchUserAvatar(playerId);
@@ -153,7 +153,7 @@ export default async function Queue() {
 	ws.addEventListener('message', handleMessage);
 
 	ws.send(JSON.stringify({
-		action: "join_1v1",
+		action: "QUEUE_JOIN_1V1",
 		payload: {}
 	}));
 

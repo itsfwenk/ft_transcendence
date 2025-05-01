@@ -30,7 +30,7 @@ export async function joinQueue1v1(playerId: string) {
 	if (queue1v1.has(playerId)) return;
 	queue1v1.add(playerId);
 	broadcastToQueue(queue1v1, {
-		type: 'join_1v1_queue',
+		type: 'QUEUE_1V1_PLAYER_JOINED',
 		playerId
 	});
 	console.log(`Joueur ${playerId} a rejoint de la queue 1v1`)
@@ -40,7 +40,7 @@ export async function joinQueue1v1(playerId: string) {
 export async function leaveQueue1v1(playerId: string) {
 	if (!queue1v1.delete(playerId)) return;
 	broadcastToQueue(queue1v1, {
-		type     : 'leave_1v1_queue',
+		type     : 'QUEUE_1V1_PLAYER_LEFT',
 		playerId
 	  });
 	console.log(`Joueur ${playerId} retiré de la queue 1v1`);
@@ -54,7 +54,7 @@ export async function joinTournamentQueue(playerId: string) {
 	if (queueTournament.has(playerId)) return;
 	queueTournament.add(playerId);
 	broadcastToQueue(queueTournament, {
-		type: 'join_tournament_queue',
+		type: 'QUEUE_TOURNAMENT_PLAYER_JOINED',
 		playerId
 	});
 	console.log(`Joueur ${playerId} a rejoint de la queue Tournament`)
@@ -64,7 +64,7 @@ export async function joinTournamentQueue(playerId: string) {
 export async function leaveTournamentQueue(playerId: string) {
 	if (!queueTournament.delete(playerId)) return;
 	broadcastToQueue(queueTournament, {
-		type     : 'leave_tournament_queue',
+		type     : 'QUEUE_TOURNAMENT_PLAYER_LEFT',
 		playerId
 	  });
 	console.log(`Joueur ${playerId} retiré de la queue tournament`);
@@ -98,7 +98,7 @@ export async function  launchMatch(matchId: string): Promise<Match | undefined> 
 		const socket1 = websocketClients.get(match.player1_Id);
 		const socket2 = websocketClients.get(match.player2_Id);
 		const message1 = JSON.stringify({
-			type: 'match_start',
+			type: 'MATCH_START',
 			payload: {
 				gameSessionId,
 				matchId: match.id,
@@ -106,7 +106,7 @@ export async function  launchMatch(matchId: string): Promise<Match | undefined> 
 			}
 		});
 		const message2 = JSON.stringify({
-			type: 'match_start',
+			type: 'MATCH_START',
 			payload: {
 				gameSessionId,
 				matchId: match.id,
@@ -168,9 +168,11 @@ export async function createGameSession(player1_id:string, player2_id:string, ma
 
 
 export async function attemptMatchv2(): Promise<Match | undefined>  {
-	if (queue1v1.length >= 2) {
-		const player1 = queue1v1.shift();
-		const player2 = queue1v1.shift();
+	if (queue1v1.size >= 2) {
+		const player1 = queue1v1.values().next().value as string | undefined;
+		if (player1) queue1v1.delete(player1);
+		const player2 = queue1v1.values().next().value as string | undefined;
+		if (player2) queue1v1.delete(player2);
 		if (player1 && player2) {
 			console.log('creating a matching betweenm', player1, player2)
 			try {
@@ -187,11 +189,16 @@ export async function attemptMatchv2(): Promise<Match | undefined>  {
 
 export async function attemptTournament(): Promise<Tournament | undefined> {
 	console.log(queueTournament);
-	if (queueTournament.length >= 4) {
-		const player1 = queueTournament.shift();
-		const player2 = queueTournament.shift();
-		const player3 = queueTournament.shift();
-		const player4 = queueTournament.shift();
+	if (queueTournament.size >= 4) {
+		const player1 = queue1v1.values().next().value as string | undefined;
+		if (player1) queue1v1.delete(player1);
+		const player2 = queue1v1.values().next().value as string | undefined;
+		if (player2) queue1v1.delete(player2);
+		const player3 = queue1v1.values().next().value as string | undefined;
+		if (player3) queue1v1.delete(player3);
+		const player4 = queue1v1.values().next().value as string | undefined;
+		if (player4) queue1v1.delete(player4);
+
 		if (player1 && player2 && player3 && player4) {
             let players: string[] = [player1, player2, player3, player4];
 			console.log('creating a tournament between')
@@ -297,7 +304,7 @@ export function onMatchCompleted(matchId: string): void {
 		const winnersocket = websocketClients.get(winner_Id);
 		const losersocket = websocketClients.get(loserId);
 		const payload = {
-			type: 'match_end',
+			type: 'MATCH_END',
 			payload: {
 			  matchId,
 			  winner_Id,

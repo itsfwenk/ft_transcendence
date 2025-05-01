@@ -64,7 +64,7 @@ export default async function Queuetournament() {
 			if (ws && ws.readyState === WebSocket.OPEN) {
 				console.log("Envoi du message de départ de la file d'attente");
 				ws.send(JSON.stringify({
-					action: 'leave_tournament_queue',
+					action: 'QUEUE_LEAVE_TOURNAMENT',
 					payload: {playerId: currentPlayerId}
 				}));
 				ws.removeEventListener('message', handleMessage);
@@ -75,7 +75,7 @@ export default async function Queuetournament() {
 				const data = JSON.parse(event.data);
 				console.log("Message reçu:", data);
 				
-				if (data.type === 'join_tournament' && data.player && data.player.userId) {
+				if (data.type === 'QUEUE_TOURNAMENT_PLAYER_JOINED' && data.player && data.player.userId) {
 					const playerId = data.player.userId;
 					if (playerId !== currentPlayerId) {
 						const playerAvatar = await fetchUserAvatar(playerId);
@@ -107,7 +107,7 @@ export default async function Queuetournament() {
 		ws.addEventListener('message', handleMessage);
 	
 		ws.send(JSON.stringify({
-			action: "join_1v1",
+			action: "QUEUE_JOIN_TOURNAMENT",
 			payload: {}
 		}));
 	

@@ -77,7 +77,7 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 					currentTournamentData = tournament;
 					console.log("tournament state", currentTournamentState);
 					break;
-				case 'match_start':
+				case 'MATCH_START':
 					const {gameSessionId} = msg.payload;
 					console.log("gameSessionId", gameSessionId);
 					history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
@@ -90,7 +90,7 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 					console.log("player_state", playerState);
 					handlePlayerStateUpdate(playerState);
 					break;
-				case 'match_end':
+				case 'MATCH_END':
 					const {winner_Id, score1, score2} = msg.payload;
 					const isWinner = winner_Id === userId;
 					show1v1ResultScreen(isWinner, {score1, score2});

@@ -179,13 +179,13 @@ export default async function userRoutes(fastify: any) {
 
   fastify.get('/status/userId', {
 	schema: {
-		params: {
-			type:'object',
-			properties: {
-				userId: { type: 'string' }
-			},
-			required: ['userId']
-		},
+		// params: {
+		// 	type:'object',
+		// 	properties: {
+		// 		userId: { type: 'string' }
+		// 	},
+		// 	// required: ['userId']
+		// },
 		response: {
 			200: {
 				type: 'object',

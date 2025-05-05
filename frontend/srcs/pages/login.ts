@@ -1,7 +1,28 @@
 import { matchmakingWebSocket } from "../wsClient";
 import { fetchUserProfile } from "./mode";
 
-export default function login() {
+export default  async function login() {
+	const baseUrl = window.location.origin;
+	try {
+		console.log("Looking for session");
+		const baseUrl = window.location.origin;
+		console.log("fetching at :", `${baseUrl}/user/status/userId`);
+		const response = await fetch(`${baseUrl}/user/status/userId`, {
+		  method: 'GET',
+		  credentials: 'include',
+		});
+		if (response.ok) {
+			const data = await response.text();
+			console.log("Session found:", data);
+			history.pushState(null, '', '/menu');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+			return;
+		}
+	}
+	catch (error) {
+		console.error("No on-going session:", error);
+	}
+
 	const app = document.getElementById('app');
 	if (app) {
 	  app.innerHTML = /*html*/`
@@ -30,7 +51,6 @@ export default function login() {
 		const password = (document.getElementById('password') as HTMLInputElement).value;
         
         try {
-			const baseUrl = window.location.origin;
 			const response = await fetch(`${baseUrl}/user/login`, {
 			  method: 'POST',
 			  credentials: 'include',

@@ -122,10 +122,10 @@ export default function mode() {
 			console.error("Socket non connectée");
 			return;
 		}
-		socket.send(JSON.stringify({
-			action: "join_queue_1v1",
-			payload: {}
-		}));
+		// socket.send(JSON.stringify({
+		// 	action: "join_queue_1v1",
+		// 	payload: {}
+		// }));
 		history.pushState(null, '', '/queue');
 		window.dispatchEvent(new PopStateEvent('popstate'));
 	});
@@ -149,10 +149,10 @@ export default function mode() {
 			console.error("Socket non connectée");
 			return;
 		}
-		socket.send(JSON.stringify({
-			action: "join_queue_tournament",
-			payload: {}
-		}));
+		// socket.send(JSON.stringify({
+		// 	action: "join_queue_tournament",
+		// 	payload: {}
+		// }));
 		history.pushState(null, '', '/queue_tournament');
 		window.dispatchEvent(new PopStateEvent('popstate'));
 	});

@@ -47,12 +47,40 @@ export async function leaveQueue1v1(playerId: string) {
 	console.log('Queue 1v1 actuelle :', queue1v1);
 }
 
+const USER_SVC = process.env.USER_SERVICE_BASE_URL ?? 'http://user:4001';
 
+export async function fetchPublicProfile(playerId: string) {
+  const { data } = await axios.get(
+    `${USER_SVC}/user/public/${playerId}`
+  );
+  return data as { userId: string; userName: string; avatarUrl: string };
+}
 
 //join tournament 1
 export async function joinTournamentQueue(playerId: string) {
 	if (queueTournament.has(playerId)) return;
 	queueTournament.add(playerId);
+	const playersList = await Promise.all(
+		[...queueTournament].map(async id => {
+		  const pub = await fetchPublicProfile(id);
+		  console.log("pub", pub);
+		  return {
+			userId   : pub.userId,
+			userName : pub.userName,
+			avatarUrl: pub.avatarUrl
+		  };
+		})
+	);
+	console.log("playersList", playersList);
+	const ws = websocketClients.get(playerId);
+	if (ws?.readyState === WebSocket.OPEN) {
+	ws.send(
+		JSON.stringify({
+		type   : 'QUEUE_SNAPSHOT',
+		players: playersList
+		})
+	);
+	}
 	broadcastToQueue(queueTournament, {
 		type: 'QUEUE_TOURNAMENT_PLAYER_JOINED',
 		playerId
@@ -188,16 +216,16 @@ export async function attemptMatchv2(): Promise<Match | undefined>  {
 }
 
 export async function attemptTournament(): Promise<Tournament | undefined> {
-	console.log(queueTournament);
+	console.log("attemptTournament", queueTournament);
 	if (queueTournament.size >= 4) {
-		const player1 = queue1v1.values().next().value as string | undefined;
-		if (player1) queue1v1.delete(player1);
-		const player2 = queue1v1.values().next().value as string | undefined;
-		if (player2) queue1v1.delete(player2);
-		const player3 = queue1v1.values().next().value as string | undefined;
-		if (player3) queue1v1.delete(player3);
-		const player4 = queue1v1.values().next().value as string | undefined;
-		if (player4) queue1v1.delete(player4);
+		const it = queueTournament.values();
+		const player1 = it.next().value as string | undefined;
+		console.log("Player1", player1);
+		const player2 = it.next().value as string | undefined;
+		const player3 = it.next().value as string | undefined;
+		const player4 = it.next().value as string | undefined;
+
+		[player1, player2, player3, player4].forEach(p => p && queueTournament.delete(p));
 
 		if (player1 && player2 && player3 && player4) {
             let players: string[] = [player1, player2, player3, player4];
@@ -352,7 +380,7 @@ export async function handleMatchmakingMessage(
 	const action = msg.action.trim();
 	console.log('ACTION =', JSON.stringify(action));
 	switch (action) {
-		case 'join_queue_1v1':
+		case 'QUEUE_JOIN_1V1':
 			console.log(`[MM] ${playerId} rejoint la file 1v1`);
 			joinQueue1v1(playerId);
 			const match = await attemptMatchv2();
@@ -360,8 +388,7 @@ export async function handleMatchmakingMessage(
 				launchMatch(match.id);
 			}
 			break;
-	  
-		case 'join_queue_tournament':
+		case 'QUEUE_JOIN_TOURNAMENT':
 			console.log(`[MM] ${playerId} rejoint la file tournoi`);
 			joinTournamentQueue(playerId);
 			const tournament = await attemptTournament();
@@ -378,19 +405,11 @@ export async function handleMatchmakingMessage(
 				}, 5000);
 			}
 			break;
-		case 'leave_queue_1v1':
+		case 'QUEUE_LEAVE_1V1':
 			leaveQueue1v1(playerId);
 			break;
-		case 'leave_queue_tournament':
+		case 'QUEUE_LEAVE_TOURNAMENT':
 			leaveTournamentQueue(playerId);
-			break;
-		case 'leave_tournament':
-			console.log(`[MM] ${playerId} quitte la file tournoi`);
-			break;
-		case 'leave_1v1_queue':
-			leaveQueue1v1(msg.payload.playerId);
-		case 'leave_tournament_queue':
-			leaveTournamentQueue(msg.payload.playerId);
 			break;
 		default:
 			console.warn(`[MM] Action inconnue : ${msg.action}`);

@@ -3,10 +3,10 @@ import { registerUser, loginUser, getUserProfile, getUserByIdController, updateP
 // import jwt from '@fastify/jwt'
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import multipart from '@fastify/multipart';
-import { deleteAvatar, getAvatar, uplpoadAvatar } from './avatarController.js';
+import { deleteAvatar, getAvatar, uploadAvatar } from './avatarController.js';
 import { addFriendController, checkFriendshipController, getFriendsController, getOnlineFriendsController, removeFriendController } from './friendController.js';
 import { getUserDashboard } from './userDashboardController.js';
-import { updateUserGameId } from './userDb.js';
+import { getUserById, updateUserGameId } from './userDb.js';
 
 
 const User = {
@@ -128,7 +128,7 @@ export default async function userRoutes(fastify: any) {
 
   fastify.put('/avatar', {
     preHandler: [fastify.authenticate],
-    handler: uplpoadAvatar
+    handler: uploadAvatar
   });
 
   fastify.delete('/avatar', {
@@ -393,6 +393,43 @@ export default async function userRoutes(fastify: any) {
 		}
 	});
 
+	fastify.get('/public/:userId',
+		{
+		  schema: {
+			params: {
+			  type: 'object',
+			  properties: { userId: { type: 'string', format: 'uuid' } },
+			  required: ['userId']
+			},
+			response: {
+			  200: {
+				type: 'object',
+				properties: {
+				  userId:   { type: 'string' },
+				  userName: { type: 'string' },
+				  avatarUrl:{ type: 'string' }
+				}
+			  },
+			  404: {
+				type: 'object',
+				properties: { error: { type: 'string' } }
+			  }
+			}
+		  }
+		},
+		(req:FastifyRequest, reply:FastifyReply) => {
+		  const { userId } = req.params as { userId: string };
+		  const user = getUserById(userId);
+		  if (!user) return reply.code(404).send({ error: 'User not found' });
+	  
+		  reply.send({
+			userId:   user.userId,
+			userName: user.userName,
+			avatarUrl:user.avatarUrl ?? ''
+		  });
+		}
+	  );
+
 
   fastify.patch('/:userId', {
     schema: {
@@ -490,4 +527,5 @@ export default async function userRoutes(fastify: any) {
 	  }
 	  }
   }, getUserDashboard);
+  
 }

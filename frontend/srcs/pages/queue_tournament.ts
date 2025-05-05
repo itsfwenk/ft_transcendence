@@ -6,13 +6,6 @@ export default async function Queuetournament() {
 	const app = document.getElementById('app');
 	if (!app) return;
   
-	app.innerHTML = /*html*/`
-	  <div class="flex flex-col items-center justify-center min-h-screen">
-		<h1 class="text-3xl font-bold mb-4">Lobby Matchmaking</h1>
-		<p class="text-gray-700">Recherche des adversaires pour le tournoi...</p>
-	  </div>
-	`;
-  	 
 	const userProfile = await fetchUserProfile();
 	console.log(userProfile);
 	if (!userProfile) {
@@ -24,6 +17,26 @@ export default async function Queuetournament() {
 
 	const currentPlayerAvatar = await fetchUserAvatar(currentPlayerId);
 	console.log("Avatar de l'utilisateur actuel:", currentPlayerAvatar);
+  
+	app.innerHTML = /*html*/ `
+	<div class="text-black font-jaro text-9xl mt-10 select-none">Tournament Queue</div>
+  
+	<!-- Grille des avatars -->
+	<div id="queue-list" class="flex gap-3 flex-wrap justify-center">
+	  ${renderPlayerBox(currentPlayerId,
+						userProfile.userName ?? 'You',
+						currentPlayerAvatar)}
+	</div>
+  
+	<p class="text-gray-700 mb-12">Recherche des adversaires…</p>
+  
+	<button id="backBtn"
+			class="px-6 py-2 rounded bg-gray-700 text-white hover:bg-gray-600">
+	  Back
+	</button>
+  `;
+  	
+
 
 	function renderPlayerBox(playerId: string, playerName: string, avatarUrl: string) {
 		console.log("Rendu du joueur:", playerName, "avec l'avatar:", avatarUrl);
@@ -54,49 +67,67 @@ export default async function Queuetournament() {
 		}
 	}
 
+	function addPlayerBox(id: string, name: string, url: string) {
+		const grid  = document.getElementById('queue-list')!;
+		const boxId = `player-${id.slice(0, 8)}`;
+		if (document.getElementById(boxId)) return;
+	  
+		grid.insertAdjacentHTML('beforeend', renderPlayerBox(id, name, url));
+	}
+	  
+	function removePlayerBox(id: string) {
+		document.getElementById(`player-${id.slice(0, 8)}`)?.remove();
+	}
+
 	const ws = getMatchmakingSocket();
 		if (!ws || ws.readyState !== WebSocket.OPEN) {
 			console.error("Pas de connexion WebSocket disponible");
 			return;
 		}
 	
-		function cleanupMatchmaking() {
-			if (ws && ws.readyState === WebSocket.OPEN) {
-				console.log("Envoi du message de départ de la file d'attente");
-				ws.send(JSON.stringify({
-					action: 'QUEUE_LEAVE_TOURNAMENT',
-					payload: {playerId: currentPlayerId}
-				}));
-				ws.removeEventListener('message', handleMessage);
-			}
+	function cleanupMatchmaking() {
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			console.log("Envoi du message de départ de la file d'attente");
+			ws.send(JSON.stringify({
+				action: 'QUEUE_LEAVE_TOURNAMENT',
+				payload: {playerId: currentPlayerId}
+			}));
+			ws.removeEventListener('message', handleMessage);
 		}
-		async function handleMessage(event: MessageEvent) {
-			try {
-				const data = JSON.parse(event.data);
-				console.log("Message reçu:", data);
-				
-				if (data.type === 'QUEUE_TOURNAMENT_PLAYER_JOINED' && data.player && data.player.userId) {
-					const playerId = data.player.userId;
-					if (playerId !== currentPlayerId) {
-						const playerAvatar = await fetchUserAvatar(playerId);
-						const playerName = data.player.userName || "Opponent";
-						console.log("Avatar du joueur rejoint:", playerAvatar);
-						
-						const player2Container = document.getElementById('player2-container');
-						if (player2Container) {
-							player2Container.innerHTML = renderPlayerBox(playerId ,playerName, playerAvatar);
-						}
+	}
+	async function handleMessage(event: MessageEvent) {
+		try {
+			const msg = JSON.parse(event.data);
+			console.log("Message reçu:", msg);
+
+			switch (msg.type) {
+				case 'QUEUE_SNAPSHOT':
+					const list: {userId: string; userName: string}[] = msg.players;
+					for (const p of list) {
+					  if (p.userId === currentPlayerId) continue;
+					  const url = await fetchUserAvatar(p.userId);
+					  addPlayerBox(p.userId, p.userName ?? 'Opponent', url);
 					}
-				}
-				if (data.type === 'launch_1v1' && data.gameSessionId) {
+					break;
+				case 'QUEUE_TOURNAMENT_PLAYER_JOINED':
+					const { userId, userName } = msg.player;
+					if (userId === currentPlayerId) break;
+					const url = await fetchUserAvatar(userId);
+					addPlayerBox(userId, userName ?? 'Opponent', url);
+					break;
+				case 'QUEUE_TOURNAMENT_PLAYER_LEFT':
+					removePlayerBox(msg.playerId);
+					break;
+				case 'MATCH_START':
 					cleanupMatchmaking();
-					history.pushState(null, '', `/game?gameSessionId=${data.gameSessionId}`);
-					window.dispatchEvent(new PopStateEvent('popstate'));
-				}
-			} catch (error) {
-				console.error("Erreur lors du traitement du message:", error);
-			}
+      				history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
+      				window.dispatchEvent(new PopStateEvent('popstate'));
+					break;
+			}		
+		} catch (error) {
+			console.error("Erreur lors du traitement du message:", error);
 		}
+	}
 	
 		const handlePageUnload = () => {
 			cleanupMatchmaking();

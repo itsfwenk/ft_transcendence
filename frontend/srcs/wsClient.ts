@@ -77,12 +77,12 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 					currentTournamentData = tournament;
 					console.log("tournament state", currentTournamentState);
 					break;
-				case 'MATCH_START':
-					const {gameSessionId} = msg.payload;
-					console.log("gameSessionId", gameSessionId);
-					history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
-					window.dispatchEvent(new PopStateEvent('popstate'));
-					break;
+				// case 'MATCH_START':
+				// 	const {gameSessionId} = msg.payload;
+				// 	console.log("gameSessionId", gameSessionId);
+				// 	history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
+				// 	window.dispatchEvent(new PopStateEvent('popstate'));
+				// 	break;
 				case 'player_state_update':
 					const {state: playerState, tournament: playerTournament} = msg.payload;
 					history.pushState(null, '', `/tournament?tournament_Id=${playerTournament.id}`);

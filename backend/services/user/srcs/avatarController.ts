@@ -8,7 +8,7 @@ import { pipeline } from "stream";
 const pump = util.promisify(pipeline);
 
 const AVATARS_STORAGE_DIR = '/app/public/avatars';
-const AVATARS_URL_PREFIX = 'http://localhost:4000/avatars';
+const AVATARS_URL_PREFIX = 'http://localhost:4001/avatars';
 const DEFAULT_AVATAR_URL = `${AVATARS_URL_PREFIX}/default.png`;
 
 interface UploadAvatarRequest extends FastifyRequest {
@@ -16,7 +16,7 @@ interface UploadAvatarRequest extends FastifyRequest {
 	file: () => Promise<any>;
 }
 
-export async function uplpoadAvatar(req: UploadAvatarRequest, reply: FastifyReply) {
+export async function uploadAvatar(req: UploadAvatarRequest, reply: FastifyReply) {
 	try {
 		const userId = req.user.userId;
 		const user = getUserById(userId);
@@ -72,6 +72,7 @@ export async function uplpoadAvatar(req: UploadAvatarRequest, reply: FastifyRepl
 		return reply.status(500).send( { error: 'Internal server error' });
 	}
 }
+
 export async function deleteAvatar(req: UploadAvatarRequest, reply: FastifyReply) {
 	try {
 		const userId = req.user.userId;

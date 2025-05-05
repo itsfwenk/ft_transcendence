@@ -15,7 +15,7 @@ POST http://localhost:4001/user/login
 Content-Type: application/json
 
 {
-	"email": "test4@email.com",
+	"email": "test2@email.com",
 	"password": "mypassword"
 }
 
@@ -24,7 +24,7 @@ GET http://localhost:4001/user/profile
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyZmRhYTEzYS02ZDMxLTQ2YWQtYjdiMy03MzkzMDFhM2FmZTEiLCJpYXQiOjE3NDQ4MDg3NDcsImV4cCI6MTc0NDg5NTE0N30.UT3OmFhr__8lldraE-stLQqy-m5ES-NiNZwNRosRIs8
 
 ### 🔍 Voir un utilisateur
-GET http://localhost:4001/user/2fdaa13a-6d31-46ad-b7b3-739301a3afe1
+GET http://localhost:4001/user/26187f7d-73de-4580-a5e7-7f29d98971fd
 
 ### Update info user
 PUT http://localhost:4001/user/profile
@@ -89,14 +89,14 @@ GET http://localhost:4001/user/avatars/fb0d506c-015b-4a86-be25-bfea20114265
 
 ### Télécharger un nouvel avatar (nécessite un token JWT valide)
 PUT http://localhost:4001/user/avatar
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmYjBkNTA2Yy0wMTViLTRhODYtYmUyNS1iZmVhMjAxMTQyNjUiLCJpYXQiOjE3NDI4MjY3NTksImV4cCI6MTc0MjkxMzE1OX0.YqGhjB98o_NoipX_rfg2kadOnPMd7hmw6m9D2EVP5WA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjOTc3YmYyMy0xOWRkLTRkOTgtODQxZS00ZGEyOGE1YTQ3NmUiLCJpYXQiOjE3NDY0NTM2NDIsImV4cCI6MTc0NjU0MDA0Mn0.hS7Ms4w4hH0k9lv9j0cQNXuhyX_7oakbVdMJoPlDiek
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="avatar"; filename="test-avatar.png"
+Content-Disposition: form-data; name="avatar"; filename="test2.png"
 Content-Type: image/png
 
-< ./test-avatar.png
+< ./test2.png
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### Réinitialiser l'avatar (supprimer et revenir à l'avatar par défaut)

@@ -116,29 +116,39 @@ export default async function Queue() {
 		}
 	}
 
+	function addPlayerBox(id: string, name: string, url: string) {
+		const grid  = document.getElementById('queue-list')!;
+		const boxId = `player-${id.slice(0, 8)}`;
+		if (document.getElementById(boxId)) return;          // déjà présent
+	  
+		grid.insertAdjacentHTML('beforeend', renderPlayerBox(id, name, url));
+	}
+	  
+	function removePlayerBox(id: string) {
+		document.getElementById(`player-${id.slice(0, 8)}`)?.remove();
+	}
+
 	async function handleMessage(event: MessageEvent) {
 		try {
 			const msg = JSON.parse(event.data);
 			console.log("Message reçu:", msg);
-			
-			if (msg.type === 'QUEUE_1V1_PLAYER_JOINED' && msg.player && msg.player.userId) {
-				const playerId = msg.player.userId;
-				if (playerId !== currentPlayerId) {
-					const playerAvatar = await fetchUserAvatar(playerId);
-					const playerName = msg.player.userName || "Opponent";
-					console.log("Avatar du joueur rejoint:", playerAvatar);
-					
-					const player2Container = document.getElementById('player2-container');
-					if (player2Container) {
-						player2Container.innerHTML = renderPlayerBox(playerId ,playerName, playerAvatar);
-					}
-				}
-			}
-			if (msg.type === 'launch_1v1' && msg.gameSessionId) {
-				cleanupMatchmaking();
-				history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
-				window.dispatchEvent(new PopStateEvent('popstate'));
-			}
+
+			switch (msg.type) {
+				case 'QUEUE_1V1_PLAYER_JOINED':
+					const { userId, userName } = msg.player;
+					if (userId === currentPlayerId) break;
+					const url = await fetchUserAvatar(userId);
+					addPlayerBox(userId, userName ?? 'Opponent', url);
+					break;
+				case 'QUEUE_1V1_PLAYER_LEFT':
+					removePlayerBox(msg.playerId);
+					break;
+				case 'MATCH_START':
+					cleanupMatchmaking();
+      				history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
+      				window.dispatchEvent(new PopStateEvent('popstate'));
+					break;
+			}		
 		} catch (error) {
 			console.error("Erreur lors du traitement du message:", error);
 		}

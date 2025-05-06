@@ -198,7 +198,9 @@ export default async function userRoutes(fastify: any) {
 			}
 		}
 	},
-	handler: checkUserConnectionStatus
+	handler: async (req: FastifyRequest, reply: FastifyReply) => {
+    return checkUserConnectionStatus(fastify, req, reply);
+    }
   });
 
   fastify.get('/online', {

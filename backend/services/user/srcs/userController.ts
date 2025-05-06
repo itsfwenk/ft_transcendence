@@ -311,6 +311,15 @@ interface JwtPayload {
 export async function checkUserConnectionStatus(fastify: FastifyInstance, req: FastifyRequest, reply: FastifyReply) {
 	console.log("checkUserConnectionStatus triggered");
 	try {
+		const cookie = req.cookies;
+		if (!cookie) {
+			console.log("No cookie", cookie);
+			return reply.status(401).send({ error: "No cookie found" });
+		}
+		else {
+			console.log("cookie :", cookie);
+		}
+
 		const token = req.cookies?.authToken;
 		if (!token) {
 			console.log("No authToken cookie found");
@@ -330,14 +339,12 @@ export async function checkUserConnectionStatus(fastify: FastifyInstance, req: F
 			return null;
 		}
 		const { userId } = decoded;
-		console.log("userId =", userId);
 		const user =getUserById(userId);
-
 		if (!user) {
 			console.log('User not found');
 			return reply.status(404).send({ error: 'User not found' });
 		}
-
+		console.log("connected user =", user?.userName);
 		const isConnected = isUserConnected(userId);
 		return reply.send({
 			userId,

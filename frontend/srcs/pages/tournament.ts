@@ -1,8 +1,6 @@
 import {  TournamentState } from "../types";
 import { currentTournamentState } from "../wsClient";
 
-console.log('[Tournament] Module chargé');
-
 export default function Tournament_mgt() {
     const app = document.getElementById('app');
     if (app) {
@@ -31,7 +29,12 @@ export function updateTournamentUI(state: TournamentState) {
 	switch (state) {
 		case 'tournament_launch':
 			app.innerHTML = `
-				<h2>Tournoi pret dans... 5, 4, 3,1, 1</h2>`;
+				<div class="flex flex-col items-center justify-center min-h-screen bg-white text-black">
+					<h2 id="countdown"
+						class="text-4xl font-bold font-jaro mb-8">
+					Préparation du tournoi…
+					</h2>
+				</div>`;
 			break;
 		default:
 			app.innerHTML = `<p>État du tournoi : ${state}</p>`;

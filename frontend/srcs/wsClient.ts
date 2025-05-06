@@ -60,14 +60,14 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 			const msg = JSON.parse(event.data);
 			console.log('Notification WebSocket matchmaking reçue:', msg);
 			switch(msg.type) {
-				case 'launch_tournament':
-					const tournament_Id = msg.payload?.tournament?.id;
-					if (tournament_Id) {
-						console.log("Tournoi lancé avec ID :", tournament_Id);
-						history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
-						window.dispatchEvent(new PopStateEvent('popstate'));
-					}
-					break;
+				// case 'launch_tournament':
+				// 	const tournament_Id = msg.payload?.tournament?.id;
+				// 	if (tournament_Id) {
+				// 		console.log("Tournoi lancé avec ID :", tournament_Id);
+				// 		history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
+				// 		window.dispatchEvent(new PopStateEvent('popstate'));
+				// 	}
+				// break;
 				case 'tournament_state_update':
 					const {state, tournament} = msg.payload;
 					const tournament_Id2 = tournament.id;

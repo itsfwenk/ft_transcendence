@@ -118,6 +118,7 @@ export default async function Queuetournament() {
 				case 'QUEUE_TOURNAMENT_PLAYER_LEFT':
 					removePlayerBox(msg.playerId);
 					break;
+
 				case 'MATCH_START':
 					cleanupMatchmaking();
       				history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);

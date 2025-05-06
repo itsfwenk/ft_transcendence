@@ -15,7 +15,7 @@ POST http://localhost:4001/user/login
 Content-Type: application/json
 
 {
-	"email": "test2@email.com",
+	"email": "test@email.com",
 	"password": "mypassword"
 }
 
@@ -89,15 +89,24 @@ GET http://localhost:4001/user/avatars/fb0d506c-015b-4a86-be25-bfea20114265
 
 ### Télécharger un nouvel avatar (nécessite un token JWT valide)
 PUT http://localhost:4001/user/avatar
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjOTc3YmYyMy0xOWRkLTRkOTgtODQxZS00ZGEyOGE1YTQ3NmUiLCJpYXQiOjE3NDY0NTM2NDIsImV4cCI6MTc0NjU0MDA0Mn0.hS7Ms4w4hH0k9lv9j0cQNXuhyX_7oakbVdMJoPlDiek
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyNjE4N2Y3ZC03M2RlLTQ1ODAtYTVlNy03ZjI5ZDk4OTcxZmQiLCJpYXQiOjE3NDY1MzQ3NzksImV4cCI6MTc0NjYyMTE3OX0.IJTqxrVsGAuGRn3vZ5szEDbk5dzraEipmNIKvS91XWc
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="avatar"; filename="test2.png"
+Content-Disposition: form-data; name="avatar"; filename="test.png"
 Content-Type: image/png
 
-< ./test2.png
+< ./test.png
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Télécharger un nouvel avatar (nécessite un token JWT valide)
+PUT http://localhost:4001/user/avatar
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyNjE4N2Y3ZC03M2RlLTQ1ODAtYTVlNy03ZjI5ZDk4OTcxZmQiLCJpYXQiOjE3NDY1MzMyNzYsImV4cCI6MTc0NjYxOTY3Nn0.GfBtEkaOx_CnjQRh6U9uFz1aRelB3MHWsRAw3RntRak
+Content-Type: multipart/form-data
+
+--file
+avatar file@./test.png;type=image/png
+--file--
 
 ### Réinitialiser l'avatar (supprimer et revenir à l'avatar par défaut)
 DELETE http://localhost:4001/user/avatar

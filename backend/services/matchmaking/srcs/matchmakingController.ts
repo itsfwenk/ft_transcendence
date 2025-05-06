@@ -10,9 +10,9 @@ export const queueTournament = new Set<string>();
 export const tournamentReadiness: Map<string, Set<string>> = new Map();
 
 export type PlayerTournamentState =
-| 'in_queue'
-| 'eliminated'
-| 'waiting_next_round'
+|	'in_queue'
+|	'eliminated'
+|	'waiting_next_round'
 |	'winner';
 
 const playerStates = new Map<string, PlayerTournamentState>();
@@ -47,16 +47,16 @@ export async function leaveQueue1v1(playerId: string) {
 	console.log('Queue 1v1 actuelle :', queue1v1);
 }
 
-const USER_SVC = process.env.USER_SERVICE_BASE_URL ?? 'http://user:4001';
 
 export async function fetchPublicProfile(playerId: string) {
-  const { data } = await axios.get(
-    `${USER_SVC}/user/public/${playerId}`
-  );
-  return data as { userId: string; userName: string; avatarUrl: string };
+	const USER_SVC = process.env.USER_SERVICE_BASE_URL ?? 'http://user:4001';
+	const { data } = await axios.get(
+		`${USER_SVC}/user/public/${playerId}`
+	);
+	return data as { userId: string; userName: string; avatarUrl: string };
 }
 
-//join tournament 1
+//join tournament
 export async function joinTournamentQueue(playerId: string) {
 	if (queueTournament.has(playerId)) return;
 	queueTournament.add(playerId);
@@ -375,7 +375,7 @@ export async function handleMatchmakingMessage(
 	msg: MatchmakingMessage,
 	playerId: string,
 	clients: Map<string, WebSocket>
-  ) {
+	) {
 	
 	const action = msg.action.trim();
 	console.log('ACTION =', JSON.stringify(action));

@@ -10,6 +10,7 @@ import mode from './pages/mode';
 import Queuetournament from './pages/queue_tournament';
 import Tournament_mgt from './pages/tournament';
 import Local from './pages/local';
+import editProfile from './pages/editProfile';
 
 // Définir vos routes sous forme d'un objet
 const routes: { [key: string]: () => void } = {
@@ -25,6 +26,7 @@ const routes: { [key: string]: () => void } = {
   '/create_account': createAccount,
   '/login_error': loginError,
   '/login_success': loginSuccess,
+  '/edit_profile': editProfile,
 };
 
 export function initRouter() {

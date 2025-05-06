@@ -1,0 +1,589 @@
+// Fonction pour afficher un message d'erreur
+function showError(message: string, duration: number = 5000) {
+	const errorElement = document.getElementById('errorMessage');
+	const errorText = document.getElementById('errorMessageText');
+	
+	if (errorElement && errorText) {
+	  errorText.textContent = message;
+	  errorElement.classList.remove('hidden');
+	  
+	  // Masquer le message après la durée spécifiée
+	  setTimeout(() => {
+		errorElement.classList.add('hidden');
+	  }, duration);
+	}
+  }
+  
+  // Fonction pour masquer le message d'erreur manuellement
+  function hideError() {
+	const errorElement = document.getElementById('errorMessage');
+	if (errorElement) {
+	  errorElement.classList.add('hidden');
+	}
+  }
+  
+  export default function EditProfile() {
+	const app = document.getElementById('app');
+	if (app) {
+	  app.innerHTML = /*html*/`
+	  <div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">Pong Game</div>
+	  <div>
+		<div id="twoBox" class="flex justify-center items-center mb-10 gap-5">
+		  <div id="profilBox" class="h-80 w-1/3 bg-blue-700 rounded-lg p-4 text-white">
+			<div id="img_name" class="flex items-center mb-4">
+			  <div id="img" class="w-28 h-28 rounded-lg bg-gray-300 mr-4 overflow-hidden relative group cursor-pointer">
+				<img id="profileImage" src="" alt="Profile" class="w-full h-full object-cover select-none"/>
+				<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+				  <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+				  </svg>
+				</div>
+				<input type="file" id="avatarUpload" class="hidden" accept="image/*" />
+			  </div>
+			  <div class="flex flex-col">
+				<!-- Username display et édition -->
+				<div id="usernameContainer" class="flex items-center">
+				  <div id="username" class="flex justify-center items-center text-xl font-bold font-jaro bg-white text-black rounded-lg pl-2 pr-2 pb-0.5 select-none">Chargement...</div>
+				  <button id="editUsernameBtn" class="ml-2 text-white hover:text-gray-200">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+					</svg>
+				  </button>
+				</div>
+				<div id="usernameEditContainer" class="hidden flex items-center mt-1">
+				  <input type="text" id="usernameInput" maxlength="7" class="bg-white text-black rounded-md w-1/2 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Max 7 caractères" />
+				  <button id="saveUsernameBtn" class="ml-1 bg-green-500 hover:bg-green-600 text-white rounded-md px-2 py-1 text-sm">✓</button>
+				  <button id="cancelUsernameBtn" class="ml-1 bg-red-500 hover:bg-red-600 text-white rounded-md px-2 py-1 text-sm">✗</button>
+				</div>
+			  </div>
+			</div>
+			
+			<!-- Email display et édition -->
+			<div id="emailContainer" class="flex items-center mb-3">
+			  <div id="email" class="flex font-jaro select-none">Chargement...</div>
+			  <button id="editEmailBtn" class="ml-2 text-white hover:text-gray-200">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+				</svg>
+			  </button>
+			</div>
+			<div id="emailEditContainer" class="hidden flex items-center mb-3">
+			  <input type="email" id="emailInput" class="bg-white text-black rounded-md px-2 py-1 text-sm w-full mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nouvel email" />
+			  <button id="saveEmailBtn" class="ml-1 bg-green-500 hover:bg-green-600 text-white rounded-md px-2 py-1 text-sm">✓</button>
+			  <button id="cancelEmailBtn" class="ml-1 bg-red-500 hover:bg-red-600 text-white rounded-md px-2 py-1 text-sm">✗</button>
+			</div>
+			
+			<div id="totalGames" class="flex mb-2">
+			  <div class="font-jaro text-2xl select-none">Total games: </div>
+			  <div id="nbGames" class="ml-2 pt-0.5 font-jaro text-xl">0</div>
+			</div>
+			<div id="stats" class="flex justify-around items-center mt-3 text-center">
+			  <div id="win" class="flex flex-col items-center gap-4">
+				<div class="font-bold font-jaro text-2xl select-none">Win</div>
+				<div id="statWin" class="text-xl font-jaro select-none">0</div>
+			  </div>
+			  <div id="losses" class="flex flex-col items-center gap-4">
+				<div class="font-bold font-jaro text-2xl select-none">Losses</div>
+				<div id="statLosses" class="text-xl font-jaro select-none">0</div>
+			  </div>
+			  <div id="winrate" class="flex flex-col items-center gap-4">
+				<div class="font-bold font-jaro text-2xl select-none">WinRate</div>
+				<div id="statWinRate" class="text-xl font-jaro select-none">0%</div>
+			  </div>
+			</div>
+		  </div>
+  
+		  <div id="friendBox" class="h-80 w-1/3 bg-red-700 rounded-lg p-4 text-white">
+			<div class="text-xl font-bold mb-4 font-jaro select-none">Friends</div>
+			<div id="friendsList" class="overflow-y-auto h-64">
+			</div>
+		  </div>
+		</div>
+		
+		<!-- Message d'erreur -->
+		<div id="errorMessage" class="hidden fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-20">
+		  <div class="flex items-center">
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+			  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+			</svg>
+			<span id="errorMessageText"></span>
+		  </div>
+		</div>
+		
+		<div class="flex justify-center items-center gap-9">
+		  <div id="saveChangesBtn" class='button mb-2 h-20 w-1/6 bg-green-600 rounded-lg cursor-pointer select-none
+		  hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#15803d,0_0px_0_0_#1b70f841]
+		  hover:border-b-[0px]
+		  transition-all duration-150 [box-shadow:0_10px_0_0_#15803d,0_15px_0_0_#1b70f841]
+		  border-b-[1px] border-green-400'>
+		  <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>Save Changes</span>
+		  </div>
+  
+		  <div id="resetChangesBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-red-600 rounded-lg cursor-pointer select-none
+		  hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#b91c1c,0_0px_0_0_#1b70f841]
+		  hover:border-b-[0px]
+		  transition-all duration-150 [box-shadow:0_10px_0_0_#b91c1c,0_15px_0_0_#1b70f841]
+		  border-b-[1px] border-red-400'>
+		  <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>Reset Changes</span>
+		  </div>
+  
+		  <div id="changePasswordBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-yellow-500 rounded-lg cursor-pointer select-none
+		  hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#d49218,0_0px_0_0_#1b70f841]
+		  hover:border-b-[0px]
+		  transition-all duration-150 [box-shadow:0_10px_0_0_#d49218,0_15px_0_0_#1b70f841]
+		  border-b-[1px] border-yellow-200'>
+		  <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>Change Password</span>
+		  </div>
+		</div>
+		
+		<div class="flex justify-center items-center">
+		  <div id="backBtn" class='button w-24 h-13 mt-10 bg-gray-700 rounded-full cursor-pointer select-none
+		  hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#181818,0_0px_0_0_#1b70f841]
+		  hover:border-b-[0px]
+		  transition-all duration-150 [box-shadow:0_10px_0_0_#181818,0_15px_0_0_#1b70f841]
+		  border-b-[1px] border-gray-400'>
+		  <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>Back</span>
+		  </div>
+		</div>
+	  </div>
+	  `;
+  
+	  setupEditProfilePage();
+	}
+  }
+  
+  interface UserData {
+	user: {
+	  userName: string;
+	  email: string;
+	  status: string;
+	  avatarUrl: string;
+	};
+	stats: {
+	  totalGames: number;
+	  wins: number;
+	  losses: number;
+	  winRate: number;
+	};
+	matchHistory: Array<{
+	  gameId: string;
+	  gameType: string;
+	  opponent: {
+		userId: string;
+		userName: string;
+	  };
+	  result: 'win' | 'loss';
+	  score: {
+		player: number;
+		opponent: number;
+	  };
+	  date: string;
+	}>;
+  }
+  
+  // Keep track of changes to profile data
+  let originalUserData: UserData | null = null;
+  let changedData: { userName?: string; email?: string; avatarFile?: File } = {};
+  
+  async function fetchUserProfile(): Promise<UserData | null> {
+	try {
+	  const baseUrl = window.location.origin;
+	  const response = await fetch(`${baseUrl}/user/dashboard`, {
+		method: 'GET',
+		credentials: 'include'
+	  });
+  
+	  if (!response.ok) {
+		throw new Error(`Échec de la récupération du profil: ${response.statusText}`);
+	  }
+	
+	  const data = await response.json();
+	  console.log("Structure des données reçues:", JSON.stringify(data, null, 2));
+	  
+	  return data;
+	} catch (error) {
+	  console.error("Erreur lors de la recuperation du profil utilisateur:", error);
+	  return null;
+	}
+  }
+  
+  function updateProfileBoxUI(userData: UserData | null) {
+	if (!userData) return;
+  
+	const profileImage = document.getElementById('profileImage') as HTMLImageElement;
+	if (profileImage && userData.user && userData.user.avatarUrl) {
+	  profileImage.src = userData.user.avatarUrl;
+	}
+  
+	const usernameElement = document.getElementById('username');
+	if (usernameElement && userData.user && userData.user.userName) {
+	  usernameElement.textContent = userData.user.userName;
+	}
+  
+	const emailElement = document.getElementById('email');
+	if (emailElement && userData.user && userData.user.email) {
+	  emailElement.textContent = userData.user.email;
+	}
+  
+	if (userData.stats) {
+	  const nbGamesElement = document.getElementById('nbGames');
+	  if (nbGamesElement) {
+		nbGamesElement.textContent = String(userData.stats.totalGames || 0);
+	  }
+  
+	  const statWinElement = document.getElementById('statWin');
+	  if (statWinElement) {
+		statWinElement.textContent = String(userData.stats.wins || 0);
+	  }
+  
+	  const statLossesElement = document.getElementById('statLosses');
+	  if (statLossesElement) {
+		statLossesElement.textContent = String(userData.stats.losses || 0);
+	  }
+  
+	  const statWinRateElement = document.getElementById('statWinRate');
+	  if (statWinRateElement) {
+		const winRate = userData.stats.winRate || 0;
+		statWinRateElement.textContent = `${Math.round(winRate)}%`;
+	  }
+	}
+  }
+  
+  async function uploadAvatar(file: File): Promise<boolean> {
+	try {
+	  const formData = new FormData();
+	  formData.append('avatar', file);
+	  
+	  const baseUrl = window.location.origin;
+	  const response = await fetch(`${baseUrl}/user/avatar`, {
+		method: 'PUT',
+		credentials: 'include',
+		body: formData
+	  });
+  
+	  if (!response.ok) {
+		const errorText = await response.text();
+		console.error('Error uploading avatar:', errorText);
+		return false;
+	  }
+  
+	  const result = await response.json();
+	  console.log('Avatar upload result:', result);
+	  
+	  if (result.success && result.avatarUrl) {
+		const profileImage = document.getElementById('profileImage') as HTMLImageElement;
+		if (profileImage) {
+		  profileImage.src = result.avatarUrl;
+		}
+		return true;
+	  }
+  
+	  return false;
+	} catch (error) {
+	  console.error('Error uploading avatar:', error);
+	  return false;
+	}
+  }
+  
+  async function updateUserProfile(data: { userName?: string; email?: string }): Promise<boolean> {
+	try {
+	  console.log('Attempting to update profile with data:', JSON.stringify(data));
+	  
+	  const baseUrl = window.location.origin;
+	  const response = await fetch(`${baseUrl}/user/profile`, {
+		method: 'PUT',
+		credentials: 'include',
+		headers: {
+		  'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(data)
+	  });
+  
+	  if (!response.ok) {
+		const errorText = await response.text();
+		console.error('Error updating profile:', errorText);
+		return false;
+	  }
+  
+	  const result = await response.json();
+	  console.log('Profile update result:', result);
+	  return result.success === true;
+	} catch (error) {
+	  console.error('Error updating profile:', error);
+	  return false;
+	}
+  }
+  
+  function showUsernameEdit() {
+	const usernameContainer = document.getElementById('usernameContainer');
+	const usernameEditContainer = document.getElementById('usernameEditContainer');
+	const usernameInput = document.getElementById('usernameInput') as HTMLInputElement;
+	const username = document.getElementById('username');
+	
+	if (usernameContainer && usernameEditContainer && usernameInput && username) {
+	  usernameContainer.classList.add('hidden');
+	  usernameEditContainer.classList.remove('hidden');
+	  usernameInput.value = username.textContent || '';
+	  usernameInput.focus();
+	}
+  }
+  
+  function hideUsernameEdit() {
+	const usernameContainer = document.getElementById('usernameContainer');
+	const usernameEditContainer = document.getElementById('usernameEditContainer');
+	
+	if (usernameContainer && usernameEditContainer) {
+	  usernameContainer.classList.remove('hidden');
+	  usernameEditContainer.classList.add('hidden');
+	}
+  }
+  
+  function showEmailEdit() {
+	const emailContainer = document.getElementById('emailContainer');
+	const emailEditContainer = document.getElementById('emailEditContainer');
+	const emailInput = document.getElementById('emailInput') as HTMLInputElement;
+	const email = document.getElementById('email');
+	
+	if (emailContainer && emailEditContainer && emailInput && email) {
+	  emailContainer.classList.add('hidden');
+	  emailEditContainer.classList.remove('hidden');
+	  emailInput.value = email.textContent || '';
+	  emailInput.focus();
+	}
+  }
+  
+  function hideEmailEdit() {
+	const emailContainer = document.getElementById('emailContainer');
+	const emailEditContainer = document.getElementById('emailEditContainer');
+	
+	if (emailContainer && emailEditContainer) {
+	  emailContainer.classList.remove('hidden');
+	  emailEditContainer.classList.add('hidden');
+	}
+  }
+  
+  async function setupEditProfilePage() {
+	// Fetch user data and update UI
+	originalUserData = await fetchUserProfile();
+	if (originalUserData) {
+	  updateProfileBoxUI(originalUserData);
+	} else {
+	  console.error("Impossible de charger les données du profil");
+	}
+  
+	// Profile image click event
+	const profileImg = document.getElementById('img');
+	const avatarUpload = document.getElementById('avatarUpload') as HTMLInputElement;
+	
+	if (profileImg && avatarUpload) {
+	  profileImg.addEventListener('click', () => {
+		avatarUpload.click();
+	  });
+	  
+	  avatarUpload.addEventListener('change', (e) => {
+		const target = e.target as HTMLInputElement;
+		const files = target.files;
+		
+		if (files && files.length > 0) {
+		  const file = files[0];
+		  
+		  // Preview the image
+		  const profileImage = document.getElementById('profileImage') as HTMLImageElement;
+		  if (profileImage) {
+			const reader = new FileReader();
+			reader.onload = (e) => {
+			  if (e.target && e.target.result) {
+				profileImage.src = e.target.result as string;
+			  }
+			};
+			reader.readAsDataURL(file);
+		  }
+		  
+		  changedData.avatarFile = file;
+		}
+	  });
+	}
+  
+	// Username edit setup
+	const editUsernameBtn = document.getElementById('editUsernameBtn');
+	const saveUsernameBtn = document.getElementById('saveUsernameBtn');
+	const cancelUsernameBtn = document.getElementById('cancelUsernameBtn');
+	
+	if (editUsernameBtn) {
+	  editUsernameBtn.addEventListener('click', showUsernameEdit);
+	}
+	
+	if (saveUsernameBtn) {
+	  saveUsernameBtn.addEventListener('click', () => {
+		const usernameInput = document.getElementById('usernameInput') as HTMLInputElement;
+		if (usernameInput) {
+		  const newUsername = usernameInput.value.trim();
+		  
+		  if (!newUsername) {
+			showError('Le nom d\'utilisateur ne peut pas être vide');
+			return;
+		  }
+		  
+		  if (newUsername.length > 7) {
+			showError('Le nom d\'utilisateur ne peut pas dépasser 7 caractères');
+			return;
+		  }
+		  
+		  changedData.userName = newUsername;
+		  
+		  // Update displayed username
+		  const usernameElement = document.getElementById('username');
+		  if (usernameElement) {
+			usernameElement.textContent = newUsername;
+		  }
+		  
+		  hideUsernameEdit();
+		}
+	  });
+	}
+	
+	if (cancelUsernameBtn) {
+	  cancelUsernameBtn.addEventListener('click', hideUsernameEdit);
+	}
+  
+	// Email edit setup
+	const editEmailBtn = document.getElementById('editEmailBtn');
+	const saveEmailBtn = document.getElementById('saveEmailBtn');
+	const cancelEmailBtn = document.getElementById('cancelEmailBtn');
+	
+	if (editEmailBtn) {
+	  editEmailBtn.addEventListener('click', showEmailEdit);
+	}
+	
+	if (saveEmailBtn) {
+	  saveEmailBtn.addEventListener('click', () => {
+		const emailInput = document.getElementById('emailInput') as HTMLInputElement;
+		if (emailInput) {
+		  const newEmail = emailInput.value.trim();
+		  
+		  if (!newEmail) {
+			showError('L\'email ne peut pas être vide');
+			return;
+		  }
+		  
+		  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+		  if (!emailRegex.test(newEmail)) {
+			showError('Veuillez entrer une adresse email valide');
+			return;
+		  }
+		  
+		  changedData.email = newEmail;
+		  
+		  // Update displayed email
+		  const emailElement = document.getElementById('email');
+		  if (emailElement) {
+			emailElement.textContent = newEmail;
+		  }
+		  
+		  hideEmailEdit();
+		}
+	  });
+	}
+	
+	if (cancelEmailBtn) {
+	  cancelEmailBtn.addEventListener('click', hideEmailEdit);
+	}
+  
+	// Save changes button
+	const saveChangesBtn = document.getElementById('saveChangesBtn');
+	if (saveChangesBtn) {
+	  saveChangesBtn.addEventListener('click', async () => {
+		// Masquer le message d'erreur précédent
+		hideError();
+		
+		// Vérifier s'il y a des modifications à enregistrer
+		if (Object.keys(changedData).length === 0) {
+		  showError('Aucune modification à enregistrer');
+		  return;
+		}
+		
+		// Désactiver le bouton pendant le traitement
+		saveChangesBtn.classList.add('opacity-50');
+		saveChangesBtn.setAttribute('disabled', 'true');
+		
+		let success = true;
+		let errorMessage = '';
+		
+		try {
+		  if (changedData.avatarFile) {
+			const avatarSuccess = await uploadAvatar(changedData.avatarFile);
+			if (!avatarSuccess) {
+			  success = false;
+			  errorMessage += 'Échec du téléchargement de l\'avatar. ';
+			}
+		  }
+		  
+		  if (changedData.userName || changedData.email) {
+			const updateData: { userName?: string; email?: string } = {};
+			if (changedData.userName) updateData.userName = changedData.userName;
+			if (changedData.email) updateData.email = changedData.email;
+			
+			const profileSuccess = await updateUserProfile(updateData);
+			if (!profileSuccess) {
+			  success = false;
+			  errorMessage += 'Échec de la mise à jour des informations du profil. ';
+			}
+		  }
+		  
+		  if (success) {
+			alert('Profil mis à jour avec succès !');
+			originalUserData = await fetchUserProfile();
+			changedData = {};
+		  } else {
+			showError(`Échec de la mise à jour : ${errorMessage}\nVeuillez vérifier votre connexion et réessayer.`);
+		  }
+		} catch (error) {
+		  console.error('Erreur lors de l\'enregistrement des modifications:', error);
+		  showError(`Une erreur est survenue : ${error}`);
+		} finally {
+		  saveChangesBtn.classList.remove('opacity-50');
+		  saveChangesBtn.removeAttribute('disabled');
+		}
+	  });
+	}
+  
+	const resetChangesBtn = document.getElementById('resetChangesBtn');
+	if (resetChangesBtn && originalUserData) {
+	  resetChangesBtn.addEventListener('click', () => {
+		// Reset the UI to original values
+		updateProfileBoxUI(originalUserData);
+		// Hide edit fields if they're open
+		hideUsernameEdit();
+		hideEmailEdit();
+		// Clear changed data
+		changedData = {};
+	  });
+	}
+  
+	// Change password button
+	const changePasswordBtn = document.getElementById('changePasswordBtn');
+	if (changePasswordBtn) {
+	  changePasswordBtn.addEventListener('click', () => {
+		alert('Password change functionality would be implemented here.');
+		// This would typically open a password change form
+	  });
+	}
+  
+	// Back button
+	const backBtn = document.getElementById('backBtn');
+	if (backBtn) {
+	  backBtn.addEventListener('click', () => {
+		// Check if there are unsaved changes
+		if (Object.keys(changedData).length > 0) {
+		  if (confirm('You have unsaved changes. Are you sure you want to go back?')) {
+			history.pushState(null, '', '/profile');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+		  }
+		} else {
+		  history.pushState(null, '', '/profile');
+		  window.dispatchEvent(new PopStateEvent('popstate'));
+		}
+	  });
+	}
+  }

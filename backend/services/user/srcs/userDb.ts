@@ -14,7 +14,7 @@ db.exec(`
 		email TEXT UNIQUE NOT NULL,
 		passwordHsh TEXT NOT NULL,
 		role TEXT NOT NULL,
-		status TEXT NOT NULL,
+		status TEXT DEFAULT 'offline',
 		avatarUrl TEXT DEFAULT '/avatars/default.png',
 		inGameId TEST NOT NULL
 	)

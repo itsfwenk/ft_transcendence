@@ -69,6 +69,11 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 			if (passwordMatch === false) {
 				return reply.status(401).send({ error: 'Invalid password' });
 			}
+			console.log("Login user :", user);
+			if  (user.status === 'online') {
+				console.log("ALREADY ONLINE");
+				return reply.status(401).send({ error: 'Already logged in somewhere else' });
+			}
 
 			updateUserStatus(user.userId, 'online');
 
@@ -83,7 +88,7 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 				secure: process.env.NODE_ENV === 'production',  // en production, utilisez HTTPS
 				sameSite: 'lax',
 				path: '/',  // disponible pour toutes les routes
-			  });
+			});
 
 			reply.send({ token,
 				user: { 
@@ -91,7 +96,7 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 					userName: user.userName,
 					role: user.role,
 					status: user.status,
-				 }
+				}
 				});
 		} else {
 			return reply.status(401).send({ error: 'Invalid email or password' });

@@ -1,6 +1,6 @@
-import { initGame } from '../game.ts';
-import { pauseGame } from '../game.ts';
-import { initOnlineGame } from '../game-online.ts';
+// import { initGame } from '../game.ts';
+// import { pauseGame } from '../game.ts';
+// import { initOnlineGame } from '../game-online.ts';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Define types for HTML elements
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameModeTitle = document.getElementById('gameMode') as HTMLElement | null;
     const localBtn = document.getElementById('localBtn') as HTMLButtonElement | null;
     const remoteBtn = document.getElementById('remoteBtn') as HTMLButtonElement | null;
-    const pauseBtn = document.getElementById('pauseBtn') as HTMLButtonElement | null;
+    // const pauseBtn = document.getElementById('pauseBtn') as HTMLButtonElement | null;
     const homeBtn = document.getElementById('homeBtn') as HTMLButtonElement | null;
     const gameCanvas = document.getElementById('gameCanvas') as HTMLCanvasElement | null;
   
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
       gameModeTitle.textContent = 'Local Multiplayer';
       showPage(gamePage);
       // startLocalGame(gameCanvas);
-      initGame();
+      // initGame();
     });
     
     remoteBtn?.addEventListener('click', () => {
@@ -35,12 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
       gameModeTitle.textContent = 'Online Multiplayer';
       showPage(gamePage);
     //   startRemoteGame(gameCanvas);
-      initOnlineGame();
+      // initOnlineGame();
     });
   
-    pauseBtn?.addEventListener('click', () => {
-      pauseGame();
-    });
+    // pauseBtn?.addEventListener('click', () => {
+    //   pauseGame();
+    // });
   
     homeBtn?.addEventListener('click', () => {
       showPage(homePage);

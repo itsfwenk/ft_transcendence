@@ -15,7 +15,7 @@ const speedIncrease = parseFloat(process.env.SPEED_INCREASE as string);
 
 const activeUsers = new Map<string, WebSocket>(); // userId -> WebSocket
 export default activeUsers;
-const gameReadyPlayers = new Map<string, Set<string>>(); // gameId -> Set of userIds who are ready
+// const gameReadyPlayers = new Map<string, Set<string>>(); // gameId -> Set of userIds who are ready
 
 /*
 // Interface pour le body de startGame
@@ -293,9 +293,9 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 	console.log(`User ${userId} connected via WebSocket`);
 
 	const gameId = user.inGameId;
-	if (!gameReadyPlayers.has(gameId)) {
-        gameReadyPlayers.set(gameId, new Set<string>());
-    }
+	// if (!gameReadyPlayers.has(gameId)) {
+    //     gameReadyPlayers.set(gameId, new Set<string>());
+    // }
 
     connection.on('message', async (message) => {
         try {
@@ -313,21 +313,22 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 			// 	updateGameCanvas(gameId, width, height);
 			// 	  console.log(`Game ${gameId} canvas size updated: ${width} x ${height}`);
 			// 	updatePaddlesInDb(gameId);
-			  if (type === 'ready_to_start') {
-                console.log(`User ${userId} is ready to start game ${gameId}`);
-                const readyPlayers = gameReadyPlayers.get(gameId)!;
-                readyPlayers.add(userId);
 
-                const game = await getGamebyId(gameId);
-                if (game && readyPlayers.size === 2 && game.status !== 'ongoing') {
-                    console.log(`Both players ready for game ${gameId}. Starting game.`);
-                    await updateGameStatusInDb(gameId, 'ongoing');
-                    for (const playerId of [game.player1_id, game.player2_id]) {
-                        const playerSocket = activeUsers.get(playerId);
-                        playerSocket?.send(JSON.stringify({ type: 'game_start' }));
-                    }
-                }
-            }
+			//   if (type === 'ready_to_start') {
+                // console.log(`User ${userId} is ready to start game ${gameId}`);
+                // const readyPlayers = gameReadyPlayers.get(gameId)!;
+                // readyPlayers.add(userId);
+
+                // const game = await getGamebyId(gameId);
+                // if (game && readyPlayers.size === 2 && game.status !== 'ongoing') {
+                    // console.log(`Both players ready for game ${gameId}. Starting game.`);
+                    // await updateGameStatusInDb(gameId, 'ongoing');
+                    // for (const playerId of [game.player1_id, game.player2_id]) {
+                    //     const playerSocket = activeUsers.get(playerId);
+                    //     playerSocket?.send(JSON.stringify({ type: 'game_start' }));
+                    // }
+                // }
+            // }
 
             // if (key === 'ArrowUp') {
             //     if (type === "keydown") {
@@ -342,7 +343,7 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
             //         updatePaddleDelta(user.inGameId, userId, 0);
             //     }
             // }
-			else if (type === 'input' && key) {
+			if (type === 'input' && key) {
                 const delta = (key === 'ArrowUp') ? -paddleSpeed : (key === 'ArrowDown') ? paddleSpeed : 0;
                 updatePaddleDelta(gameId, userId, state === 'keydown' ? delta : 0);
 			}
@@ -355,14 +356,14 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 	// Handle socket close
 	connection.on('close', () => {
 		activeUsers.delete(userId);
-		const readyPlayers = gameReadyPlayers.get(gameId);
-		readyPlayers?.delete(userId);
-		if (readyPlayers?.size === 0)
-		{
-			endGameInDb(gameId);
-			console.log("Game", gameId, "has finished.");
-			gameReadyPlayers.delete(gameId);
-		}
+		// const readyPlayers = gameReadyPlayers.get(gameId);
+		// readyPlayers?.delete(userId);
+		// if (readyPlayers?.size === 0)
+		// {
+		// 	endGameInDb(gameId);
+		// 	console.log("Game", gameId, "has finished.");
+		// 	gameReadyPlayers.delete(gameId);
+		// }
 		console.log(`User ${userId} disconnected`);
 		connection.close(1003, 'Invalid message format');
 
@@ -379,8 +380,8 @@ async function broadcastGameToPlayers(gameId: string) {
 	if (!game || game.status !== 'ongoing') return;
 
 	[game.player1_id, game.player2_id].forEach(userId => {
-		const gameSet = gameReadyPlayers.get(gameId);
-		if (gameSet?.has(userId)) {
+		// const gameSet = gameReadyPlayers.get(gameId);
+		// if (gameSet?.has(userId)) {
 			const socket = activeUsers.get(userId);
 			if (socket) {
 				const message = {
@@ -390,7 +391,7 @@ async function broadcastGameToPlayers(gameId: string) {
 				// console.log("from broadcastGameToPlayers :", JSON.stringify(message));
 				socket.send(JSON.stringify(message));
 			}
-		}
+		// }
 	});
 }
 

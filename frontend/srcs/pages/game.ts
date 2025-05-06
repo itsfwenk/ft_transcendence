@@ -60,11 +60,11 @@ export default function game() {
     app.appendChild(scoreDisplay);
 
 
-    const lancerButton = document.createElement('button');
-    lancerButton.id = 'lancerBtn';
-    lancerButton.className = 'bg-blue-600 text-white px-4 py-2 rounded mt-4';
-    lancerButton.textContent = 'Lancer';
-    app.appendChild(lancerButton);
+    // const lancerButton = document.createElement('button');
+    // lancerButton.id = 'lancerBtn';
+    // lancerButton.className = 'bg-blue-600 text-white px-4 py-2 rounded mt-4';
+    // lancerButton.textContent = 'Lancer';
+    // app.appendChild(lancerButton);
 
     const gameStateDisplay = document.createElement('p');
     gameStateDisplay.id = 'gameState';
@@ -73,7 +73,7 @@ export default function game() {
 
     const score1Display = document.getElementById('score1');
     const score2Display = document.getElementById('score2');
-    const lancerBtn = document.getElementById('lancerBtn') as HTMLButtonElement;
+    // const lancerBtn = document.getElementById('lancerBtn') as HTMLButtonElement;
     const gameStateLabel = document.getElementById('gameState');
 
     let gameStarted = false;
@@ -99,15 +99,15 @@ export default function game() {
             const data = JSON.parse(event.data);
             console.log("datatype =", data.type);
             console.log("data :", data);
-            if (data.type === 'game_start') {
+            if (data && data.game_state.status === 'ongoing' && !gameStarted === true) {
                 console.log("Le jeu a démarré!");
                 gameStarted = true;
                 if (gameStateLabel) {
                     gameStateLabel.textContent = "Partie en cours!";
                 }
-                if (lancerBtn) {
-                    lancerBtn.style.display = 'none'; // Hide the button once the game starts
-                }
+                // if (lancerBtn) {
+                //     lancerBtn.style.display = 'none'; // Hide the button once the game starts
+                // }
             } else if (gameStarted && data.type === 'game_update' && data.game_state.ball) {
                 // currentGameState = data;
                 renderGame(data.game_state as Game); //  Call renderGame
@@ -133,13 +133,13 @@ export default function game() {
     };
 
         // Event listener for the "Lancer" button
-        lancerBtn.addEventListener('click', () => {
-            if (socket && socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify({ type: 'ready_to_start' }));
-                lancerBtn.textContent = 'En attente de l\'autre joueur...';
-                lancerBtn.disabled = true;
-            }
-        });
+        // lancerBtn.addEventListener('click', () => {
+        //     if (socket && socket.readyState === WebSocket.OPEN) {
+        //         socket.send(JSON.stringify({ type: 'ready_to_start' }));
+        //         lancerBtn.textContent = 'En attente de l\'autre joueur...';
+        //         lancerBtn.disabled = true;
+        //     }
+        // });
     
         // Keyboard event listeners for player input
           document.addEventListener('keydown', (e) => {

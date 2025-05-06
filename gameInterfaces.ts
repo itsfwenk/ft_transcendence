@@ -21,7 +21,7 @@ export interface Game {
 	leftPaddle: Paddle;
 	rightPaddle: Paddle;
 	ball: Ball;
-	status: 'waiting' | 'ongoing' | 'finished';
+	status: 'ongoing' | 'finished';
 	winner_id?: string | null;
 	matchId?: string | null;
 	canvasWidth: number;

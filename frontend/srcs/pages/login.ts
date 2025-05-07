@@ -12,12 +12,12 @@ export default  async function login() {
 		  credentials: 'include',
 		});
 		if (response.ok) {
-			const profile = await fetchUserProfile();
-			if (profile && profile.userId) {
-				matchmakingWebSocket(profile.userId);
-			} else {
-				console.error ('Impossible de recuperer le profile du user');
-			}
+			// const profile = await fetchUserProfile();
+			// if (profile && profile.userId) {
+			// 	matchmakingWebSocket(profile.userId);
+			// } else {
+			// 	console.error ('Impossible de recuperer le profile du user');
+			// }
 
 			const data = await response.text();
 			console.log("Session found:", data);

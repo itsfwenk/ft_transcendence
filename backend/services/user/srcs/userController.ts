@@ -71,10 +71,10 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 				return reply.status(401).send({ error: 'Invalid password' });
 			}
 			console.log("Login user :", user);
-			if  (user.status === 'online') {
-				console.log("ALREADY ONLINE");
-				return reply.status(401).send({ error: 'Already logged in somewhere else' });
-			}
+			// if  (user.status === 'online') {
+			// 	console.log("ALREADY ONLINE");
+			// 	return reply.status(401).send({ error: 'Already logged in somewhere else' });
+			// }
 
 			updateUserStatus(user.userId, 'online');
 

@@ -54,7 +54,6 @@ export default function game() {
             // console.log('CANVAS_WIDTH:', process.env.CANVAS_WIDTH);
             // console.log('CANVAS_HEIGHT:', process.env.CANVAS_HEIGHT);
             canvas.classList.add('border-2', 'border-gray-400', 'bg-white');
-        
             app.appendChild(canvas);
         
             const ctx = canvas.getContext('2d');

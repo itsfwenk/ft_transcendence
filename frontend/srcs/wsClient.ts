@@ -1,11 +1,11 @@
-import { updatePlayerStateUI} from "./pages/tournament";
+// import { updatePlayerStateUI} from "./pages/tournament";
 import { TournamentState } from "./types";
 import { Tournament } from "./types";
 
 
 let userSocket: WebSocket | null = null;
 let matchmakingSocket: WebSocket | null = null;
-let currentPlayerState: string | null = null;
+// let currentPlayerState: string | null = null;
 
 export let currentTournamentState: TournamentState | null = null;
 export let currentTournamentData: Tournament | null = null;
@@ -128,37 +128,37 @@ export function getUserSocket(): WebSocket | null {
 	return userSocket;
 }
 
-function handlePlayerStateUpdate(playerState: string) {
-	currentPlayerState = playerState;
-	console.log("Nouveau playerState =", currentPlayerState);
-	updatePlayerStateUI(currentPlayerState);
-}
+// function handlePlayerStateUpdate(playerState: string) {
+// 	currentPlayerState = playerState;
+// 	console.log("Nouveau playerState =", currentPlayerState);
+// 	updatePlayerStateUI(currentPlayerState);
+// }
 
-function show1v1ResultScreen(
-	isWinner: boolean,
-	scores: { score1: number; score2: number }
-  ) {
-	const app = document.getElementById('app');
-	if (!app) return;
+// function show1v1ResultScreen(
+// 	isWinner: boolean,
+// 	scores: { score1: number; score2: number }
+//   ) {
+// 	const app = document.getElementById('app');
+// 	if (!app) return;
   
-	app.innerHTML = `
-	  <div class="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
-		<h2 class="text-3xl font-bold mb-4">
-		  ${isWinner ? '🎉 Victoire !' : '😢 Défaite'}
-		</h2>
+// 	app.innerHTML = `
+// 	  <div class="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
+// 		<h2 class="text-3xl font-bold mb-4">
+// 		  ${isWinner ? '🎉 Victoire !' : '😢 Défaite'}
+// 		</h2>
   
-		<p class="mb-6 text-lg">Score : ${scores.score1} – ${scores.score2}</p>
+// 		<p class="mb-6 text-lg">Score : ${scores.score1} – ${scores.score2}</p>
   
-		<button id="backBtn"
-				class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">
-		  Retour au menu
-		</button>
-	  </div>
-	`;
+// 		<button id="backBtn"
+// 				class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">
+// 		  Retour au menu
+// 		</button>
+// 	  </div>
+// 	`;
   
-	document.getElementById('backBtn')?.addEventListener('click', () => {
-		history.pushState(null, '', '/menu');
-		window.dispatchEvent(new PopStateEvent('popstate'));
-	});
-}
+// 	document.getElementById('backBtn')?.addEventListener('click', () => {
+// 		history.pushState(null, '', '/menu');
+// 		window.dispatchEvent(new PopStateEvent('popstate'));
+// 	});
+// }
  

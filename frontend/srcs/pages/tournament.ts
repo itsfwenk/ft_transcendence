@@ -1,5 +1,5 @@
-import {  TournamentState } from "../types";
-import { currentTournamentState, getMatchmakingSocket } from "../wsClient";
+
+import { getMatchmakingSocket } from "../wsClient";
 import { fetchUserProfile } from "./mode";
 
 let ws: WebSocket;

@@ -8,7 +8,7 @@ import dotenv from 'dotenv'
 import googleAuthRoutes from './googleAuthRoutes.js';
 import path from 'path';
 import fs from 'fs';
-import cors from '@fastify/cors';
+import fastifyCors from '@fastify/cors';
 
 import websocket from '@fastify/websocket';
 import { handleWebSocketConnection } from './WebsocketHandler.js';
@@ -19,11 +19,13 @@ dotenv.config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 const app = Fastify();
 
 // dotenv.config();
+// app.register(fastifyCors, {
+// 	origin: true, // allow all origins dynamically
+// 	credentials: true
+//   });
 
 app.register(fastifyCookie, {
 	secret: process.env.COOKIE_SECRET,
-	// hook: 'onRequest', // set to false to disable cookie parsing on all requests
-	// parseOptions: {}     // options for parsing cookies
 });
 
 // app.register(cors, {
@@ -141,3 +143,7 @@ app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 // 	});
 // });
 
+app.addHook('onRequest', async (req, reply) => {
+	console.log('Incoming cookies:', req.cookies);
+  });
+  

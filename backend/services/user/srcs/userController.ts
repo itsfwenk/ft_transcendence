@@ -1,8 +1,9 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcrypt';
 import jwt from '@fastify/jwt';
 import { saveUser, getUserByEmail, getUserById, isValidEmail, updateUser, deleteUser, updateUserRole, updateUserStatus, getUsersByRole, getUserWithStatus, User, getUserByUserName } from './userDb.js';
 import { getConnectedUsers, isUserConnected } from './WebsocketHandler.js';
+import { error } from 'console';
 
 // Interface pour les requêtes de création d'utilisateur
 interface RegisterRequest extends FastifyRequest {
@@ -85,7 +86,7 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 			reply.setCookie('authToken', token, {
 				signed: true,
 				httpOnly: true,
-				secure: process.env.NODE_ENV === 'production',  // en production, utilisez HTTPS
+				secure: true,  // en production, utilisez HTTPS
 				sameSite: 'lax',
 				path: '/',  // disponible pour toutes les routes
 			});
@@ -303,21 +304,59 @@ export async function getOnlineUsers(req: FastifyRequest, reply: FastifyReply) {
 	}
 }
 
-export async function checkUserConnectionStatus(req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) {
-	const { userId } = req.params;
-	const user =getUserById(userId);
+interface JwtPayload {
+	userId: string;
+}
 
-	if (!user) {
-		return reply.status(404).send({ error: 'User not found' });
+export async function checkUserConnectionStatus(fastify: FastifyInstance, req: FastifyRequest, reply: FastifyReply) {
+	console.log("checkUserConnectionStatus triggered");
+	try {
+		const cookie = req.cookies;
+		if (!cookie) {
+			console.log("No cookie", cookie);
+			return reply.status(401).send({ error: "No cookie found" });
+		}
+		else {
+			console.log("cookie :", cookie);
+		}
+
+		const token = req.cookies?.authToken;
+		if (!token) {
+			console.log("No authToken cookie found");
+			return reply.status(401).send({ error: "No authToken cookie found" });
+		}
+		const { value: unsignedToken, valid } = req.unsignCookie(token);
+		if (!valid) {
+			console.log("Invalid signed cookie");
+			return reply.status(401).send({ error: "Invalid signed cookie" });
+		}
+
+		let decoded;
+		try {
+			decoded = fastify.jwt.verify(unsignedToken) as JwtPayload;
+		} catch (err) {
+			console.error("Token verification failed:", err);
+			return null;
+		}
+		const { userId } = decoded;
+		const user =getUserById(userId);
+		if (!user) {
+			console.log('User not found');
+			return reply.status(404).send({ error: 'User not found' });
+		}
+		console.log("connected user =", user?.userName);
+		const isConnected = isUserConnected(userId);
+		return reply.send({
+			userId,
+			userName: user.userName,
+			isConnected,
+			status: isConnected ? 'online' : 'offline'
+		});
+	
 	}
-
-	const isConnected = isUserConnected(userId);
-
-	return reply.send({
-		userId,
-		userName: user.userName,
-		isConnected,
-		status: isConnected ? 'online' : 'offline'
-	});
+ catch(error) {
+	console.log(error);
+	return reply.status(404).send({ error: 'User not found' });
+ }
 }
 

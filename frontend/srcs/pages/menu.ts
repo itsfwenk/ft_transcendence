@@ -78,6 +78,7 @@ export const handleDisconnect = async () => {
 		}
 		history.pushState(null, '', '/');
 		window.dispatchEvent(new PopStateEvent('popstate'));
+		localStorage.removeItem("userId");
 	} catch (error) {
 		console.error('Erreur lors de la déconnexion:', error);
 		history.pushState(null, '', '/');

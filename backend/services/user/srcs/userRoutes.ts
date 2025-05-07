@@ -179,13 +179,13 @@ export default async function userRoutes(fastify: any) {
 
   fastify.get('/status/userId', {
 	schema: {
-		params: {
-			type:'object',
-			properties: {
-				userId: { type: 'string' }
-			},
-			required: ['userId']
-		},
+		// params: {
+		// 	type:'object',
+		// 	properties: {
+		// 		userId: { type: 'string' }
+		// 	},
+		// 	// required: ['userId']
+		// },
 		response: {
 			200: {
 				type: 'object',
@@ -198,7 +198,9 @@ export default async function userRoutes(fastify: any) {
 			}
 		}
 	},
-	handler: checkUserConnectionStatus
+	handler: async (req: FastifyRequest, reply: FastifyReply) => {
+    return checkUserConnectionStatus(fastify, req, reply);
+    }
   });
 
   fastify.get('/online', {

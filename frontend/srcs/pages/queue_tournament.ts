@@ -80,10 +80,10 @@ export default async function Queuetournament() {
 	}
 
 	const ws = getMatchmakingSocket();
-		if (!ws || ws.readyState !== WebSocket.OPEN) {
-			console.error("Pas de connexion WebSocket disponible");
-			return;
-		}
+	if (!ws || ws.readyState !== WebSocket.OPEN) {
+		console.error("Pas de connexion WebSocket disponible");
+		return;
+	}
 	
 	function cleanupMatchmaking() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
@@ -118,12 +118,19 @@ export default async function Queuetournament() {
 				case 'QUEUE_TOURNAMENT_PLAYER_LEFT':
 					removePlayerBox(msg.playerId);
 					break;
-
-				case 'MATCH_START':
+				case 'TOURNAMENT_LAUNCH':
 					cleanupMatchmaking();
-      				history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
-      				window.dispatchEvent(new PopStateEvent('popstate'));
+					const tournament = msg.payload;
+					const tournament_Id = tournament.id;
+					history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
+					window.dispatchEvent(new PopStateEvent('popstate'));
 					break;
+
+				// case 'MATCH_START':
+					
+      			// 	history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
+      			// 	window.dispatchEvent(new PopStateEvent('popstate'));
+				// 	break;
 			}		
 		} catch (error) {
 			console.error("Erreur lors du traitement du message:", error);

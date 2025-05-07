@@ -50,69 +50,75 @@ export function matchmakingWebSocket(userId: string): WebSocket {
 	console.log("test_websocket", userId);
 	const baseUrl = window.location.origin.replace(/^https?:\/\//, '');
 	const ws = new WebSocket(`wss://${baseUrl}/matchmaking/ws?playerId=${userId}`);
-	ws.onopen = () => {
-		console.log('Connexion WebSocket matchmaking établie');
-	};
 
-	// message recu du back impactant le front
-	ws.onmessage = (event) => {
-		try{
-			const msg = JSON.parse(event.data);
-			console.log('Notification WebSocket matchmaking reçue:', msg);
-			switch(msg.type) {
-				// case 'launch_tournament':
-				// 	const tournament_Id = msg.payload?.tournament?.id;
-				// 	if (tournament_Id) {
-				// 		console.log("Tournoi lancé avec ID :", tournament_Id);
-				// 		history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
-				// 		window.dispatchEvent(new PopStateEvent('popstate'));
-				// 	}
-				// break;
-				case 'tournament_state_update':
-					const {state, tournament} = msg.payload;
-					const tournament_Id2 = tournament.id;
-					history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id2}`);
-					window.dispatchEvent(new PopStateEvent('popstate'));
-					currentTournamentState = state;
-					currentTournamentData = tournament;
-					console.log("tournament state", currentTournamentState);
-					break;
-				// case 'MATCH_START':
-				// 	const {gameSessionId} = msg.payload;
-				// 	console.log("gameSessionId", gameSessionId);
-				// 	history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
-				// 	window.dispatchEvent(new PopStateEvent('popstate'));
-				// 	break;
-				case 'player_state_update':
-					const {state: playerState, tournament: playerTournament} = msg.payload;
-					history.pushState(null, '', `/tournament?tournament_Id=${playerTournament.id}`);
-					window.dispatchEvent(new PopStateEvent('popstate'));
-					console.log("player_state", playerState);
-					handlePlayerStateUpdate(playerState);
-					break;
-				case 'MATCH_END':
-					const {winner_Id, score1, score2} = msg.payload;
-					const isWinner = winner_Id === userId;
-					show1v1ResultScreen(isWinner, {score1, score2});
-					break;
-				default:
-					break;
-			}
-		} catch (error) {
-			console.error('Erreur lors du parsing du message matchmaking:', error);
-		}
-	};
-	
-	ws.onerror = (error) => {
-		console.error('Erreur WebSocket matchmaking:', error);
-	};
-	
-	ws.onclose = () => {
-		console.log('Connexion WebSocket matchmaking fermée');
-	};
+	ws.addEventListener('open',  () => console.log('[WS] open'));
+	ws.addEventListener('close', () => console.log('[WS] closed'));
+	ws.addEventListener('error', e => console.error('[WS] error', e));
 	matchmakingSocket = ws;
-	return ws;
+	return (ws)
 }
+	// ws.onopen = () => {
+	// 	console.log('Connexion WebSocket matchmaking établie');
+	// };
+	// message recu du back impactant le front
+// 	ws.onmessage = (event) => {
+// 		try{
+// 			const msg = JSON.parse(event.data);
+// 			console.log('Notification WebSocket matchmaking reçue:', msg);
+// 			switch(msg.type) {
+// 				// case 'launch_tournament':
+// 				// 	const tournament_Id = msg.payload?.tournament?.id;
+// 				// 	if (tournament_Id) {
+// 				// 		console.log("Tournoi lancé avec ID :", tournament_Id);
+// 				// 		history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
+// 				// 		window.dispatchEvent(new PopStateEvent('popstate'));
+// 				// 	}
+// 				// break;
+// 				case 'MATCH_START':
+// 					const {state, tournament} = msg.payload;
+// 					const tournament_Id2 = tournament.id;
+// 					history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id2}`);
+// 					window.dispatchEvent(new PopStateEvent('popstate'));
+// 					currentTournamentState = state;
+// 					currentTournamentData = tournament;
+// 					console.log("tournament state", currentTournamentState);
+// 					break;
+// 				// case 'MATCH_START':
+// 				// 	const {gameSessionId} = msg.payload;
+// 				// 	console.log("gameSessionId", gameSessionId);
+// 				// 	history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
+// 				// 	window.dispatchEvent(new PopStateEvent('popstate'));
+// 				// 	break;
+// 				case 'player_state_update':
+// 					const {state: playerState, tournament: playerTournament} = msg.payload;
+// 					history.pushState(null, '', `/tournament?tournament_Id=${playerTournament.id}`);
+// 					window.dispatchEvent(new PopStateEvent('popstate'));
+// 					console.log("player_state", playerState);
+// 					handlePlayerStateUpdate(playerState);
+// 					break;
+// 				case 'MATCH_END':
+// 					const {winner_Id, score1, score2} = msg.payload;
+// 					const isWinner = winner_Id === userId;
+// 					show1v1ResultScreen(isWinner, {score1, score2});
+// 					break;
+// 				default:
+// 					break;
+// 			}
+// 		} catch (error) {
+// 			console.error('Erreur lors du parsing du message matchmaking:', error);
+// 		}
+// 	};
+	
+// 	ws.onerror = (error) => {
+// 		console.error('Erreur WebSocket matchmaking:', error);
+// 	};
+	
+// 	ws.onclose = () => {
+// 		console.log('Connexion WebSocket matchmaking fermée');
+// 	};
+// 	matchmakingSocket = ws;
+// 	return ws;
+// }
 
 
 export function getMatchmakingSocket(): WebSocket | null {
@@ -154,5 +160,5 @@ function show1v1ResultScreen(
 		history.pushState(null, '', '/menu');
 		window.dispatchEvent(new PopStateEvent('popstate'));
 	});
-  }
-  
+}
+ 

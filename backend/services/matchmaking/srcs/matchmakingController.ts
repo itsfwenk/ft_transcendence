@@ -63,7 +63,7 @@ export async function  launchMatch(matchId: string): Promise<Match | undefined> 
 		const socket1 = websocketClients.get(match.player1_Id);
 		const socket2 = websocketClients.get(match.player2_Id);
 		const message1 = JSON.stringify({
-			type: 'match_start',
+			type: 'MATCH_START',
 			payload: {
 				gameSessionId,
 				matchId: match.id,
@@ -71,7 +71,7 @@ export async function  launchMatch(matchId: string): Promise<Match | undefined> 
 			}
 		});
 		const message2 = JSON.stringify({
-			type: 'match_start',
+			type: 'MATCH_START',
 			payload: {
 				gameSessionId,
 				matchId: match.id,

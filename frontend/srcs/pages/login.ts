@@ -77,6 +77,7 @@ export default  async function login() {
 			//recup du userId
 			const profile = await fetchUserProfile();
 			if (profile && profile.userId) {
+				localStorage.setItem("userId", profile.userId);
 				matchmakingWebSocket(profile.userId);
 			} else {
 				console.error ('Impossible de recuperer le profile du user');

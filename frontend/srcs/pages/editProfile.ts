@@ -1,3 +1,5 @@
+import { UserData, fetchUserProfile, getAvatarUrl, updateProfileBoxUI } from './profile';
+
 // Fonction pour afficher un message d'erreur
 function showError(message: string, duration: number = 5000) {
 	const errorElement = document.getElementById('errorMessage');
@@ -7,22 +9,20 @@ function showError(message: string, duration: number = 5000) {
 	  errorText.textContent = message;
 	  errorElement.classList.remove('hidden');
 	  
-	  // Masquer le message après la durée spécifiée
 	  setTimeout(() => {
 		errorElement.classList.add('hidden');
 	  }, duration);
 	}
-  }
+}
   
-  // Fonction pour masquer le message d'erreur manuellement
-  function hideError() {
+function hideError() {
 	const errorElement = document.getElementById('errorMessage');
 	if (errorElement) {
 	  errorElement.classList.add('hidden');
 	}
-  }
-  
-  export default function EditProfile() {
+}
+
+export default function EditProfile() {
 	const app = document.getElementById('app');
 	if (app) {
 	  app.innerHTML = /*html*/`
@@ -32,7 +32,7 @@ function showError(message: string, duration: number = 5000) {
 		  <div id="profilBox" class="h-80 w-1/3 bg-blue-700 rounded-lg p-4 text-white">
 			<div id="img_name" class="flex items-center mb-4">
 			  <div id="img" class="w-28 h-28 rounded-lg bg-gray-300 mr-4 overflow-hidden relative group cursor-pointer">
-				<img id="profileImage" src="" alt="Profile" class="w-full h-full object-cover select-none"/>
+				<img id="profileImage" src="/avatars/default.png" alt="Profile" class="w-full h-full object-cover select-none"/>
 				<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
 				  <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -42,7 +42,6 @@ function showError(message: string, duration: number = 5000) {
 				<input type="file" id="avatarUpload" class="hidden" accept="image/*" />
 			  </div>
 			  <div class="flex flex-col">
-				<!-- Username display et édition -->
 				<div id="usernameContainer" class="flex items-center">
 				  <div id="username" class="flex justify-center items-center text-xl font-bold font-jaro bg-white text-black rounded-lg pl-2 pr-2 pb-0.5 select-none">Chargement...</div>
 				  <button id="editUsernameBtn" class="ml-2 text-white hover:text-gray-200">
@@ -59,7 +58,6 @@ function showError(message: string, duration: number = 5000) {
 			  </div>
 			</div>
 			
-			<!-- Email display et édition -->
 			<div id="emailContainer" class="flex items-center mb-3">
 			  <div id="email" class="flex font-jaro select-none">Chargement...</div>
 			  <button id="editEmailBtn" class="ml-2 text-white hover:text-gray-200">
@@ -93,15 +91,8 @@ function showError(message: string, duration: number = 5000) {
 			  </div>
 			</div>
 		  </div>
-  
-		  <div id="friendBox" class="h-80 w-1/3 bg-red-700 rounded-lg p-4 text-white">
-			<div class="text-xl font-bold mb-4 font-jaro select-none">Friends</div>
-			<div id="friendsList" class="overflow-y-auto h-64">
-			</div>
-		  </div>
 		</div>
 		
-		<!-- Message d'erreur -->
 		<div id="errorMessage" class="hidden fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-20">
 		  <div class="flex items-center">
 			<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -151,106 +142,12 @@ function showError(message: string, duration: number = 5000) {
   
 	  setupEditProfilePage();
 	}
-  }
+}
   
-  interface UserData {
-	user: {
-	  userName: string;
-	  email: string;
-	  status: string;
-	  avatarUrl: string;
-	};
-	stats: {
-	  totalGames: number;
-	  wins: number;
-	  losses: number;
-	  winRate: number;
-	};
-	matchHistory: Array<{
-	  gameId: string;
-	  gameType: string;
-	  opponent: {
-		userId: string;
-		userName: string;
-	  };
-	  result: 'win' | 'loss';
-	  score: {
-		player: number;
-		opponent: number;
-	  };
-	  date: string;
-	}>;
-  }
-  
-  // Keep track of changes to profile data
-  let originalUserData: UserData | null = null;
-  let changedData: { userName?: string; email?: string; avatarFile?: File } = {};
-  
-  async function fetchUserProfile(): Promise<UserData | null> {
-	try {
-	  const baseUrl = window.location.origin;
-	  const response = await fetch(`${baseUrl}/user/dashboard`, {
-		method: 'GET',
-		credentials: 'include'
-	  });
-  
-	  if (!response.ok) {
-		throw new Error(`Échec de la récupération du profil: ${response.statusText}`);
-	  }
-	
-	  const data = await response.json();
-	  console.log("Structure des données reçues:", JSON.stringify(data, null, 2));
-	  
-	  return data;
-	} catch (error) {
-	  console.error("Erreur lors de la recuperation du profil utilisateur:", error);
-	  return null;
-	}
-  }
-  
-  function updateProfileBoxUI(userData: UserData | null) {
-	if (!userData) return;
-  
-	const profileImage = document.getElementById('profileImage') as HTMLImageElement;
-	if (profileImage && userData.user && userData.user.avatarUrl) {
-	  profileImage.src = userData.user.avatarUrl;
-	}
-  
-	const usernameElement = document.getElementById('username');
-	if (usernameElement && userData.user && userData.user.userName) {
-	  usernameElement.textContent = userData.user.userName;
-	}
-  
-	const emailElement = document.getElementById('email');
-	if (emailElement && userData.user && userData.user.email) {
-	  emailElement.textContent = userData.user.email;
-	}
-  
-	if (userData.stats) {
-	  const nbGamesElement = document.getElementById('nbGames');
-	  if (nbGamesElement) {
-		nbGamesElement.textContent = String(userData.stats.totalGames || 0);
-	  }
-  
-	  const statWinElement = document.getElementById('statWin');
-	  if (statWinElement) {
-		statWinElement.textContent = String(userData.stats.wins || 0);
-	  }
-  
-	  const statLossesElement = document.getElementById('statLosses');
-	  if (statLossesElement) {
-		statLossesElement.textContent = String(userData.stats.losses || 0);
-	  }
-  
-	  const statWinRateElement = document.getElementById('statWinRate');
-	  if (statWinRateElement) {
-		const winRate = userData.stats.winRate || 0;
-		statWinRateElement.textContent = `${Math.round(winRate)}%`;
-	  }
-	}
-  }
-  
-  async function uploadAvatar(file: File): Promise<boolean> {
+let originalUserData: UserData | null = null;
+let changedData: { userName?: string; email?: string; avatarFile?: File } = {};
+
+async function uploadAvatar(file: File): Promise<boolean> {
 	try {
 	  const formData = new FormData();
 	  formData.append('avatar', file);
@@ -271,10 +168,10 @@ function showError(message: string, duration: number = 5000) {
 	  const result = await response.json();
 	  console.log('Avatar upload result:', result);
 	  
-	  if (result.success && result.avatarUrl) {
+	  if (result.success && originalUserData?.user?.userId) {
 		const profileImage = document.getElementById('profileImage') as HTMLImageElement;
 		if (profileImage) {
-		  profileImage.src = result.avatarUrl;
+		  profileImage.src = getAvatarUrl(originalUserData.user.userId);
 		}
 		return true;
 	  }
@@ -284,9 +181,9 @@ function showError(message: string, duration: number = 5000) {
 	  console.error('Error uploading avatar:', error);
 	  return false;
 	}
-  }
+}
   
-  async function updateUserProfile(data: { userName?: string; email?: string }): Promise<boolean> {
+async function updateUserProfile(data: { userName?: string; email?: string }): Promise<boolean> {
 	try {
 	  console.log('Attempting to update profile with data:', JSON.stringify(data));
 	  
@@ -313,9 +210,9 @@ function showError(message: string, duration: number = 5000) {
 	  console.error('Error updating profile:', error);
 	  return false;
 	}
-  }
+}
   
-  function showUsernameEdit() {
+function showUsernameEdit() {
 	const usernameContainer = document.getElementById('usernameContainer');
 	const usernameEditContainer = document.getElementById('usernameEditContainer');
 	const usernameInput = document.getElementById('usernameInput') as HTMLInputElement;
@@ -327,9 +224,9 @@ function showError(message: string, duration: number = 5000) {
 	  usernameInput.value = username.textContent || '';
 	  usernameInput.focus();
 	}
-  }
+}
   
-  function hideUsernameEdit() {
+function hideUsernameEdit() {
 	const usernameContainer = document.getElementById('usernameContainer');
 	const usernameEditContainer = document.getElementById('usernameEditContainer');
 	
@@ -337,9 +234,9 @@ function showError(message: string, duration: number = 5000) {
 	  usernameContainer.classList.remove('hidden');
 	  usernameEditContainer.classList.add('hidden');
 	}
-  }
+}
   
-  function showEmailEdit() {
+function showEmailEdit() {
 	const emailContainer = document.getElementById('emailContainer');
 	const emailEditContainer = document.getElementById('emailEditContainer');
 	const emailInput = document.getElementById('emailInput') as HTMLInputElement;
@@ -351,9 +248,9 @@ function showError(message: string, duration: number = 5000) {
 	  emailInput.value = email.textContent || '';
 	  emailInput.focus();
 	}
-  }
+}
   
-  function hideEmailEdit() {
+function hideEmailEdit() {
 	const emailContainer = document.getElementById('emailContainer');
 	const emailEditContainer = document.getElementById('emailEditContainer');
 	
@@ -361,10 +258,9 @@ function showError(message: string, duration: number = 5000) {
 	  emailContainer.classList.remove('hidden');
 	  emailEditContainer.classList.add('hidden');
 	}
-  }
+}
   
-  async function setupEditProfilePage() {
-	// Fetch user data and update UI
+async function setupEditProfilePage() {
 	originalUserData = await fetchUserProfile();
 	if (originalUserData) {
 	  updateProfileBoxUI(originalUserData);
@@ -372,7 +268,6 @@ function showError(message: string, duration: number = 5000) {
 	  console.error("Impossible de charger les données du profil");
 	}
   
-	// Profile image click event
 	const profileImg = document.getElementById('img');
 	const avatarUpload = document.getElementById('avatarUpload') as HTMLInputElement;
 	
@@ -388,7 +283,6 @@ function showError(message: string, duration: number = 5000) {
 		if (files && files.length > 0) {
 		  const file = files[0];
 		  
-		  // Preview the image
 		  const profileImage = document.getElementById('profileImage') as HTMLImageElement;
 		  if (profileImage) {
 			const reader = new FileReader();
@@ -405,7 +299,6 @@ function showError(message: string, duration: number = 5000) {
 	  });
 	}
   
-	// Username edit setup
 	const editUsernameBtn = document.getElementById('editUsernameBtn');
 	const saveUsernameBtn = document.getElementById('saveUsernameBtn');
 	const cancelUsernameBtn = document.getElementById('cancelUsernameBtn');
@@ -432,7 +325,6 @@ function showError(message: string, duration: number = 5000) {
 		  
 		  changedData.userName = newUsername;
 		  
-		  // Update displayed username
 		  const usernameElement = document.getElementById('username');
 		  if (usernameElement) {
 			usernameElement.textContent = newUsername;
@@ -447,7 +339,6 @@ function showError(message: string, duration: number = 5000) {
 	  cancelUsernameBtn.addEventListener('click', hideUsernameEdit);
 	}
   
-	// Email edit setup
 	const editEmailBtn = document.getElementById('editEmailBtn');
 	const saveEmailBtn = document.getElementById('saveEmailBtn');
 	const cancelEmailBtn = document.getElementById('cancelEmailBtn');
@@ -475,7 +366,6 @@ function showError(message: string, duration: number = 5000) {
 		  
 		  changedData.email = newEmail;
 		  
-		  // Update displayed email
 		  const emailElement = document.getElementById('email');
 		  if (emailElement) {
 			emailElement.textContent = newEmail;
@@ -490,20 +380,16 @@ function showError(message: string, duration: number = 5000) {
 	  cancelEmailBtn.addEventListener('click', hideEmailEdit);
 	}
   
-	// Save changes button
 	const saveChangesBtn = document.getElementById('saveChangesBtn');
 	if (saveChangesBtn) {
 	  saveChangesBtn.addEventListener('click', async () => {
-		// Masquer le message d'erreur précédent
 		hideError();
 		
-		// Vérifier s'il y a des modifications à enregistrer
 		if (Object.keys(changedData).length === 0) {
 		  showError('Aucune modification à enregistrer');
 		  return;
 		}
 		
-		// Désactiver le bouton pendant le traitement
 		saveChangesBtn.classList.add('opacity-50');
 		saveChangesBtn.setAttribute('disabled', 'true');
 		
@@ -535,6 +421,9 @@ function showError(message: string, duration: number = 5000) {
 			alert('Profil mis à jour avec succès !');
 			originalUserData = await fetchUserProfile();
 			changedData = {};
+			if (originalUserData) {
+			  updateProfileBoxUI(originalUserData);
+			}
 		  } else {
 			showError(`Échec de la mise à jour : ${errorMessage}\nVeuillez vérifier votre connexion et réessayer.`);
 		  }
@@ -551,30 +440,23 @@ function showError(message: string, duration: number = 5000) {
 	const resetChangesBtn = document.getElementById('resetChangesBtn');
 	if (resetChangesBtn && originalUserData) {
 	  resetChangesBtn.addEventListener('click', () => {
-		// Reset the UI to original values
 		updateProfileBoxUI(originalUserData);
-		// Hide edit fields if they're open
 		hideUsernameEdit();
 		hideEmailEdit();
-		// Clear changed data
 		changedData = {};
 	  });
 	}
   
-	// Change password button
 	const changePasswordBtn = document.getElementById('changePasswordBtn');
 	if (changePasswordBtn) {
 	  changePasswordBtn.addEventListener('click', () => {
 		alert('Password change functionality would be implemented here.');
-		// This would typically open a password change form
 	  });
-	}
+	} // a faire
   
-	// Back button
 	const backBtn = document.getElementById('backBtn');
 	if (backBtn) {
 	  backBtn.addEventListener('click', () => {
-		// Check if there are unsaved changes
 		if (Object.keys(changedData).length > 0) {
 		  if (confirm('You have unsaved changes. Are you sure you want to go back?')) {
 			history.pushState(null, '', '/profile');
@@ -586,4 +468,4 @@ function showError(message: string, duration: number = 5000) {
 		}
 	  });
 	}
-  }
+}

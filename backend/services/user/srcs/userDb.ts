@@ -16,6 +16,8 @@ db.exec(`
 		role TEXT NOT NULL,
 		status TEXT NOT NULL,
 		avatarUrl TEXT DEFAULT '/avatars/default.png',
+		avatarImage BLOB,
+		avatarMimeType TEXT,
 		inGameId TEST NOT NULL
 	)
 `);
@@ -54,8 +56,9 @@ export interface User {
 	role: string;
 	status: string;
 	avatarUrl: string;
+	avatarImage?: Buffer;
+	avatarMimeType?: string;
 	inGameId: string;
-	// token: string;
 }
 
 const users: User[] = [];
@@ -102,11 +105,6 @@ export function isValidEmail(email: string): boolean {
 	const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 	return emailRegex.test(email);
 }
-
-// export function generateSessionId(): string {
-// 	const bytes = crypto.randomBytes(15);
-// 	return base32.encode(bytes).replace(/=/g, "");
-// }
 
 export function updateUser(userId: string, data: Partial<User>): User | undefined {
 	const entries = Object.entries(data).filter(([_, value]) => value !== undefined);
@@ -165,4 +163,57 @@ export async function updateUserGameId(userId: string, gameId: string) {
 	const stmt = db.prepare(`UPDATE users SET inGameId = ? WHERE userId = ?`);
 	const result = stmt.run(gameId, userId);
 	return result.changes > 0;
+}
+
+export function updateUserAvatar(userId: string, avatarImage: Buffer, mimeType: string): boolean {
+	try {
+		const stmt = db.prepare(`
+			UPDATE users 
+			SET avatarImage = ?, avatarMimeType = ? 
+			WHERE userId = ?
+		`);
+		const result = stmt.run(avatarImage, mimeType, userId);
+		return result.changes > 0;
+	} catch (error) {
+		console.error('Error updating user avatar:', error);
+		return false;
+	}
+}
+
+export function getUserAvatar(userId: string): { image: Buffer; mimeType: string } | null {
+	try {
+		const stmt = db.prepare(`
+			SELECT avatarImage, avatarMimeType
+			FROM users
+			WHERE userId = ?
+		`);
+		const result = stmt.get(userId) as { avatarImage: Buffer; avatarMimeType: string } | undefined;
+		
+		if (!result || !result.avatarImage || !result.avatarMimeType) {
+			return null;
+		}
+		
+		return {
+			image: result.avatarImage,
+			mimeType: result.avatarMimeType
+		};
+	} catch (error) {
+		console.error('Error getting user avatar:', error);
+		return null;
+	}
+}
+
+export function deleteUserAvatar(userId: string): boolean {
+	try {
+		const stmt = db.prepare(`
+			UPDATE users
+			SET avatarImage = NULL, avatarMimeType = NULL
+			WHERE userId = ?
+		`);
+		const result = stmt.run(userId);
+		return result.changes > 0;
+	} catch (error) {
+		console.error('Error deleting user avatar:', error);
+		return false;
+	}
 }

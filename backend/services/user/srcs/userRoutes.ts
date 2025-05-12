@@ -22,7 +22,7 @@ export default async function userRoutes(fastify: any) {
 
   fastify.register(multipart, {
 	limits: {
-		fileSize: 1000000 // 1MB
+		fileSize: 5000000 // Increased to 5MB for avatar images
 	}
   });
 
@@ -67,13 +67,6 @@ export default async function userRoutes(fastify: any) {
   fastify.get('/profile', { 
     preHandler: [fastify.authenticate],  // Protection avec JWT
     schema: {
-      headers: {  // Swagger attend maintenant un token dans les headers
-        type: 'object',
-        properties: {
-          Authorization: { type: 'string', description: 'Bearer <token>' }
-        },
-        required: ['Authorization']
-      },
       response: {
         200: {
           type: 'object',
@@ -92,13 +85,6 @@ export default async function userRoutes(fastify: any) {
   fastify.put('/profile', {
 	preHandler: [fastify.authenticate],
 	schema: {
-	  headers: {
-		type: 'object',
-		properties: {
-		  Authorization: { type: 'string', description: 'Bearer <token>' }
-		},
-		required: ['Authorization']
-	  },
 	  body: {
 		type: 'object',
 		properties: {
@@ -136,7 +122,18 @@ export default async function userRoutes(fastify: any) {
     handler: deleteAvatar
   });
 
-  fastify.get('/avatar/:userId', getAvatar);
+  fastify.get('/avatar/:userId', {
+    schema: {
+      params: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string' }
+        },
+        required: ['userId']
+      }
+    },
+    handler: getAvatar
+  });
   
   fastify.delete('/profile', {
 	  preHandler: [fastify.authenticate],
@@ -209,13 +206,6 @@ export default async function userRoutes(fastify: any) {
   fastify.get('/friends', {
     preHandler: [fastify.authenticate],
     schema: {
-      headers: {
-        type: 'object',
-        properties: {
-          Authorization: { type: 'string', description: 'Bearer <token>' }
-        },
-        required: ['Authorization']
-      },
       response: {
         200: {
           type: 'object',
@@ -244,13 +234,6 @@ export default async function userRoutes(fastify: any) {
   fastify.get('/friends/online', {
     preHandler: [fastify.authenticate],
     schema: {
-      headers: {
-        type: 'object',
-        properties: {
-          Authorization: { type: 'string', description: 'Bearer <token>' }
-        },
-        required: ['Authorization']
-      },
       response: {
         200: {
           type: 'object',
@@ -279,13 +262,6 @@ export default async function userRoutes(fastify: any) {
   fastify.post('/friends/:userName', {
 	preHandler: [fastify.authenticate],
 	schema: {
-	  headers: {
-		type: 'object',
-		properties: {
-		  Authorization: { type: 'string', description: 'Bearer <token>' }
-		},
-		required: ['Authorization']
-	  },
 	  params: {
 		type: 'object',
 		properties: {
@@ -318,13 +294,6 @@ export default async function userRoutes(fastify: any) {
   fastify.delete('/friends/:friendId', {
     preHandler: [fastify.authenticate],
     schema: {
-      headers: {
-        type: 'object',
-        properties: {
-          Authorization: { type: 'string', description: 'Bearer <token>' }
-        },
-        required: ['Authorization']
-      },
       params: {
         type: 'object',
         properties: {
@@ -348,13 +317,6 @@ export default async function userRoutes(fastify: any) {
   fastify.get('/friends/check/:friendId', {
     preHandler: [fastify.authenticate],
     schema: {
-      headers: {
-        type: 'object',
-        properties: {
-          Authorization: { type: 'string', description: 'Bearer <token>' }
-        },
-        required: ['Authorization']
-      },
       params: {
         type: 'object',
         properties: {
@@ -428,13 +390,6 @@ export default async function userRoutes(fastify: any) {
   fastify.get('/dashboard', {
 	  preHandler: [fastify.authenticate],
 	  schema: {
-	  headers: {
-		  type: 'object',
-		  properties: {
-		  Authorization: { type: 'string', description: 'Bearer <token>' }
-		  },
-		  required: ['Authorization']
-	  },
 	  response: {
 		  200: {
 		  type: 'object',

@@ -1,10 +1,269 @@
+export interface UserData {
+	user: {
+		userName: string;
+		email: string;
+		status: string;
+		avatarUrl: string;
+		userId: string;
+	};
+	stats: {
+		totalGames: number;
+		wins: number;
+		losses: number;
+		winRate: number;
+	};
+	matchHistory: Array<{
+		gameId: string;
+		gameType: string;
+		opponent: {
+			userId: string;
+			userName: string;
+		};
+		result: 'win' | 'loss';
+		score: {
+			player: number;
+			opponent: number;
+		};
+		date: string;
+	}>;
+}
+
+export interface Friend {
+	userId: string;
+	userName: string;
+	status: string;
+	avatarUrl: string;
+}
+
+export function getAvatarUrl(userId: string): string {
+	const baseUrl = window.location.origin;
+	const cacheBuster = new Date().getTime();
+	return `${baseUrl}/user/avatar/${userId}?v=${cacheBuster}`;
+}
+
+export async function fetchUserProfile(): Promise<UserData | null> {
+	try {
+		const baseUrl = window.location.origin;
+		const response = await fetch(`${baseUrl}/user/dashboard`, {
+			method: 'GET',
+			credentials: 'include'
+		});
+
+		if (!response.ok) {
+			throw new Error(`Échec de la récupération du profil: ${response.statusText}`);
+		}
+		
+		const data = await response.json();
+		console.log("Structure des données reçues:", JSON.stringify(data, null, 2));
+		
+		return data;
+	} catch (error) {
+		console.error("Erreur lors de la recuperation du profil utilisateur:", error);
+		return null;
+	}
+}
+
+export async function fetchFriends(): Promise<Friend[]> {
+	try {
+		const baseUrl = window.location.origin;
+		const response = await fetch(`${baseUrl}/user/friends`, {
+			method: 'GET',
+			credentials: 'include'
+		});
+
+		if (!response.ok) {
+			throw new Error(`Échec de la récupération des amis: ${response.statusText}`);
+		}
+
+		const data = await response.json();
+		console.log("Liste d'amis reçue:", data);
+		
+		if (data.success && Array.isArray(data.friends)) {
+			return data.friends;
+		}
+		
+		return [];
+	} catch (error) {
+		console.error("Erreur lors de la récupération des amis:", error);
+		return [];
+	}
+}
+
+export async function addFriend(userName: string): Promise<{ success: boolean; message: string; friend?: Friend }> {
+	try {
+		const baseUrl = window.location.origin;
+		console.log('debut de fonction addfriend', userName);
+		const response = await fetch(`${baseUrl}/user/friends/${userName}`, {
+			method: 'POST',
+			credentials: 'include'
+		});
+
+		const data = await response.json();
+		
+		if (!response.ok) {
+			return { 
+				success: false, 
+				message: data.error || "Échec de l'ajout d'ami" 
+			};
+		}
+
+		return { 
+			success: true, 
+			message: data.message || "Ami ajouté avec succès",
+			friend: data.friend
+		};
+	} catch (error) {
+		console.error("Erreur lors de l'ajout d'un ami:", error);
+		return { 
+			success: false, 
+			message: "Une erreur est survenue lors de l'ajout d'ami" 
+		};
+	}
+}
+
+export function updateProfileBoxUI(userData: UserData | null) {
+	if (!userData) return;
+
+	const profileImage = document.getElementById('profileImage') as HTMLImageElement;
+	if (profileImage && userData.user) {
+		const userId = userData.user.userId;
+		if (userId) {
+			profileImage.src = getAvatarUrl(userId);
+			profileImage.onerror = function() {
+				this.onerror = null;
+				this.src = '/avatars/default.png';
+			};
+		} else if (userData.user.avatarUrl) {
+			profileImage.src = userData.user.avatarUrl;
+		} else {
+			profileImage.src = '/avatars/default.png';
+		}
+	}
+
+	const usernameElement = document.getElementById('username');
+	if (usernameElement && userData.user && userData.user.userName) {
+		usernameElement.textContent = userData.user.userName;
+	}
+
+	const emailElement = document.getElementById('email');
+	if (emailElement && userData.user && userData.user.email) {
+		emailElement.textContent = userData.user.email;
+	}
+
+	if (userData.stats) {
+		const nbGamesElement = document.getElementById('nbGames');
+		if (nbGamesElement) {
+			nbGamesElement.textContent = String(userData.stats.totalGames || 0);
+		}
+
+		const statWinElement = document.getElementById('statWin');
+		if (statWinElement) {
+			statWinElement.textContent = String(userData.stats.wins || 0);
+		}
+
+		const statLossesElement = document.getElementById('statLosses');
+		if (statLossesElement) {
+			statLossesElement.textContent = String(userData.stats.losses || 0);
+		}
+
+		const statWinRateElement = document.getElementById('statWinRate');
+		if (statWinRateElement) {
+			const winRate = userData.stats.winRate || 0;
+			statWinRateElement.textContent = `${Math.round(winRate)}%`;
+		}
+	}
+}
+
+export function renderFriendsList(friends: Friend[]) {
+	const friendsListElement = document.getElementById('friendsList');
+	
+	if (!friendsListElement) return;
+	
+	if (friends.length === 0) {
+		friendsListElement.innerHTML = `
+			<div class="text-center text-gray-300 mt-8">
+				<p>Vous n'avez pas encore d'amis</p>
+				<p class="mt-2 text-sm">Utilisez le bouton "Add Friend" pour en ajouter</p>
+			</div>
+		`;
+		return;
+	}
+	
+	const friendsHTML = friends.map(friend => {
+		const isOnline = friend.status === 'online';
+		const statusColor = isOnline ? 'bg-green-500' : 'bg-gray-500';
+		
+		return `
+			<div class="flex items-center mb-3 bg-red-800 rounded-md p-2 hover:bg-red-900 transition-colors">
+				<div class="relative mr-3">
+					<div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
+						<img 
+							src="${getAvatarUrl(friend.userId)}" 
+							alt="${friend.userName}" 
+							class="w-full h-full object-cover"
+							onerror="this.onerror=null; this.src='/avatars/default.png';"
+						/>
+					</div>
+					<div class="absolute bottom-0 right-0 w-3 h-3 ${statusColor} border-2 border-red-800 rounded-full"></div>
+				</div>
+				<div class="flex-grow">
+					<div class="font-bold">${friend.userName}</div>
+					<div class="text-xs text-gray-300">${isOnline ? 'En ligne' : 'Hors ligne'}</div>
+				</div>
+			</div>
+		`;
+	}).join('');
+	
+	friendsListElement.innerHTML = friendsHTML;
+}
+
+export function showFriendStatus(message: string, isSuccess: boolean) {
+	const statusElement = document.getElementById('friendStatus');
+	const contentElement = document.getElementById('friendStatusContent');
+	
+	if (statusElement && contentElement) {
+		contentElement.textContent = message;
+		contentElement.className = isSuccess 
+			? 'px-4 py-2 rounded-md bg-green-500 text-white'
+			: 'px-4 py-2 rounded-md bg-red-500 text-white';
+		
+		statusElement.classList.remove('hidden');
+		
+		// Cacher le message après 3 secondes
+		setTimeout(() => {
+			statusElement.classList.add('hidden');
+		}, 3000);
+	}
+}
+
+export function toggleFriendSearch(show: boolean) {
+	const searchContainer = document.getElementById('friendSearchContainer');
+	
+	if (searchContainer) {
+		if (show) {
+			searchContainer.classList.remove('hidden');
+			// Focus sur l'input
+			const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
+			if (searchInput) {
+				searchInput.focus();
+			}
+		} else {
+			searchContainer.classList.add('hidden');
+			// Réinitialiser l'input
+			const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
+			if (searchInput) {
+				searchInput.value = '';
+			}
+		}
+	}
+}
+
 export default function Profile() {
 	const app = document.getElementById('app');
 	if (app) {
 		app.innerHTML = /*html*/`
 		<div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">Pong Game</div>
 		
-		<!-- Barre de recherche d'amis (hidden par défaut) -->
 		<div id="friendSearchContainer" class="hidden flex justify-center items-center mb-12 gap-10">
 			<div class="flex items-center bg-white rounded-md shadow-md w-1/3">
 				<input type="text" id="friendSearchInput" class="flex-grow py-2 px-4 rounded-l-md focus:outline-none text-black" placeholder="Rechercher un utilisateur par nom..." />
@@ -26,7 +285,7 @@ export default function Profile() {
 			<div id="profilBox" class="h-80 w-1/3 bg-blue-700 rounded-lg p-4 text-white">
 				<div id="img_name" class="flex items-center mb-4">
 					<div id="img" class="w-28 h-28 rounded-lg bg-gray-300 mr-4 overflow-hidden">
-						<img id="profileImage" src="" alt="Profile" class="w-full h-full object-cover select-none"/>
+						<img id="profileImage" src="/avatars/default.png" alt="Profile" class="w-full h-full object-cover select-none"/>
 					</div>
 					<div id="username" class="flex justify-center items-center text-xl font-bold font-jaro bg-white text-black rounded-lg pl-2 pr-2 pb-0.5 select-none">Chargement...</div>
 				</div>
@@ -54,13 +313,11 @@ export default function Profile() {
 			<div id="friendBox" class="h-80 w-1/3 bg-red-700 rounded-lg p-4 text-white">
 				<div class="text-xl font-bold mb-4 font-jaro select-none">Friends</div>
 				<div id="friendsList" class="overflow-y-auto h-64 pr-2">
-					<!-- Liste des amis sera générée dynamiquement ici -->
 					<div class="text-center text-gray-300 mt-10">Chargement de la liste d'amis...</div>
 				</div>
 			</div>
 		</div>
 		
-		<!-- Message de statut pour l'ajout d'ami -->
 		<div id="friendStatus" class="hidden flex justify-center items-center mb-4">
 			<div id="friendStatusContent" class="px-4 py-2 rounded-md"></div>
 		</div>
@@ -105,332 +362,93 @@ export default function Profile() {
 	
 		setupProfilePage();
 	}
+}
+
+async function setupProfilePage() {
+	const userData = await fetchUserProfile();
+	if (userData) {
+		updateProfileBoxUI(userData);
+	} else {
+		console.error("Impossible de charger les données du profil");
 	}
 	
-	interface UserData {
-		user: {
-		  userName: string;
-		  email: string;
-		  status: string;
-		  avatarUrl: string;
-		};
-		stats: {
-		  totalGames: number;
-		  wins: number;
-		  losses: number;
-		  winRate: number;
-		};
-		matchHistory: Array<{
-		  gameId: string;
-		  gameType: string;
-		  opponent: {
-			userId: string;
-			userName: string;
-		  };
-		  result: 'win' | 'loss';
-		  score: {
-			player: number;
-			opponent: number;
-		  };
-		  date: string;
-		}>;
+	// Charger et afficher la liste d'amis
+	const friends = await fetchFriends();
+	renderFriendsList(friends);
+	
+	setupEventListeners();
+}
+
+function setupEventListeners() {
+	const backBtn = document.getElementById('backBtn');
+	if (backBtn) {
+		backBtn.addEventListener('click', () => {
+			history.pushState(null, '', '/menu');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+		});
+	}
+
+	const editBtn = document.getElementById('editBtn');
+	if (editBtn) {
+		editBtn.addEventListener('click', () => {
+			history.pushState(null, '', '/edit_profile');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+		});
+	}
+
+	const historyBtn = document.getElementById('historyBtn');
+	if (historyBtn) {
+		historyBtn.addEventListener('click', () => {
+			console.log("Affichage de l'historique demandé");
+		});
+	}
+
+	const addFriendBtn = document.getElementById('addFriendBtn');
+	if (addFriendBtn) {
+		addFriendBtn.addEventListener('click', () => {
+			toggleFriendSearch(true);
+		});
 	}
 	
-	interface Friend {
-		userId: string;
-		userName: string;
-		status: string;
-		avatarUrl: string;
-	}
-	
-	async function fetchUserProfile(): Promise<UserData | null> {
-		try {
-			const baseUrl = window.location.origin;
-			const response = await fetch(`${baseUrl}/user/dashboard`, {
-			method: 'GET',
-			credentials: 'include'
-			});
-	
-			if (!response.ok) {
-				throw new Error(`Échec de la récupération du profil: ${response.statusText}`);
-			}
-		  
-			const data = await response.json();
-			console.log("Structure des données reçues:", JSON.stringify(data, null, 2));
+	const confirmFriendSearch = document.getElementById('confirmFriendSearch');
+	if (confirmFriendSearch) {
+		confirmFriendSearch.addEventListener('click', async () => {
+			const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
 			
-			return data;
-		} catch (error) {
-			console.error("Erreur lors de la recuperation du profil utilisateur:", error);
-			return null;
-		}
-	}
-	
-	async function fetchFriends(): Promise<Friend[]> {
-		try {
-			const baseUrl = window.location.origin;
-			const response = await fetch(`${baseUrl}/user/friends`, {
-				method: 'GET',
-				credentials: 'include'
-			});
-	
-			if (!response.ok) {
-				throw new Error(`Échec de la récupération des amis: ${response.statusText}`);
-			}
-	
-			const data = await response.json();
-			console.log("Liste d'amis reçue:", data);
-			
-			if (data.success && Array.isArray(data.friends)) {
-				return data.friends;
-			}
-			
-			return [];
-		} catch (error) {
-			console.error("Erreur lors de la récupération des amis:", error);
-			return [];
-		}
-	}
-	
-	async function addFriend(userName: string): Promise<{ success: boolean; message: string; friend?: Friend }> {
-		try {
-			const baseUrl = window.location.origin;
-			console.log('debut de fonction addfriend', userName);
-			const response = await fetch(`${baseUrl}/user/friends/${userName}`, {
-				method: 'POST',
-				credentials: 'include'
-			});
-	
-			const data = await response.json();
-			
-			if (!response.ok) {
-				return { 
-					success: false, 
-					message: data.error || "Échec de l'ajout d'ami" 
-				};
-			}
-	
-			return { 
-				success: true, 
-				message: data.message || "Ami ajouté avec succès",
-				friend: data.friend
-			};
-		} catch (error) {
-			console.error("Erreur lors de l'ajout d'un ami:", error);
-			return { 
-				success: false, 
-				message: "Une erreur est survenue lors de l'ajout d'ami" 
-			};
-		}
-	}
-	
-	function updateProfileBoxUI(userData: UserData | null) {
-		if (!userData) return;
-	
-		const profileImage = document.getElementById('profileImage') as HTMLImageElement;
-		if (profileImage && userData.user && userData.user.avatarUrl) {
-			profileImage.src = userData.user.avatarUrl;
-		}
-	
-		const usernameElement = document.getElementById('username');
-		if (usernameElement && userData.user && userData.user.userName) {
-			usernameElement.textContent = userData.user.userName;
-		}
-	
-		const emailElement = document.getElementById('email');
-		if (emailElement && userData.user && userData.user.email) {
-			emailElement.textContent = userData.user.email;
-		}
-	
-		if (userData.stats) {
-			const nbGamesElement = document.getElementById('nbGames');
-			if (nbGamesElement) {
-				nbGamesElement.textContent = String(userData.stats.totalGames || 0);
-			}
-	
-			const statWinElement = document.getElementById('statWin');
-			if (statWinElement) {
-				statWinElement.textContent = String(userData.stats.wins || 0);
-			}
-	
-			const statLossesElement = document.getElementById('statLosses');
-			if (statLossesElement) {
-				statLossesElement.textContent = String(userData.stats.losses || 0);
-			}
-	
-			const statWinRateElement = document.getElementById('statWinRate');
-			if (statWinRateElement) {
-				const winRate = userData.stats.winRate || 0;
-				statWinRateElement.textContent = `${Math.round(winRate)}%`;
-			}
-		}
-	}
-	
-	function renderFriendsList(friends: Friend[]) {
-		const friendsListElement = document.getElementById('friendsList');
-		
-		if (!friendsListElement) return;
-		
-		if (friends.length === 0) {
-			friendsListElement.innerHTML = `
-				<div class="text-center text-gray-300 mt-8">
-					<p>Vous n'avez pas encore d'amis</p>
-					<p class="mt-2 text-sm">Utilisez le bouton "Add Friend" pour en ajouter</p>
-				</div>
-			`;
-			return;
-		}
-		
-		const friendsHTML = friends.map(friend => {
-			const isOnline = friend.status === 'online';
-			const statusColor = isOnline ? 'bg-green-500' : 'bg-gray-500';
-			
-			return `
-				<div class="flex items-center mb-3 bg-red-800 rounded-md p-2 hover:bg-red-900 transition-colors">
-					<div class="relative mr-3">
-						<div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
-							<img src="${friend.avatarUrl || ''}" alt="${friend.userName}" 
-								class="w-full h-full object-cover"
-								onerror="this.src='';this.classList.add('bg-gray-400');">
-						</div>
-						<div class="absolute bottom-0 right-0 w-3 h-3 ${statusColor} border-2 border-red-800 rounded-full"></div>
-					</div>
-					<div class="flex-grow">
-						<div class="font-bold">${friend.userName}</div>
-						<div class="text-xs text-gray-300">${isOnline ? 'En ligne' : 'Hors ligne'}</div>
-					</div>
-				</div>
-			`;
-		}).join('');
-		
-		friendsListElement.innerHTML = friendsHTML;
-	}
-	
-	function showFriendStatus(message: string, isSuccess: boolean) {
-		const statusElement = document.getElementById('friendStatus');
-		const contentElement = document.getElementById('friendStatusContent');
-		
-		if (statusElement && contentElement) {
-			contentElement.textContent = message;
-			contentElement.className = isSuccess 
-				? 'px-4 py-2 rounded-md bg-green-500 text-white'
-				: 'px-4 py-2 rounded-md bg-red-500 text-white';
-			
-			statusElement.classList.remove('hidden');
-			
-			// Cacher le message après 3 secondes
-			setTimeout(() => {
-				statusElement.classList.add('hidden');
-			}, 3000);
-		}
-	}
-	
-	function toggleFriendSearch(show: boolean) {
-		const searchContainer = document.getElementById('friendSearchContainer');
-		
-		if (searchContainer) {
-			if (show) {
-				searchContainer.classList.remove('hidden');
-				// Focus sur l'input
-				const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
-				if (searchInput) {
-					searchInput.focus();
-				}
-			} else {
-				searchContainer.classList.add('hidden');
-				// Réinitialiser l'input
-				const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
-				if (searchInput) {
-					searchInput.value = '';
-				}
-			}
-		}
-	}
-	
-	async function setupProfilePage() {
-		const userData = await fetchUserProfile();
-		if (userData) {
-			updateProfileBoxUI(userData);
-		} else {
-			console.error("Impossible de charger les données du profil");
-		}
-		
-		// Charger et afficher la liste d'amis
-		const friends = await fetchFriends();
-		renderFriendsList(friends);
-		
-		setupEventListeners();
-	}
-	
-	function setupEventListeners() {
-		const backBtn = document.getElementById('backBtn');
-		if (backBtn) {
-			backBtn.addEventListener('click', () => {
-				history.pushState(null, '', '/menu');
-				window.dispatchEvent(new PopStateEvent('popstate'));
-			});
-		}
-	
-		const editBtn = document.getElementById('editBtn');
-		if (editBtn) {
-			editBtn.addEventListener('click', () => {
-				history.pushState(null, '', '/edit_profile');
-				window.dispatchEvent(new PopStateEvent('popstate'));
-			});
-		}
-	
-		const historyBtn = document.getElementById('historyBtn');
-		if (historyBtn) {
-			historyBtn.addEventListener('click', () => {
-				console.log("Affichage de l'historique demandé");
-			});
-		}
-	
-		const addFriendBtn = document.getElementById('addFriendBtn');
-		if (addFriendBtn) {
-			addFriendBtn.addEventListener('click', () => {
-				toggleFriendSearch(true);
-			});
-		}
-		
-		const confirmFriendSearch = document.getElementById('confirmFriendSearch');
-		if (confirmFriendSearch) {
-			confirmFriendSearch.addEventListener('click', async () => {
-				const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
+			if (searchInput && searchInput.value.trim()) {
+				const userName = searchInput.value.trim();
 				
-				if (searchInput && searchInput.value.trim()) {
-					const userName = searchInput.value.trim();
-					
-					// Tentative d'ajout d'ami
-					const result = await addFriend(userName);
-					
-					showFriendStatus(result.message, result.success);
-					
-					if (result.success && result.friend) {
-						// Récupérer à nouveau la liste d'amis pour la mettre à jour
-						const friends = await fetchFriends();
-						renderFriendsList(friends);
-					}
-					
-					toggleFriendSearch(false);
+				// Tentative d'ajout d'ami
+				const result = await addFriend(userName);
+				
+				showFriendStatus(result.message, result.success);
+				
+				if (result.success && result.friend) {
+					// Récupérer à nouveau la liste d'amis pour la mettre à jour
+					const friends = await fetchFriends();
+					renderFriendsList(friends);
 				}
-			});
-		}
-		
-		const cancelFriendSearch = document.getElementById('cancelFriendSearch');
-		if (cancelFriendSearch) {
-			cancelFriendSearch.addEventListener('click', () => {
+				
 				toggleFriendSearch(false);
-			});
-		}
-		
-		// Gestion de la soumission par Enter
-		const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
-		if (searchInput) {
-			searchInput.addEventListener('keypress', (event) => {
-				if (event.key === 'Enter') {
-					event.preventDefault();
-					confirmFriendSearch?.click();
-				}
-			});
-		}
+			}
+		});
 	}
+	
+	const cancelFriendSearch = document.getElementById('cancelFriendSearch');
+	if (cancelFriendSearch) {
+		cancelFriendSearch.addEventListener('click', () => {
+			toggleFriendSearch(false);
+		});
+	}
+	
+	// Gestion de la soumission par Enter
+	const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
+	if (searchInput) {
+		searchInput.addEventListener('keypress', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				confirmFriendSearch?.click();
+			}
+		});
+	}
+}

@@ -23,6 +23,7 @@ interface UserDashboard {
 		email: string;
 		status: string;
 		avatarUrl: string;
+		userId: string; // Ajouté pour faciliter l'accès direct à l'avatar
 	  };
 	  stats: {
 		totalGames: number;
@@ -59,18 +60,48 @@ export async function getUserDashboard(req: AuthenticatedRequest, reply: Fastify
 			return reply.status(404).send({ error: 'User not found' });
 		}
 
+		const dashboardBase: UserDashboard = {
+			user: {
+				userName: user.userName,
+				email: user.email,
+				status: user.status,
+				avatarUrl: user.avatarUrl,
+				userId: user.userId
+			},
+			stats: {
+				totalGames: 0,
+				wins: 0,
+				losses: 0,
+				winRate: 0
+			},
+			matchHistory: []
+		};
+
 		try {
 			const matchmakingServiceUrl = process.env.MATCHMAKING_SERVICE_BASE_URL;
+			
+			if (!matchmakingServiceUrl) {
+				console.warn('MATCHMAKING_SERVICE_BASE_URL is not defined');
+				return reply.send(dashboardBase);
+			}
+			
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 secondes timeout
+			
 			const matchHistoryResponse = await fetch(`${matchmakingServiceUrl}/matchmaking/history/${userId}`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
 					'Cookie': req.headers.cookie || '' // credentials ne fonctionne pas avec node-fetch v2
-				}
+				},
+				signal: controller.signal
 			});
+			
+			clearTimeout(timeoutId);
 
 			if (!matchHistoryResponse.ok) {
-				throw new Error(`Failed to fetch match history: ${matchHistoryResponse.statusText}`);
+				console.warn(`Failed to fetch match history: ${matchHistoryResponse.statusText}`);
+				return reply.send(dashboardBase);
 			}
 
 			const matchHistory = await matchHistoryResponse.json() as MatchHistoryItem[];
@@ -98,7 +129,8 @@ export async function getUserDashboard(req: AuthenticatedRequest, reply: Fastify
 					userName: user.userName,
 					email: user.email,
 					status: user.status,
-					avatarUrl: user.avatarUrl
+					avatarUrl: user.avatarUrl,
+					userId: user.userId
 				},
 				stats: {
 					totalGames,
@@ -112,23 +144,8 @@ export async function getUserDashboard(req: AuthenticatedRequest, reply: Fastify
 			return reply.send(dashboard);
 
 		} catch (error) {
-			console.error('Error fetching math history:', error);
-			return reply.send({
-				user: {
-					userName: user.userName,
-					email: user.email,
-					status:user.status,
-					avatarUrl: user.avatarUrl
-				},
-				stats: {
-					totalGames: 0,
-					wins: 0,
-					losses: 0,
-					winRate: 0
-				},
-				matchHistory: [],
-				error: 'Failed to fetch match history, matchmaking service unavaible'
-			});
+			console.error('Error fetching match history:', error);
+			return reply.send(dashboardBase);
 		}
 	} catch (error) {
 		console.error('Error generating user dashboard:', error);

@@ -123,6 +123,37 @@ export default function EditProfile() {
         </div>
       </div>
       
+      <div id="passwordChangeContainer" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg p-6 shadow-xl w-96 text-black">
+          <h3 class="text-xl font-bold mb-4 font-jaro">Changer de mot de passe</h3>
+          
+          <div class="mb-4">
+            <label for="oldPassword" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe actuel</label>
+            <input type="password" id="oldPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez votre mot de passe actuel" />
+          </div>
+          
+          <div class="mb-4">
+            <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe</label>
+            <input type="password" id="newPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez votre nouveau mot de passe" />
+            <p class="text-xs text-gray-500 mt-1">Le mot de passe doit comporter au moins 6 caractères.</p>
+          </div>
+          
+          <div class="mb-4">
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
+            <input type="password" id="confirmPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Confirmez votre nouveau mot de passe" />
+          </div>
+          
+          <div class="flex justify-end space-x-3 mt-6">
+            <button id="cancelPasswordChange" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none">
+              Annuler
+            </button>
+            <button id="savePasswordChange" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none">
+              Enregistrer
+            </button>
+          </div>
+        </div>
+      </div>
+      
       <div class="flex justify-center items-center gap-9">
         <div id="saveChangesBtn" class='button mb-2 h-20 w-1/6 bg-green-600 rounded-lg cursor-pointer select-none
         hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#15803d,0_0px_0_0_#1b70f841]
@@ -230,6 +261,56 @@ async function updateUserProfile(data: { userName?: string; email?: string }): P
   } catch (error) {
     console.error('Error updating profile:', error);
     return false;
+  }
+}
+
+async function changePassword(currentPassword: string, newPassword: string): Promise<boolean> {
+  try {
+    const baseUrl = window.location.origin;
+    const response = await fetch(`${baseUrl}/user/password`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        currentPassword,
+        newPassword
+      })
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Erreur lors du changement de mot de passe');
+    }
+
+    const result = await response.json();
+    return result.success === true;
+  } catch (error) {
+    console.error('Error changing password:', error);
+    throw error;
+  }
+}
+
+function togglePasswordChange(show: boolean) {
+  const passwordChangeContainer = document.getElementById('passwordChangeContainer');
+  
+  if (passwordChangeContainer) {
+    if (show) {
+      passwordChangeContainer.classList.remove('hidden');
+      const oldPasswordInput = document.getElementById('oldPassword') as HTMLInputElement;
+      const newPasswordInput = document.getElementById('newPassword') as HTMLInputElement;
+      const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
+      
+      if (oldPasswordInput && newPasswordInput && confirmPasswordInput) {
+        oldPasswordInput.value = '';
+        newPasswordInput.value = '';
+        confirmPasswordInput.value = '';
+        oldPasswordInput.focus();
+      }
+    } else {
+      passwordChangeContainer.classList.add('hidden');
+    }
   }
 }
   
@@ -401,6 +482,77 @@ async function setupEditProfilePage() {
     cancelEmailBtn.addEventListener('click', hideEmailEdit);
   }
 
+  const changePasswordBtn = document.getElementById('changePasswordBtn');
+  const savePasswordChangeBtn = document.getElementById('savePasswordChange') as HTMLInputElement;
+  const cancelPasswordChangeBtn = document.getElementById('cancelPasswordChange');
+  
+  if (changePasswordBtn) {
+    changePasswordBtn.addEventListener('click', () => {
+      togglePasswordChange(true);
+    });
+  }
+  
+  if (cancelPasswordChangeBtn) {
+    cancelPasswordChangeBtn.addEventListener('click', () => {
+      togglePasswordChange(false);
+    });
+  }
+  
+  if (savePasswordChangeBtn) {
+    savePasswordChangeBtn.addEventListener('click', async () => {
+      const oldPasswordInput = document.getElementById('oldPassword') as HTMLInputElement;
+      const newPasswordInput = document.getElementById('newPassword') as HTMLInputElement;
+      const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
+      
+      const oldPassword = oldPasswordInput.value;
+      const newPassword = newPasswordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      
+      if (!oldPassword || !newPassword || !confirmPassword) {
+        showError('Tous les champs doivent être remplis');
+        return;
+      }
+      
+      if (newPassword.length < 6) {
+        showError('Le nouveau mot de passe doit contenir au moins 6 caractères');
+        return;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        showError('Les mots de passe ne correspondent pas');
+        return;
+      }
+      
+      try {
+        savePasswordChangeBtn.disabled = true;
+        savePasswordChangeBtn.textContent = 'Traitement...';
+        
+        const success = await changePassword(oldPassword, newPassword);
+        
+        if (success) {
+          showNotification('Mot de passe modifié avec succès', true);
+          togglePasswordChange(false);
+        } else {
+          showError('Échec de la modification du mot de passe');
+        }
+      } catch (error: any) {
+        showError(error.message || 'Erreur lors du changement de mot de passe');
+      } finally {
+        savePasswordChangeBtn.disabled = false;
+        savePasswordChangeBtn.textContent = 'Enregistrer';
+      }
+    });
+  }
+  
+  const passwordChangeContainer = document.getElementById('passwordChangeContainer');
+  if (passwordChangeContainer) {
+    passwordChangeContainer.addEventListener('click', function(event) {
+      if (event.target === this) {
+        togglePasswordChange(false);
+      }
+    });
+  }
+
   const saveChangesBtn = document.getElementById('saveChangesBtn');
   if (saveChangesBtn) {
     saveChangesBtn.addEventListener('click', async () => {
@@ -468,13 +620,6 @@ async function setupEditProfilePage() {
       changedData = {};
       
       showNotification('Modifications annulées', true);
-    });
-  }
-
-  const changePasswordBtn = document.getElementById('changePasswordBtn');
-  if (changePasswordBtn) {
-    changePasswordBtn.addEventListener('click', () => {
-      showNotification('Fonctionnalité de changement de mot de passe à implémenter', false);
     });
   }
 

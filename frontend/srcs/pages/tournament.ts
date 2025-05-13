@@ -57,6 +57,7 @@ async function onWsMessage(ev: MessageEvent, myId: string) {
 	switch (msg.type) {
 		case 'MATCH_START':
 		  // msg.payload = { gameSessionId }
+		  console.log("MATCH_START");
 		  startCountdown(5, () => {
 			history.pushState(null, '', `/game?gameSessionId=${msg.payload.gameSessionId}`);
 			window.dispatchEvent(new PopStateEvent('popstate'));

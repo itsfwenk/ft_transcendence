@@ -70,18 +70,22 @@ export async function joinTournamentQueue(playerId: string) {
 		})
 	);
 	console.log("playersList", playersList);
-	const ws = websocketClients.get(playerId);
-	if (ws?.readyState === WebSocket.OPEN) {
-	ws.send(
-		JSON.stringify({
-		type   : 'QUEUE_SNAPSHOT',
+	// const ws = websocketClients.get(playerId);
+	// if (ws?.readyState === WebSocket.OPEN) {
+	// ws.send(
+	// 	JSON.stringify({
+	// 	type   : 'QUEUE_SNAPSHOT',
+	// 	players: playersList
+	// 	})
+	// );
+	// }
+	// broadcastToQueue(queueTournament, {
+	// 	type: 'QUEUE_TOURNAMENT_PLAYER_JOINED',
+	// 	playerId
+	// });
+		broadcastToQueue(queueTournament, {
+		type: 'QUEUE_SNAPSHOT',
 		players: playersList
-		})
-	);
-	}
-	broadcastToQueue(queueTournament, {
-		type: 'QUEUE_TOURNAMENT_PLAYER_JOINED',
-		playerId
 	});
 	console.log(`Joueur ${playerId} a rejoint de la queue Tournament`)
 	console.log(queueTournament);
@@ -232,7 +236,7 @@ export async function attemptTournament(): Promise<Tournament | undefined> {
 				throw Error ("No tournament created");
 			}
 			const message = JSON.stringify({
-				type: 'launch_tournament',
+				type: 'TOURNAMENT_LAUNCH',
 				payload: {tournament}
 			});
 			players.forEach((playerId) => {

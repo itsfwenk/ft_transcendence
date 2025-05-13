@@ -215,6 +215,9 @@ interface LogoutUserRequest extends FastifyRequest {
 export async function logoutUser(req: LogoutUserRequest, reply: FastifyReply) {
 	try {
 		console.log(req.user.userId);
+		reply.clearCookie('authToken', {
+		path: '/',
+		});
 		updateUserStatus(req.user.userId, 'offline');
 		reply.send({ success: true, message: `UserId: ${req.user.userId} loggout` });
 	} catch (error) {

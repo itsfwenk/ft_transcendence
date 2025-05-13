@@ -111,15 +111,14 @@ export default function game() {
                         // if (lancerBtn) {
                         //     lancerBtn.style.display = 'none'; // Hide the button once the game starts
                         // }
-                    } else if (data.type === 'game_update' && data.game_state.ball) {
+                    } else if (data.type === 'game_update' && data.game_state.ball && data.game_state.status === 'ongoing') {
                         // currentGameState = data;
-                        if (data.game_state.status === 'ongoing') {
-                            gameStarted = true;
-                        }
+                        gameStarted = true;
                         renderGame(data.game_state as Game); //  Call renderGame
                     } else if (data.type === 'game_update' && data.game_state.status === 'finished') {
                         // currentGameState = data;
                         renderGame(data.game_state as Game);
+                        console.log("Game finished");
                         // if (gameStateLabel) {
                         //     gameStateLabel.textContent = "Partie terminée!";
                         // }

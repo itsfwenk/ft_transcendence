@@ -376,7 +376,7 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 
 async function broadcastGameToPlayers(gameId: string) {
 	const game = await getGamebyId(gameId);
-	if (!game || game.status !== 'ongoing') return;
+	if (!game) return;
 
 	[game.player1_id, game.player2_id].forEach(userId => {
 		const gameSet = gameReadyPlayers.get(gameId);

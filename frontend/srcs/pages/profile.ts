@@ -229,7 +229,6 @@ export function showFriendStatus(message: string, isSuccess: boolean) {
 		
 		statusElement.classList.remove('hidden');
 		
-		// Cacher le message après 3 secondes
 		setTimeout(() => {
 			statusElement.classList.add('hidden');
 		}, 3000);
@@ -242,14 +241,12 @@ export function toggleFriendSearch(show: boolean) {
 	if (searchContainer) {
 		if (show) {
 			searchContainer.classList.remove('hidden');
-			// Focus sur l'input
 			const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
 			if (searchInput) {
 				searchInput.focus();
 			}
 		} else {
 			searchContainer.classList.add('hidden');
-			// Réinitialiser l'input
 			const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
 			if (searchInput) {
 				searchInput.value = '';
@@ -281,7 +278,7 @@ export default function Profile() {
 		</div>
 		
 		<div>
-		<div id="twoBox" class="flex justify-center items-center mb-10 gap-5">
+		<div id="twoBox" class="flex justify-center items-center mb-12 gap-5">
 			<div id="profilBox" class="h-80 w-1/3 bg-blue-700 rounded-lg p-4 text-white">
 				<div id="img_name" class="flex items-center mb-4">
 					<div id="img" class="w-28 h-28 rounded-lg bg-gray-300 mr-4 overflow-hidden">
@@ -372,7 +369,6 @@ async function setupProfilePage() {
 		console.error("Impossible de charger les données du profil");
 	}
 	
-	// Charger et afficher la liste d'amis
 	const friends = await fetchFriends();
 	renderFriendsList(friends);
 	
@@ -418,13 +414,11 @@ function setupEventListeners() {
 			if (searchInput && searchInput.value.trim()) {
 				const userName = searchInput.value.trim();
 				
-				// Tentative d'ajout d'ami
 				const result = await addFriend(userName);
 				
 				showFriendStatus(result.message, result.success);
 				
 				if (result.success && result.friend) {
-					// Récupérer à nouveau la liste d'amis pour la mettre à jour
 					const friends = await fetchFriends();
 					renderFriendsList(friends);
 				}
@@ -441,7 +435,6 @@ function setupEventListeners() {
 		});
 	}
 	
-	// Gestion de la soumission par Enter
 	const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
 	if (searchInput) {
 		searchInput.addEventListener('keypress', (event) => {

@@ -76,6 +76,7 @@ export const handleDisconnect = async () => {
 			console.log("Fermeture de la WebSocket user...");
 			usersocket.close();
 		}
+		localStorage.removeItem("userId");
 		history.pushState(null, '', '/');
 		window.dispatchEvent(new PopStateEvent('popstate'));
 		localStorage.removeItem("userId");

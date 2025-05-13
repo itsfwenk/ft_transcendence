@@ -74,15 +74,15 @@ export default function game() {
             // lancerButton.textContent = 'Lancer';
             // app.appendChild(lancerButton);
         
-            const gameStateDisplay = document.createElement('p');
-            gameStateDisplay.id = 'gameState';
-            gameStateDisplay.textContent = 'En attente du lancement par les deux joueurs...';
-            app.appendChild(gameStateDisplay);
+            // const gameStateDisplay = document.createElement('p');
+            // gameStateDisplay.id = 'gameState';
+            // gameStateDisplay.textContent = 'En attente du lancement par les deux joueurs...';
+            // app.appendChild(gameStateDisplay);
         
             const score1Display = document.getElementById('score1');
             const score2Display = document.getElementById('score2');
             // const lancerBtn = document.getElementById('lancerBtn') as HTMLButtonElement;
-            const gameStateLabel = document.getElementById('gameState');
+            // const gameStateLabel = document.getElementById('gameState');
         
             let gameStarted = false;
             // let currentGameState: Game;
@@ -105,21 +105,24 @@ export default function game() {
                     if (data.type === 'game_start') {
                         console.log("Le jeu a démarré!");
                         gameStarted = true;
-                        if (gameStateLabel) {
-                            gameStateLabel.textContent = "Partie en cours!";
-                        }
+                        // if (gameStateLabel) {
+                        //     gameStateLabel.textContent = "Partie en cours!";
+                        // }
                         // if (lancerBtn) {
                         //     lancerBtn.style.display = 'none'; // Hide the button once the game starts
                         // }
-                    } else if (gameStarted && data.type === 'game_update' && data.game_state.ball) {
+                    } else if (data.type === 'game_update' && data.game_state.ball) {
                         // currentGameState = data;
+                        if (data.game_state.status === 'ongoing') {
+                            gameStarted = true;
+                        }
                         renderGame(data.game_state as Game); //  Call renderGame
                     } else if (data.type === 'game_update' && data.game_state.status === 'finished') {
                         // currentGameState = data;
                         renderGame(data.game_state as Game);
-                        if (gameStateLabel) {
-                            gameStateLabel.textContent = "Partie terminée!";
-                        }
+                        // if (gameStateLabel) {
+                        //     gameStateLabel.textContent = "Partie terminée!";
+                        // }
                         socket.close();
                     }
                 } catch (error) {
@@ -199,9 +202,9 @@ export default function game() {
                         score1Display.textContent = state.score1.toString();
                         score2Display.textContent = state.score2.toString();
                     }
-                    if (gameStateLabel && state.status === 'finished') {
-                        gameStateLabel.textContent = "Partie terminée!";
-                    }
+                    // if (gameStateLabel && state.status === 'finished') {
+                    //     // gameStateLabel.textContent = "Partie terminée!";
+                    // }
                 }
         }
     }, 1000);

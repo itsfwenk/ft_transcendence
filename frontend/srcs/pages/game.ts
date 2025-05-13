@@ -74,10 +74,10 @@ export default function game() {
             // lancerButton.textContent = 'Lancer';
             // app.appendChild(lancerButton);
         
-            const gameStateDisplay = document.createElement('p');
-            gameStateDisplay.id = 'gameState';
-            gameStateDisplay.textContent = 'En attente du lancement par les deux joueurs...';
-            app.appendChild(gameStateDisplay);
+            // const gameStateDisplay = document.createElement('p');
+            // gameStateDisplay.id = 'gameState';
+            // gameStateDisplay.textContent = 'En attente du lancement par les deux joueurs...';
+            // app.appendChild(gameStateDisplay);
         
             const score1Display = document.getElementById('score1');
             const score2Display = document.getElementById('score2');

@@ -15,7 +15,7 @@ POST http://localhost:4001/user/login
 Content-Type: application/json
 
 {
-	"email": "test@email.com",
+	"email": "yo@email.com",
 	"password": "123456"
 }
 
@@ -78,7 +78,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyZmRhY
 
 ### Obtenir le dashboard utilisateur
 GET http://localhost:4001/user/dashboard
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3MWJmMmFhYy0xZDdmLTRjYjctYTliZi02NWRiMDdjZjQ0YWYiLCJpYXQiOjE3NDM1OTc0NDcsImV4cCI6MTc0MzY4Mzg0N30.vavxuywdknOCYjUyr9Gzmf-qvXMkWtaHVwUR0MqKzR8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMzUyYmQ2OC0xMTEzLTQxMmYtYjZlNi0yODc1YTcyMWFiYjkiLCJpYXQiOjE3NDcwNTM1MjMsImV4cCI6MTc0NzEzOTkyM30.HcHSv9kt12qRZJkssBWjNHDHY2x4oJm2ToE6foIxaGk
 
 ############################ AVATAR ############################
 

@@ -1,5 +1,6 @@
 import { getMatchmakingSocket } from "../wsClient";
 import { fetchUserProfile } from "./mode";
+import { getAvatarUrl } from "./profile";
 
 export async function fetchUserAvatar(userId: string): Promise<string> {
   try {
@@ -42,7 +43,8 @@ export default async function Queue() {
 	const currentPlayerId = userProfile.userId;
 	console.log("currentPlayerId:", currentPlayerId);
 
-	const currentPlayerAvatar = await fetchUserAvatar(currentPlayerId);
+	//const currentPlayerAvatar = await fetchUserAvatar(currentPlayerId);
+	const currentPlayerAvatar = getAvatarUrl(currentPlayerId);
 	console.log("Avatar de l'utilisateur actuel:", currentPlayerAvatar);
   
 	function renderPlayerBox(playerId: string, playerName: string, avatarUrl: string) {
@@ -137,7 +139,8 @@ export default async function Queue() {
 				case 'QUEUE_1V1_PLAYER_JOINED':
 					const { userId, userName } = msg.player;
 					if (userId === currentPlayerId) break;
-					const url = await fetchUserAvatar(userId);
+					//const url = await fetchUserAvatar(userId);
+					const url = getAvatarUrl(userId);
 					addPlayerBox(userId, userName ?? 'Opponent', url);
 					break;
 				case 'QUEUE_1V1_PLAYER_LEFT':

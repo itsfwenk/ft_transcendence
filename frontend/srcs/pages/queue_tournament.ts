@@ -1,6 +1,8 @@
 import { fetchUserProfile } from "./mode";
-import { fetchUserAvatar } from "./queue";
+//import { fetchUserAvatar } from "./queue";
+
 import { getMatchmakingSocket } from "../wsClient";
+import { getAvatarUrl } from "./profile";
 
 export default async function Queuetournament() {
 	const app = document.getElementById('app');
@@ -15,7 +17,8 @@ export default async function Queuetournament() {
 	const currentPlayerId = userProfile.userId;
 	console.log("currentPlayerId:", currentPlayerId);
 
-	const currentPlayerAvatar = await fetchUserAvatar(currentPlayerId);
+	//const currentPlayerAvatar = await fetchUserAvatar(currentPlayerId);
+	const currentPlayerAvatar = getAvatarUrl(currentPlayerId);
 	console.log("Avatar de l'utilisateur actuel:", currentPlayerAvatar);
   
 	app.innerHTML = /*html*/ `
@@ -105,14 +108,16 @@ export default async function Queuetournament() {
 					const list: {userId: string; userName: string}[] = msg.players;
 					for (const p of list) {
 					  if (p.userId === currentPlayerId) continue;
-					  const url = await fetchUserAvatar(p.userId);
+					  //const url = await fetchUserAvatar(p.userId);
+					  const url = getAvatarUrl(p.userId);
 					  addPlayerBox(p.userId, p.userName ?? 'Opponent', url);
 					}
 					break;
 				case 'QUEUE_TOURNAMENT_PLAYER_JOINED':
 					const { userId, userName } = msg.player;
 					if (userId === currentPlayerId) break;
-					const url = await fetchUserAvatar(userId);
+					//const url = await fetchUserAvatar(userId);
+					const url = getAvatarUrl(userId);
 					addPlayerBox(userId, userName ?? 'Opponent', url);
 					break;
 				case 'QUEUE_TOURNAMENT_PLAYER_LEFT':

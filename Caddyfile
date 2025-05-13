@@ -53,6 +53,11 @@
         header Access-Control-Allow-Credentials "true"
 	}
 
+	handle /avatars/* {
+		reverse_proxy user:4001
+	}
+
+
 	handle {
 		try_files {path} /index.html
 		file_server
@@ -62,9 +67,4 @@
 		header Access-Control-Allow-Headers "Content-Type, Authorization"
         header Access-Control-Allow-Credentials "true"
 	}
-
-	handle /avatars/* {
-		reverse_proxy user:4001
-	}
-
 }

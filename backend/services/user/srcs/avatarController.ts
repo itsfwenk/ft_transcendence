@@ -1,15 +1,11 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { getUserById, updateUser } from "./userDb";
-import path from 'path';
+import { getUserById, updateUser, updateUserAvatar, getUserAvatar, deleteUserAvatar } from "./userDb";
 import { randomUUID } from "crypto";
-import fs from 'fs';
 import util from 'util';
 import { pipeline } from "stream";
 const pump = util.promisify(pipeline);
 
-const AVATARS_STORAGE_DIR = '/app/public/avatars';
-const AVATARS_URL_PREFIX = 'http://localhost:4001/avatars';
-const DEFAULT_AVATAR_URL = `${AVATARS_URL_PREFIX}/default.png`;
+const DEFAULT_AVATAR_URL = '/avatars/default.png';
 
 interface UploadAvatarRequest extends FastifyRequest {
 	user: { userId: string };
@@ -31,36 +27,30 @@ export async function uploadAvatar(req: UploadAvatarRequest, reply: FastifyReply
 			return reply.status(400).send({ error: 'No file uploaded' });
 		}
 
-		// verif si c'est bien une image avec le MIM
 		const mimeType = data.mimetype;
 		if (!mimeType.startsWith('image/')) {
 			return reply.status(400).send({ error: 'Only image files are allowed' });
 		}
 
-		const extension = path.extname(data.filename || '.jpg').toLowerCase();
-		const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+		const chunks: Buffer[] = [];
+		for await (const chunk of data.file) {
+			chunks.push(chunk);
+		}
+		const fileBuffer = Buffer.concat(chunks);
 
-		if (!allowedExtensions.includes(extension)) {
-			return reply.status(400).send({ error: 'Only jpg, png and gif files are allowed' });
+		const success = updateUserAvatar(userId, fileBuffer, mimeType);
+
+		if (!success) {
+			return reply.status(500).send({ error: 'Failed to update avatar' });
 		}
 
-		const filename = `${userId}-${randomUUID()}${extension}`;
-		const avatarPath = path.join(AVATARS_STORAGE_DIR, filename);
-		const avatarUrl = `${AVATARS_URL_PREFIX}/${filename}`;
-
-		await pump(data.file, fs.createWriteStream(avatarPath));
-
-		if (user.avatarUrl && user.avatarUrl !== DEFAULT_AVATAR_URL) {
-			const oldAvatarPath = path.join(AVATARS_STORAGE_DIR, user.avatarUrl);
-			if (fs.existsSync(oldAvatarPath)) {
-				fs.unlinkSync(oldAvatarPath);
-			}
-		}
-
+		const uniqueId = randomUUID();
+		const avatarUrl = `/api/user/avatar/${userId}?v=${uniqueId}`;
+		
 		const updatedUser = updateUser(userId, { avatarUrl });
 
 		if (!updatedUser) {
-			return reply.status(500).send({ error: 'Failed to update avatar' });
+			return reply.status(500).send({ error: 'Failed to update avatar URL' });
 		}
 
 		return reply.send({
@@ -69,7 +59,7 @@ export async function uploadAvatar(req: UploadAvatarRequest, reply: FastifyReply
 		});
 	} catch (error) {
 		console.error('Error uploading avatar:', error);
-		return reply.status(500).send( { error: 'Internal server error' });
+		return reply.status(500).send({ error: 'Internal server error' });
 	}
 }
 
@@ -82,16 +72,11 @@ export async function deleteAvatar(req: UploadAvatarRequest, reply: FastifyReply
 			return reply.status(404).send({ error: 'User not found' });
 		}
 
-		if (user.avatarUrl && user.avatarUrl !== DEFAULT_AVATAR_URL) {
-			const avatarPath = path.join(AVATARS_STORAGE_DIR, user.avatarUrl);
-			if (fs.existsSync(avatarPath)) {
-				fs.unlinkSync(avatarPath);
-			}
-		}
+		const success = deleteUserAvatar(userId);
 
 		const updatedUser = updateUser(userId, { avatarUrl: DEFAULT_AVATAR_URL });
 
-		if (!updatedUser) {
+		if (!success || !updatedUser) {
 			return reply.status(500).send({ error: 'Failed to reset avatar' });
 		}
 
@@ -114,7 +99,14 @@ export async function getAvatar(req: FastifyRequest<{ Params: {userId: string } 
 			return reply.status(404).send({ error: 'User not found' });
 		}
 
-		return reply.send({ avatarUrl: user.avatarUrl });
+		const avatar = getUserAvatar(userId);
+
+		if (avatar && avatar.image) {
+			reply.type(avatar.mimeType);
+			return reply.send(avatar.image);
+		} else {
+			return reply.send({ avatarUrl: user.avatarUrl || DEFAULT_AVATAR_URL });
+		}
 	} catch (error) {
 		console.error('Error getting avatar:', error);
 		return reply.status(500).send({ error: 'Internal server error' });

@@ -362,3 +362,45 @@ export async function checkUserConnectionStatus(fastify: FastifyInstance, req: F
 	return reply.status(404).send({ error: 'User not found' });
  }
 }
+
+interface ChangePasswordRequest extends FastifyRequest {
+  body: {
+    currentPassword: string;
+    newPassword: string;
+  };
+  user: { userId: string };
+}
+
+export async function changePassword(req: ChangePasswordRequest, reply: FastifyReply) {
+  const { currentPassword, newPassword } = req.body;
+  const userId = req.user.userId;
+
+  try {
+    const user = getUserById(userId);
+    if (!user) {
+      return reply.status(404).send({ error: 'User not found' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHsh);
+    if (!isPasswordValid) {
+      return reply.status(401).send({ error: 'Current password is incorrect' });
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      return reply.status(400).send({ error: 'New password must be at least 6 characters long' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const updatedUser = updateUser(userId, { passwordHsh: hashedPassword });
+    
+    if (!updatedUser) {
+      return reply.status(500).send({ error: 'Failed to update password' });
+    }
+
+    return reply.send({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Error in changePassword:', error);
+    return reply.status(500).send({ error: 'Internal server error' });
+  }
+}

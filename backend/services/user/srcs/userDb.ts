@@ -14,7 +14,7 @@ db.exec(`
 		email TEXT UNIQUE NOT NULL,
 		passwordHsh TEXT NOT NULL,
 		role TEXT NOT NULL,
-		status TEXT NOT NULL,
+		status TEXT DEFAULT 'offline',
 		avatarUrl TEXT DEFAULT '/avatars/default.png',
 		avatarImage BLOB,
 		avatarMimeType TEXT,
@@ -68,7 +68,7 @@ export function saveUser(userName: string, email: string, password: string) {
 
 	const stmt = db.prepare(`
 		INSERT INTO users (userId, userName, email, passwordHsh, role, status, avatarUrl, inGameId)
-		VALUES (?, ?, ?, ?, 'user', 'online', '/avatars/default.png', ?)
+		VALUES (?, ?, ?, ?, 'user', 'offline', '/avatars/default.png', ?)
 	`);
 	const result = stmt.run(userId, userName, email, password, "none");
 

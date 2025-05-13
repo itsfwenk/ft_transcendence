@@ -49,34 +49,40 @@ export default function menu() {
       
       const disconnectBtn = document.getElementById('disconnectBtn');
       disconnectBtn?.addEventListener('click', async () => {
-        try {
-			const baseUrl = window.location.origin;
-			const response = await fetch(`${baseUrl}/user/logout`, {
-				method: 'POST'
-			});
-            if (!response.ok) {
-				console.error('Erreur lors de la déconnexion:', response.statusText);
-            } else {
-				console.log('Statut utilisateur mis à offline');
-            }
-			const matchmakingsocket = getMatchmakingSocket();
-			console.log("websocket matchmaking", matchmakingsocket);
-			if (matchmakingsocket && matchmakingsocket.readyState === WebSocket.OPEN) {
-				console.log("Fermeture de la WebSocket matchmaking...");
-				matchmakingsocket.close();
-			}
-			const usersocket = getUserSocket();
-			if (usersocket && usersocket.readyState === WebSocket.OPEN) {
-				console.log("Fermeture de la WebSocket user...");
-				usersocket.close();
-			}
-			history.pushState(null, '', '/');
-			window.dispatchEvent(new PopStateEvent('popstate'));
-        } catch (error) {
-			console.error('Erreur lors de la déconnexion:', error);
-			history.pushState(null, '', '/');
-			window.dispatchEvent(new PopStateEvent('popstate'));
-        }
+		handleDisconnect();
       });
       };
 }
+
+export const handleDisconnect = async () => {
+	try {
+		const baseUrl = window.location.origin;
+		const response = await fetch(`${baseUrl}/user/logout`, {
+			method: 'POST'
+		});
+		if (!response.ok) {
+			console.error('Erreur lors de la déconnexion:', response.statusText);
+		} else {
+			console.log('Statut utilisateur mis à offline');
+		}
+		const matchmakingsocket = getMatchmakingSocket();
+		console.log("websocket matchmaking", matchmakingsocket);
+		if (matchmakingsocket && matchmakingsocket.readyState === WebSocket.OPEN) {
+			console.log("Fermeture de la WebSocket matchmaking...");
+			matchmakingsocket.close();
+		}
+		const usersocket = getUserSocket();
+		if (usersocket && usersocket.readyState === WebSocket.OPEN) {
+			console.log("Fermeture de la WebSocket user...");
+			usersocket.close();
+		}
+		localStorage.removeItem("userId");
+		history.pushState(null, '', '/');
+		window.dispatchEvent(new PopStateEvent('popstate'));
+		localStorage.removeItem("userId");
+	} catch (error) {
+		console.error('Erreur lors de la déconnexion:', error);
+		history.pushState(null, '', '/');
+		window.dispatchEvent(new PopStateEvent('popstate'));
+	}
+};

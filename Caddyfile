@@ -57,4 +57,14 @@
 		reverse_proxy user:4001
 	}
 
+
+	handle {
+		try_files {path} /index.html
+		file_server
+		@origin header Origin *
+		header @origin Access-Control-Allow-Origin {http.request.header.Origin}
+		header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+		header Access-Control-Allow-Headers "Content-Type, Authorization"
+        header Access-Control-Allow-Credentials "true"
+	}
 }

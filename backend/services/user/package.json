@@ -30,6 +30,7 @@
     "dotenv": "^16.4.7",
     "electron": "^35.0.0",
     "fastify": "^5.2.1",
+    "fastify-cookie": "^5.6.1",
     "hi-base32": "^0.5.1",
     "jsonwebtoken": "^9.0.2",
     "node-fetch": "^2.7.0",

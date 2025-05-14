@@ -24,7 +24,7 @@ export default function game() {
         return;
     }
 
-    app.innerHTML = '';
+    app.innerHTML = /*html*/'';
 
     const timerDisplay = document.createElement('div');
     timerDisplay.id = 'timer';
@@ -43,6 +43,34 @@ export default function game() {
         if (timeLeft === 0) {
             clearInterval(intervalId);
             timerDisplay.style.display = 'none';
+			/* ------------------------------------------------------------------
+				1.  CRÉATION DU BOUTON QUIT
+			------------------------------------------------------------------ */
+			const quitBtn = document.createElement('button');            
+			quitBtn.id        = 'quitBtn';                               
+			quitBtn.textContent = 'Quitter la partie';                   
+			quitBtn.className =
+				'mt-4 px-4 py-2 rounded bg-red-600 text-white hover:bg-red-500'; 
+			app.appendChild(quitBtn);                                    
+
+			/* ------------------------------------------------------------------
+				2.  HANDLER   (clic sur “Quit”)
+			------------------------------------------------------------------ */
+			function doForfeit() {                                       
+				if (socket.readyState === WebSocket.OPEN) {
+				socket.send(JSON.stringify({ type: 'FORFEIT' }));        
+				socket.close(1000, 'player quit');                       
+				}
+				history.pushState(null, '', '/mode');                      
+				window.dispatchEvent(new PopStateEvent('popstate'));       
+			}                                                            
+
+			quitBtn.addEventListener('click', doForfeit);                
+
+			/* ------------------------------------------------------------------
+				3.  BACKUP si l’onglet est fermé
+			------------------------------------------------------------------ */
+			window.addEventListener('beforeunload', doForfeit);          
             timerDisplay.textContent = 'GO !';
             if (socket && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({ type: 'ready_to_start' }));

@@ -346,6 +346,11 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
                 const delta = (key === 'ArrowUp') ? -paddleSpeed : (key === 'ArrowDown') ? paddleSpeed : 0;
                 updatePaddleDelta(gameId, userId, state === 'keydown' ? delta : 0);
 			}
+			else if (type === 'FORFEIT') {
+				markPlayerAsForfeit(playerId);
+				break;
+
+			}
         } catch (err) {
             console.error("Error processing WebSocket message:", err);
             connection.close(1003, 'Invalid message format'); // Close with unsupported data error

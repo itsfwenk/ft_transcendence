@@ -108,7 +108,7 @@ export default async function Queuetournament() {
 			console.log("Message reçu:", msg);
 
 			switch (msg.type) {
-				case 'QUEUE_SNAPSHOT':
+				case 'QUEUE_TOURNAMENT_PLAYER_JOINED':
 					const list: {userId: string; userName: string}[] = msg.players;
 					for (const p of list) {
 					  if (p.userId === currentPlayerId) continue;
@@ -116,13 +116,6 @@ export default async function Queuetournament() {
 					  const url = getAvatarUrl(p.userId);
 					  addPlayerBox(p.userId, p.userName ?? 'Opponent', url);
 					}
-					break;
-				case 'QUEUE_TOURNAMENT_PLAYER_JOINED':
-					const { userId, userName } = msg.player;
-					if (userId === currentPlayerId) break;
-					//const url = await fetchUserAvatar(userId);
-					const url = getAvatarUrl(userId);
-					addPlayerBox(userId, userName ?? 'Opponent', url);
 					break;
 				case 'QUEUE_TOURNAMENT_PLAYER_LEFT':
 					removePlayerBox(msg.playerId);

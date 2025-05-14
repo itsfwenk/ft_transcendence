@@ -7,31 +7,23 @@ import { handleDisconnect } from './pages/menu';
 
 initRouter();
 
-window.addEventListener('beforeunload', async () => {
-	const isClosing = !sessionStorage.getItem('isPageReloaded');
-    if (isClosing) {
-		console.log('disconnecting in eventlistener beforeunload');
-        await handleDisconnect();
-    }
-    sessionStorage.setItem('isPageReloaded', 'true');
+window.addEventListener('beforeunload', () => {
+    handleDisconnect()
 });
 
 window.addEventListener("load", async () => {
 	try {
-			console.log("in window event listener load");
-			sessionStorage.removeItem('isPageReloaded');
 			const baseUrl = window.location.origin;
-			const currentPath = window.location.pathname;
+			// const currentPath = window.location.pathname;
 
-			console.log("currentPath :", currentPath)
-			if (currentPath === '/' || currentPath === '/menu') {
-				return;
-			}
+			// if (currentPath === '/') {
+			// return;
+			// }
 			const response = await fetch(`${baseUrl}/user/status/userId`, {
 		  		method: 'GET',
 		  		credentials: 'include',
 			});
-			if (!response.ok) {
+			  if (!response.ok) {
 				history.pushState(null, '', '/');
 				window.dispatchEvent(new PopStateEvent('popstate'));
 			} else {

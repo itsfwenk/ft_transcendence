@@ -16,7 +16,7 @@ export default async function Tournament_mgt() {
 	}
 	const currentPlayerId =  userProfile.userId;
 	console.log("currentPlayerId:", currentPlayerId);
-	attachWebSocketHandlers(currentPlayerId);
+	attachWebSocketHandlers();
 
     if (app) {
       app.innerHTML = /*html*/`
@@ -35,10 +35,10 @@ export default async function Tournament_mgt() {
 	
 }
 
-function attachWebSocketHandlers(myId: string) {
+function attachWebSocketHandlers() {
 	ws = getMatchmakingSocket()!;
 	if (wsHandler) ws.removeEventListener('message', wsHandler);
-	wsHandler = (ev: MessageEvent) => onWsMessage(ev, myId);
+	wsHandler = (ev: MessageEvent) => onWsMessage(ev);
 	ws.addEventListener('message', wsHandler);
 	window.addEventListener('beforeunload', leaveTournament);
 }
@@ -51,7 +51,7 @@ function leaveTournament() {
 	window.removeEventListener('beforeunload', leaveTournament);
 }
 
-async function onWsMessage(ev: MessageEvent, myId: string) {
+async function onWsMessage(ev: MessageEvent) {
 	let msg;
 	try { msg = JSON.parse(ev.data); } catch { return; }
 	switch (msg.type) {
@@ -64,12 +64,12 @@ async function onWsMessage(ev: MessageEvent, myId: string) {
 		  });
 		  break;
 	
-		case 'MATCH_END':
-			// msg.payload = { score1, score2, winnerId }
-			const {winner_Id, score1, score2} = msg.payload;
- 			const isWinner = winner_Id === myId;
-			show1v1ResultScreen(isWinner, {score1, score2});
-		  break;
+		// case 'MATCH_END':
+		// 	// msg.payload = { score1, score2, winnerId }
+		// 	const {winner_Id, score1, score2} = msg.payload;
+ 		// 	const isWinner = winner_Id === myId;
+		// 	show1v1ResultScreen(isWinner, {score1, score2});
+		//   break;
 	
 		case 'PLAYER_STATE_UPDATE':
 		  // msg.payload = { state: 'eliminated' | 'waiting_next_round' | 'winner' }
@@ -170,30 +170,30 @@ export function updatePlayerStateUI(state: string) {
 // 	updatePlayerStateUI(currentPlayerState);
 //   }
   
-  function show1v1ResultScreen(
-	isWinner: boolean,
-	scores: { score1: number; score2: number }
-	) {
-	const app = document.getElementById('app');
-	if (!app) return;
+//   function show1v1ResultScreen(
+// 	isWinner: boolean,
+// 	scores: { score1: number; score2: number }
+// 	) {
+// 	const app = document.getElementById('app');
+// 	if (!app) return;
 	
-	app.innerHTML = `
-	  <div class="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
-		<h2 class="text-3xl font-bold mb-4">
-		  ${isWinner ? '🎉 Victoire !' : '😢 Défaite'}
-		</h2>
+// 	app.innerHTML = `
+// 	  <div class="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
+// 		<h2 class="text-3xl font-bold mb-4">
+// 		  ${isWinner ? '🎉 Victoire !' : '😢 Défaite'}
+// 		</h2>
 	
-		<p class="mb-6 text-lg">Score : ${scores.score1} – ${scores.score2}</p>
+// 		<p class="mb-6 text-lg">Score : ${scores.score1} – ${scores.score2}</p>
 	
-		<button id="backBtn"
-				class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">
-		  Retour au menu
-		</button>
-	  </div>
-	`;
+// 		<button id="backBtn"
+// 				class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">
+// 		  Retour au menu
+// 		</button>
+// 	  </div>
+// 	`;
 	
-	document.getElementById('backBtn')?.addEventListener('click', () => {
-		history.pushState(null, '', '/menu');
-		window.dispatchEvent(new PopStateEvent('popstate'));
-	});
-  }
+// 	document.getElementById('backBtn')?.addEventListener('click', () => {
+// 		history.pushState(null, '', '/menu');
+// 		window.dispatchEvent(new PopStateEvent('popstate'));
+// 	});
+//   }

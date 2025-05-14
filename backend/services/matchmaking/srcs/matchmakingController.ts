@@ -283,7 +283,7 @@ export function onMatchCompleted(matchId: string): void {
 		setPlayerState(loserId, 'eliminated');
 		const losersocket = websocketClients.get(loserId);
 		losersocket?.send(JSON.stringify({
-			type: 'player_state_update',
+			type: 'PLAYER_STATE_UPDATE',
 			payload: {
 				state: 'eliminated',
 				tournament
@@ -294,12 +294,13 @@ export function onMatchCompleted(matchId: string): void {
 		const final_match = tournament.matches.find(m => m.round === 2);
 		const finalDone = final_match?.status === 'completed';
 		console.log("final Done ? ", finalDone);
+		console.log("Semi Done ? ", semiDone);
 		if (finalDone) {
 			console.log("final Done ? ", finalDone);
 			setPlayerState(winner_Id, 'winner');
 			const tournamentWinnerSocket = websocketClients.get(winner_Id);
 			tournamentWinnerSocket?.send(JSON.stringify({
-				type: 'player_state_update',
+				type: 'PLAYER_STATE_UPDATE',
 				payload: {
 					state: 'winner',
 					tournament
@@ -322,7 +323,7 @@ export function onMatchCompleted(matchId: string): void {
 			setPlayerState(winner_Id, 'waiting_next_round')
 			const winnersocket = websocketClients.get(winner_Id);
 			winnersocket?.send(JSON.stringify({
-				type: 'player_state_update',
+				type: 'PLAYER_STATE_UPDATE',
 				payload: {
 					state: 'waiting_next_round',
 					tournament

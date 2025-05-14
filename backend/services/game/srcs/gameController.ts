@@ -353,13 +353,32 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
     });
 
 	// Handle socket close
-	connection.on('close', () => {
+	connection.on('close', async () => {
 		activeUsers.delete(userId);
 		const readyPlayers = gameReadyPlayers.get(gameId);
 		readyPlayers?.delete(userId);
 		if (readyPlayers?.size === 0)
 		{
-			endGameInDb(gameId);
+			const updatedGame = endGameInDb(gameId);
+			if (!updatedGame) 
+			{
+				console.error('gme not found');
+				return 
+			}	
+			//reply.send({success: true, updatedGame});
+			//mise a jour du service matchmaking
+			console.log("EndGame", updatedGame);
+			try {
+				const baseUrl = process.env.MATCHMAKING_SERVICE_BASE_URL || 'http://matchmaking:4003';
+				const response = await axios.post(`${baseUrl}/matchmaking/match/update/${updatedGame.matchId}`, {
+					matchId: updatedGame.matchId,
+					score1: updatedGame.score1,
+					score2: updatedGame.score2,
+					winner_id: updatedGame.winner_id
+				});
+			} catch (error) {
+				console.error('Erreur lors de la mise à jour du matchmaking:', error);
+			}
 			console.log("Game", gameId, "has finished.");
 			gameReadyPlayers.delete(gameId);
 		}
@@ -376,7 +395,7 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 
 async function broadcastGameToPlayers(gameId: string) {
 	const game = await getGamebyId(gameId);
-	if (!game || game.status !== 'ongoing') return;
+	if (!game) return;
 
 	[game.player1_id, game.player2_id].forEach(userId => {
 		const gameSet = gameReadyPlayers.get(gameId);

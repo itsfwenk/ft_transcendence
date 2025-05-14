@@ -126,10 +126,17 @@ export async function getGamebyId(gameId: string): Promise<Game | null> {
 export function updateGameScore(gameId: string, score1: number, score2: number) {
 	const stmt = db.prepare (`
 		UPDATE games
-		SET score1 = ?, score2 = ?
+		SET score1 = ?, score2 = ?, status = ?
 		WHERE gameId = ?
 	`);
-	const result = stmt.run(score1, score2, gameId);
+	let result;
+	if (score1 < 5 && score2 < 5) {
+		result = stmt.run(score1, score2, 'ongoing', gameId);
+	}
+	else {
+		console.log("game finished in updateGameScore")
+		result = stmt.run(score1, score2, 'finished', gameId);
+	}
 	if (result.changes > 0) {
 		const updatedStmt = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
 		return updatedStmt.get(gameId);
@@ -185,8 +192,8 @@ export async function updateBallPositionInDb(gameId: string, ball: Ball) {
 
 export async function getAllGamesId() : Promise<{ gameId: string }[]> {
 	try {
-		const stmt = db.prepare('SELECT gameId FROM games WHERE status = ?');
-		const allIds : { gameId: string }[] = stmt.all('ongoing') as { gameId: string }[];
+		const stmt = db.prepare('SELECT gameId FROM games');
+		const allIds : { gameId: string }[] = stmt.all() as { gameId: string }[];
 		return allIds;
 	  } catch (error) {
 		console.error('Error fetching game Ids:', error);

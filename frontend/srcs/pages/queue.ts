@@ -30,6 +30,34 @@ export async function fetchUserAvatar(userId: string): Promise<string> {
   }
 }
 
+function show1v1ResultScreen(
+	isWinner: boolean,
+	scores: { score1: number; score2: number }
+	) {
+	const app = document.getElementById('app');
+	if (!app) return;
+	
+	app.innerHTML = `
+	  <div class="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
+		<h2 class="text-3xl font-bold mb-4">
+		  ${isWinner ? '🎉 Victoire !' : '😢 Défaite'}
+		</h2>
+	
+		<p class="mb-6 text-lg">Score : ${scores.score1} – ${scores.score2}</p>
+	
+		<button id="backBtn"
+				class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">
+		  Retour au menu
+		</button>
+	  </div>
+	`;
+	
+	document.getElementById('backBtn')?.addEventListener('click', () => {
+		history.pushState(null, '', '/menu');
+		window.dispatchEvent(new PopStateEvent('popstate'));
+	});
+}
+
 export default async function Queue() {
 	const app = document.getElementById('app');
 	if (!app) return;
@@ -142,8 +170,7 @@ export default async function Queue() {
 			switch (msg.type) {
 				case 'QUEUE_1V1_PLAYER_JOINED':
 					const { userId, userName } = msg.player;
-					if (userId === currentPlayerId) break;
-					//const url = await fetchUserAvatar(userId);
+					if (!userId || userId === currentPlayerId) break;
 					const url = getAvatarUrl(userId);
 					addPlayerBox(userId, userName ?? 'Opponent', url);
 					break;
@@ -151,9 +178,13 @@ export default async function Queue() {
 					removePlayerBox(msg.playerId);
 					break;
 				case 'MATCH_START':
-					cleanupMatchmaking();
-      				history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
+      				history.pushState(null, '', `/game?gameSessionId=${msg.payload.gameSessionId}`);
       				window.dispatchEvent(new PopStateEvent('popstate'));
+					break;
+				case 'MATCH_END':
+					const {winner_Id, score1, score2} = msg.payload;
+					const isWinner = winner_Id === currentPlayerId;
+					show1v1ResultScreen(isWinner, {score1, score2});
 					break;
 			}		
 		} catch (error) {

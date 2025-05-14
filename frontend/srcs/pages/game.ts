@@ -7,6 +7,7 @@ import { Game } from '../../../gameInterfaces'
 // const port = window.location.port;
 // const path = '/ws';
 
+
 export default function game() {
 
     let wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:${window.location.port}/game/ws`;

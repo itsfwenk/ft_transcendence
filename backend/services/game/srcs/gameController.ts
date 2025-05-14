@@ -362,7 +362,7 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 			const updatedGame = endGameInDb(gameId);
 			if (!updatedGame) 
 			{
-				console.error('gme not found');
+				console.error('game not found');
 				return 
 			}	
 			//reply.send({success: true, updatedGame});

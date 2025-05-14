@@ -28,9 +28,13 @@ export function getPlayerState(playerId: string) {
 export async function joinQueue1v1(playerId: string) {
 	if (queue1v1.has(playerId)) return;
 	queue1v1.add(playerId);
+	const {userName} = await fetchPublicProfile(playerId);
 	broadcastToQueue(queue1v1, {
 		type: 'QUEUE_1V1_PLAYER_JOINED',
-		playerId
+		player: {
+			userId: playerId,
+			userName
+		}
 	});
 	console.log(`Joueur ${playerId} a rejoint de la queue 1v1`)
 	console.log(queue1v1);
@@ -84,7 +88,7 @@ export async function joinTournamentQueue(playerId: string) {
 	// 	playerId
 	// });
 		broadcastToQueue(queueTournament, {
-		type: 'QUEUE_SNAPSHOT',
+		type: 'QUEUE_TOURNAMENT_PLAYER_JOINED',
 		players: playersList
 	});
 	console.log(`Joueur ${playerId} a rejoint de la queue Tournament`)
@@ -339,6 +343,7 @@ export function onMatchCompleted(matchId: string): void {
 			}));
 		}
 	} else {
+		console.log("1v1_Match_end", match);
 		const winnersocket = websocketClients.get(winner_Id);
 		const losersocket = websocketClients.get(loserId);
 		const payload = {

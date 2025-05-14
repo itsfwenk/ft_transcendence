@@ -6,7 +6,7 @@ export default  async function login() {
 	try {
 		console.log("Looking for session");
 		const baseUrl = window.location.origin;
-		console.log("fetching at :", `${baseUrl}/user/status/userId`);
+		console.log("in login first check fetching at :", `${baseUrl}/user/status/userId`);
 		const response = await fetch(`${baseUrl}/user/status/userId`, {
 		  method: 'GET',
 		  credentials: 'include',

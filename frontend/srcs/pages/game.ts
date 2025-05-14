@@ -1,5 +1,5 @@
 // src/pages/Home.ts
-import { Game } from '../../../gameInterfaces'
+import { Game } from '../../gameInterfaces'
 
 // let gameState : Game;
 // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';

@@ -28,9 +28,13 @@ export function getPlayerState(playerId: string) {
 export async function joinQueue1v1(playerId: string) {
 	if (queue1v1.has(playerId)) return;
 	queue1v1.add(playerId);
+	const {userName} = await fetchPublicProfile(playerId);
 	broadcastToQueue(queue1v1, {
 		type: 'QUEUE_1V1_PLAYER_JOINED',
-		playerId
+		player: {
+			userId: playerId,
+			userName
+		}
 	});
 	console.log(`Joueur ${playerId} a rejoint de la queue 1v1`)
 	console.log(queue1v1);

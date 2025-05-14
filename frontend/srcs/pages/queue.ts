@@ -142,8 +142,7 @@ export default async function Queue() {
 			switch (msg.type) {
 				case 'QUEUE_1V1_PLAYER_JOINED':
 					const { userId, userName } = msg.player;
-					if (userId === currentPlayerId) break;
-					//const url = await fetchUserAvatar(userId);
+					if (!userId || userId === currentPlayerId) break;
 					const url = getAvatarUrl(userId);
 					addPlayerBox(userId, userName ?? 'Opponent', url);
 					break;

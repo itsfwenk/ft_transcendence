@@ -178,7 +178,6 @@ export default async function Queue() {
 					removePlayerBox(msg.playerId);
 					break;
 				case 'MATCH_START':
-					//cleanupMatchmaking();
       				history.pushState(null, '', `/game?gameSessionId=${msg.payload.gameSessionId}`);
       				window.dispatchEvent(new PopStateEvent('popstate'));
 					break;

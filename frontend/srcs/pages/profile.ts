@@ -394,9 +394,10 @@ function setupEventListeners() {
 
 	const historyBtn = document.getElementById('historyBtn');
 	if (historyBtn) {
-		historyBtn.addEventListener('click', () => {
-			console.log("Affichage de l'historique demandé");
-		});
+	historyBtn.addEventListener('click', () => {
+		history.pushState(null, '', '/history');
+		window.dispatchEvent(new PopStateEvent('popstate'));
+	});
 	}
 
 	const addFriendBtn = document.getElementById('addFriendBtn');

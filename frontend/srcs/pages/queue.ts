@@ -51,7 +51,7 @@ export default async function Queue() {
 		console.log("Rendu du joueur:", playerName, "avec l'avatar:", avatarUrl);
 
 		const boxId = `player-${playerId.slice(0, 8)}`;
-		const playerInitial = playerName.charAt(0).toUpperCase();
+		// const playerInitial = playerName.charAt(0).toUpperCase();
 
 		if (avatarUrl) {
 			console.log("Test de l'URL de l'avatar:", avatarUrl);
@@ -63,14 +63,18 @@ export default async function Queue() {
 				alt="${playerName}" 
 				class="w-full h-full object-cover"
 				onload="console.log('Image chargée avec succès:', '${avatarUrl}')"
-				onerror="console.log('Erreur de chargement image:', '${avatarUrl}'); document.getElementById('${boxId}').innerHTML='${playerInitial}';"
+				onerror="console.log('Erreur de chargement image:', '${avatarUrl}'); this.onerror=null; this.src='/avatars/default.png';"
 				/>
 			</div>
 			`;
 		} else {
 			return `
 			<div class="w-16 h-16 bg-blue-600 rounded-md cube-3d flex items-center justify-center text-white text-2xl">
-				${playerInitial}
+				<img 
+				src="/avatars/default.png" 
+				alt="${playerName}" 
+				class="w-full h-full object-cover"
+				/>
 			</div>
 			`;
 		}

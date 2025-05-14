@@ -1,5 +1,4 @@
-FROM node:18.20.7
-
+FROM node:20-bullseye-slim
 RUN apt-get update && apt-get install -y \
     python3 make g++ libsqlite3-dev curl net-tools \
     && ln -s /usr/bin/python3 /usr/bin/python \

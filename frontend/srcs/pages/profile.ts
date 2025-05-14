@@ -200,15 +200,15 @@ export function renderFriendsList(friends: Friend[]) {
 						<img 
 							src="${getAvatarUrl(friend.userId)}" 
 							alt="${friend.userName}" 
-							class="w-full h-full object-cover"
+							class="w-full h-full object-cover select-none"
 							onerror="this.onerror=null; this.src='/avatars/default.png';"
 						/>
 					</div>
-					<div class="absolute bottom-0 right-0 w-3 h-3 ${statusColor} border-2 border-red-800 rounded-full"></div>
+					<div class="absolute bottom-0 right-0 w-3 h-3 ${statusColor} border-2 border-red-800 rounded-full select-none"></div>
 				</div>
 				<div class="flex-grow">
-					<div class="font-bold">${friend.userName}</div>
-					<div class="text-xs text-gray-300">${isOnline ? 'En ligne' : 'Hors ligne'}</div>
+					<div class="font-bold select-none">${friend.userName}</div>
+					<div class="text-xs text-gray-300 select-none">${isOnline ? 'En ligne' : 'Hors ligne'}</div>
 				</div>
 			</div>
 		`;
@@ -224,8 +224,8 @@ export function showFriendStatus(message: string, isSuccess: boolean) {
 	if (statusElement && contentElement) {
 		contentElement.textContent = message;
 		contentElement.className = isSuccess 
-			? 'px-4 py-2 rounded-md bg-green-500 text-white'
-			: 'px-4 py-2 rounded-md bg-red-500 text-white';
+			? 'px-4 py-2 rounded-md bg-green-500 text-white select-none'
+			: 'px-4 py-2 rounded-md bg-red-500 text-white select-none';
 		
 		statusElement.classList.remove('hidden');
 		

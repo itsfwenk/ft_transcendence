@@ -7,7 +7,7 @@ Content-Type: application/json
 {
 	"userName": "test4",
 	"email": "test4@email.com",
-	"password": "mypassword"
+	"password": "123456"
 }
 
 ### Connexion

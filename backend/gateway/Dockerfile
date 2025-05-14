@@ -1,4 +1,4 @@
-FROM node:20-bullseye-slim
+FROM node:18.20.7
 
 RUN apt-get update && apt-get install -y curl net-tools
 

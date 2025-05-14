@@ -255,11 +255,11 @@ export function finishTournament(tournament_Id: string):void {
 
 export function getMatchHistoryByUserId(userId: string) {
 	const stmt = db.prepare(`
-		SELECT tm.*, t.status as tournamentStatus
+		SELECT m.*, t.status as tournamentStatus
 		FROM Match m
 		LEFT JOIN Tournament t ON m.tournament_Id = t.id
 		WHERE (m.player1_Id = ? OR m.player2_Id = ?) AND m.status = 'completed'
-		ORDER BY m.matchTimne DESC
+		ORDER BY m.matchTime DESC
 	`);
 
 	const matches = stmt.all(userId, userId) as any[];

@@ -308,6 +308,14 @@ export function onMatchCompleted(matchId: string): void {
 			}));
 		} else if (semiDone) {
 			console.log(`[MM] Demi-finales terminées, lancement de la finale`);
+			const winnersocket = websocketClients.get(winner_Id);
+			winnersocket?.send(JSON.stringify({
+				type: 'PLAYER_STATE_UPDATE',
+				payload: {
+					state: 'waiting_final_prep',
+					tournament
+				}
+			}));
 			scheduleFinal(tournament.id);
 			const updatedtournament = getTournamentById(tournament_Id);
 			if (!updatedtournament) return;

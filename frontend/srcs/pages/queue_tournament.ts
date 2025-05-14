@@ -126,6 +126,7 @@ export default async function Queuetournament() {
 				case 'TOURNAMENT_LAUNCH':
 					cleanupMatchmaking();
 					const tournament = msg.payload;
+					console.log("tournament = ", tournament);
 					const tournament_Id = tournament.id;
 					history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
 					window.dispatchEvent(new PopStateEvent('popstate'));

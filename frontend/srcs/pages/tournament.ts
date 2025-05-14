@@ -79,16 +79,33 @@ async function onWsMessage(ev: MessageEvent) {
 	  }
 }
 
+
 function startCountdown(sec: number, onEnd: () => void) {
-	const stage = document.getElementById('stage')!;
-	let t = sec;
-	stage.textContent = `Match starts in ${t}…`;
-	const id = setInterval(() => {
-	  t--;
-	  if (t === 0) { clearInterval(id); onEnd(); return; }
-	  stage.textContent = `Match starts in ${t}…`;
-	}, 1_000);
+
+  let stage = document.getElementById('stage') as HTMLElement | null;
+
+  if (!stage) {
+    stage         = document.createElement('div');
+    stage.id      = 'stage';
+    stage.className = 'text-2xl font-bold my-4';
+    document.getElementById('app')?.prepend(stage);
   }
+
+  let t = sec;
+  stage.textContent = `Match starts in ${t}…`;
+
+  const timer = setInterval(() => {
+    t--;
+    if (t === 0) {
+      clearInterval(timer);
+      stage.remove();
+      onEnd();
+      return;
+    }
+    stage.textContent = `Match starts in ${t}…`;
+  }, 1_000);
+}
+
 
 // export function updateTournamentUI(state: TournamentState) {
 // 	console.log("updateTournamentState", state);
@@ -134,6 +151,15 @@ export function updatePlayerStateUI(state: string) {
 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
 					<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
 					<p class="text-gray-600">En attente du prochain tour...</p>
+				</div>
+			`;
+		  break;
+
+		case 'waiting_final_prep':
+			app.innerHTML = `
+				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+					<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
+					<p class="text-gray-600">La finale est en preparation...</p>
 				</div>
 			`;
 		  break;

@@ -400,7 +400,7 @@ export async function handleMatchmakingMessage(
 			joinQueue1v1(playerId);
 			const match = await attemptMatchv2();
 			if (match) {
-				launchMatch(match.id);
+					launchMatch(match.id);
 			}
 			break;
 	  
@@ -411,14 +411,12 @@ export async function handleMatchmakingMessage(
 			if (tournament) {
 				tournament.state = 'tournament_launch';
 				broadcastTournamentState(tournament);
-				setTimeout(() => {
-					const semiFinals = tournament.matches.filter(m => m.round === 1);
-					console.log("voici les demis finales", semiFinals);
-					for (const match of semiFinals) {
-						console.log("match qui va etre lance", match.id);
-						launchMatch(match.id);
-					}
-				}, 5000);
+				const semiFinals = tournament.matches.filter(m => m.round === 1);
+				console.log("voici les demis finales", semiFinals);
+				for (const match of semiFinals) {
+					console.log("match qui va etre lance", match.id);
+					launchMatch(match.id);
+				}
 			}
 			break;		
 		

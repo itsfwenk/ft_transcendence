@@ -14,7 +14,7 @@ window.addEventListener('beforeunload', () => {
 window.addEventListener("load", async () => {
 	try {
 			const baseUrl = window.location.origin;
-			// const currentPath = window.location.pathname;
+			const currentPath = window.location.pathname;
 
 			// if (currentPath === '/') {
 			// return;
@@ -30,6 +30,10 @@ window.addEventListener("load", async () => {
 				const userId = localStorage.getItem("userId");
 				if (userId) {
 					matchmakingWebSocket(userId);
+					if (currentPath === '/') {
+						history.pushState(null, '', '/menu');
+						window.dispatchEvent(new PopStateEvent('popstate'));
+					}
 				}
 			}
 	}

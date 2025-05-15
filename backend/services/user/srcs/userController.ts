@@ -214,7 +214,7 @@ interface LogoutUserRequest extends FastifyRequest {
 
 export async function logoutUser(req: LogoutUserRequest, reply: FastifyReply) {
 	try {
-		console.log(req.user.userId);
+		console.log(req.user.userId, 'called logoutUser');
 		reply.clearCookie('authToken', {
 		path: '/',
 		});
@@ -275,11 +275,11 @@ export async function updateStatus(req: UpdateStatusRequest, reply: FastifyReply
 
 	try {
 		const success = updateUserStatus(userId, status);
-		if (success) {
-			return reply.send({ success: true, message: `Status updated in ${status}.`});
-		} else {
-			return reply.status(404).send({ error: 'User not found' });
-		}
+		// if (success) {
+			// return reply.send({ success: true, message: `Status updated in ${status}.`});
+		// } else {
+			// return reply.status(404).send({ error: 'User not found' });
+		// }
 	} catch (error) {
 		console.error(error);
 		return reply.status(500).send({ error: 'Internal server error' });
@@ -348,13 +348,26 @@ export async function checkUserConnectionStatus(fastify: FastifyInstance, req: F
 			return reply.status(404).send({ error: 'User not found' });
 		}
 		console.log("connected user =", user?.userName);
-		const isConnected = isUserConnected(userId);
-		return reply.send({
-			userId,
-			userName: user.userName,
-			isConnected,
-			status: isConnected ? 'online' : 'offline'
-		});
+		// const isConnected = isUserConnected(userId);
+		// if (isConnected) {
+			try {
+					updateUserStatus(userId, 'online');
+				// if (success) {
+					return reply.send({ success: true, message: `User ${userId} status updated to online.`});
+				// } else {
+					// return reply.status(404).send({ error: 'User not found' });
+				// }
+			} catch (error) {
+				console.error(error);
+				return reply.status(500).send({ error: 'Internal server error' });
+			}
+		// }
+		// return reply.send({
+		// 	userId,
+		// 	userName: user.userName,
+		// 	isConnected,
+		// 	status: isConnected ? 'online' : 'offline'
+		// });
 	
 	}
  catch(error) {

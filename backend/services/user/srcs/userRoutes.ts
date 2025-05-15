@@ -1,5 +1,5 @@
 import fastify, { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest, FastifySchema } from 'fastify';
-import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount, updateRole, updateStatus, getOnlineUsers, logoutUser, checkUserConnectionStatus, changePassword } from './userController.js';
+import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount, updateRole, updateStatus, getOnlineUsers, logoutUser, checkUserConnectionStatus, changePassword, internalLogoutUser } from './userController.js';
 // import jwt from '@fastify/jwt'
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import multipart from '@fastify/multipart';
@@ -167,6 +167,10 @@ export default async function userRoutes(fastify: any) {
   fastify.post('/logout', {
 	preHandler: [fastify.authenticate],
 	handler: logoutUser
+  })
+
+  fastify.post('/internal/logout/:userId', {
+	  handler: internalLogoutUser
   })
 
   fastify.put('/role', {

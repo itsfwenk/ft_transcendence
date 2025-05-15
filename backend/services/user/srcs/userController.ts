@@ -89,6 +89,7 @@ export async function loginUser(req:LoginRequest, reply:FastifyReply) {
 				secure: true,  // en production, utilisez HTTPS
 				sameSite: 'lax',
 				path: '/',  // disponible pour toutes les routes
+				maxAge: 60 * 60 * 24,
 			});
 
 			reply.send({ token,
@@ -223,6 +224,19 @@ export async function logoutUser(req: LogoutUserRequest, reply: FastifyReply) {
 	} catch (error) {
 		console.error(error);
 		return reply.status(500).send({ error: 'Internal server error' });
+	}
+}
+
+export async function internalLogoutUser(req: FastifyRequest, reply: FastifyReply) {
+	try {
+		const { userId } = req.params as {userId: string};
+		console.log(userId, 'called internalLogoutUser');
+
+		updateUserStatus(userId, 'offline');
+		reply.send({ success: true, message: `UserId: ${userId} loggout` });
+	} catch (error) {
+		console.error(error);
+		return reply.status(500).send({ error: 'Internal user server error' });
 	}
 }
 

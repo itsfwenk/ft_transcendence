@@ -1,15 +1,15 @@
 import './styles.css'
 import { initRouter } from './router';
 import { matchmakingWebSocket } from "./wsClient";
-import { handleDisconnect } from './pages/menu';
+// import { handleDisconnect } from './pages/menu';
 // import { fetchUserProfile } from './pages/mode';
 
 
 initRouter();
 
-window.addEventListener('beforeunload', () => {
-    handleDisconnect()
-});
+// window.addEventListener('beforeunload', () => {
+//     handleDisconnect()
+// });
 
 window.addEventListener("load", async () => {
 	try {

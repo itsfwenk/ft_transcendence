@@ -146,6 +146,9 @@ export function updateUserRole(userId: string, role: string): boolean {
 export function updateUserStatus(userId: string, status: string): boolean {
 	const stmt = db.prepare(`UPDATE users SET status = ? WHERE userId = ?`);
 	const result = stmt.run(status, userId);
+	if (result.changes > 0) {
+		console.log('In updateUserStatus, user', userId, 'successfully set to', status);
+	}
 	return result.changes > 0;
 }
 

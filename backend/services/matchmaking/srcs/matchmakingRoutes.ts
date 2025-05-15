@@ -5,6 +5,7 @@ import { request } from 'axios';
 import { WebSocket } from "ws";
 //import WebSocket from '@fastify/websocket';
 import { handleMatchmakingMessage, onMatchCompleted } from './matchmakingController';
+import axios from 'axios';
 
 export const websocketClients = new Map<string, WebSocket>();
 
@@ -164,7 +165,7 @@ export default async function matchmakingRoutes(fastify: any) {
 		}
 	});
 // END - YOYO
-	fastify.get('/ws', { websocket: true }, (connection: WebSocket, request: FastifyRequest) => {
+	fastify.get('/ws', { websocket: true }, async (connection: WebSocket, request: FastifyRequest) => {
 		const { playerId } = request.query as { playerId?: string };
 		console.log('Query params:', request.query);
 		if (!playerId) {
@@ -193,9 +194,19 @@ export default async function matchmakingRoutes(fastify: any) {
 		// Stocker la connexion dans la Map avec le playerId comme clé
 		websocketClients.set(playerId, connection);
 		
-		connection.on('close', () => {
+		connection.on('close', async () => {
 			console.log(`Un client WebSocket s'est déconnecté pour le playerId: ${playerId}`);
 			websocketClients.delete(playerId);
+			try {
+				const baseUrl = process.env.USER_SERVICE_BASE_URL || 'http://user:4001';
+				console.log('Call on axios internal logout for user', playerId);
+				const response = await axios.post(
+					`${baseUrl}/user/internal/logout/${playerId}`, 
+					{}
+				);
+			} catch (error) {
+				console.error(error);
+			}
 		});
 	});
 

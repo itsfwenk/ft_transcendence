@@ -105,6 +105,11 @@ export default function game() {
 			/* ------------------------------------------------------------------
 				1.  CRÉATION DU BOUTON QUIT
 			------------------------------------------------------------------ */
+			const existingQuitBtn = document.getElementById('quitBtn');
+			if (existingQuitBtn) {
+				console.warn("Removing old quit button");
+                existingQuitBtn.remove();
+			}
 			const quitBtn = document.createElement('button');            
 			quitBtn.id        = 'quitBtn';                               
 			quitBtn.textContent = 'Quitter la partie';                   

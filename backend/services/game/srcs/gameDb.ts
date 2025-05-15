@@ -161,7 +161,8 @@ export function updateGameScore(gameId: string, score1: number, score2: number) 
 export function endGameInDb(gameId: string): Game | null {
 	const game = db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | undefined;
 	if (!game) return null;
-	if (game.status === 'finished') return game;
+	console.log("endGameInDB game", game);
+	if (game.status === 'finished' && game.winner_id != null) return game;
 
 	let winner_id: string | null = null;
 	if (game.score1 > game.score2) winner_id = game.player1_id;

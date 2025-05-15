@@ -13,6 +13,7 @@ import fastifyCors from '@fastify/cors';
 import websocket from '@fastify/websocket';
 import { handleWebSocketConnection } from './WebsocketHandler.js';
 import fastifyStatic from '@fastify/static';
+import { getAllUserId, updateUserStatus } from './userDb.js';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 
@@ -107,6 +108,14 @@ app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	console.log('User Service running on http://localhost:4001');
 });
 
-app.addHook('onRequest', async (req, reply) => {
-	console.log('Incoming cookies:', req.cookies);
-});
+// app.addHook('onRequest', async (req, reply) => {
+// 	console.log('Incoming cookies:', req.cookies);
+// });
+
+app.addHook('onReady', async function () {
+  const userIds = await getAllUserId() as Array<{ userId: string }>;
+  for (const row of userIds) {
+    console.log('disconnecting :', row);
+    updateUserStatus(row.userId as string, 'offline');
+  }
+})

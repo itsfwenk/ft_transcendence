@@ -161,6 +161,7 @@ export function updateGameScore(gameId: string, score1: number, score2: number) 
 export function endGameInDb(gameId: string): Game | null {
 	const game = db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | undefined;
 	if (!game) return null;
+	if (game.status === 'finished') return game;
 
 	let winner_id: string | null = null;
 	if (game.score1 > game.score2) winner_id = game.player1_id;
@@ -175,6 +176,16 @@ export function endGameInDb(gameId: string): Game | null {
 	return db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | null;
 }
 
+export function endGameForfeitInDb(game: Game): Game | null {
+	console.log("endGameForteit", game);
+	const stmt = db.prepare (`
+		UPDATE games
+		SET status = 'finished', winner_id = ?
+		WHERE gameId = ?
+	`);
+	stmt.run(game.winner_id, game.gameId);
+	return db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(game.gameId) as Game | null;
+}
 
 export async function updateBallPositionInDb(gameId: string, ball: Ball) {
 	try {

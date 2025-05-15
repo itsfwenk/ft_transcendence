@@ -217,3 +217,17 @@ export function deleteUserAvatar(userId: string): boolean {
 		return false;
 	}
 }
+
+export async function getAllUserId() {
+	try {
+		const stmt = db.prepare(`
+			SELECT userId
+			FROM users
+		`);
+		const result = stmt.all();
+		return result;
+	} catch (error) {
+		console.error('Error retrieving all users Id:', error);
+		return [];
+	}
+}

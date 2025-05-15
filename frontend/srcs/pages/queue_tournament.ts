@@ -130,19 +130,19 @@ export default async function Queuetournament() {
 
   function updatePlayersDisplay(players: {userId: string; userName: string}[]) {
     document.querySelectorAll('[id^="player"][id$="-container"]').forEach((container, index) => {
-      if (index > 0) { 
+      if (index > 0) {
         container.innerHTML = `<div class="w-16 h-16 bg-white rounded-md cube-3d"></div>`;
       }
     });
     
-    let playerIndex = 1;
+    let playerIndex = 1; 
     for (const player of players) {
       if (player.userId === currentPlayerId) continue;
       
       const containerSelector = `#player${playerIndex + 1}-container`;
       const container = document.querySelector(containerSelector);
       
-      if (container && playerIndex < 4) { 
+      if (container && playerIndex < 4) {
         const avatarUrl = getAvatarUrl(player.userId);
         container.innerHTML = renderPlayerBox(player.userId, player.userName || "Player", avatarUrl);
         playerIndex++;
@@ -160,7 +160,7 @@ export default async function Queuetournament() {
   }
 
   function removePlayerFromDisplay(playerId: string) {
-    if (playerId === currentPlayerId) return; 
+    if (playerId === currentPlayerId) return;
     
     const playerNode = document.getElementById(`player-${playerId.slice(0, 8)}`);
     if (!playerNode) return;
@@ -181,7 +181,7 @@ export default async function Queuetournament() {
     
     if (backBtn) backBtn.classList.add('hidden');
     
-    let timeLeft = 5;
+    let timeLeft = 3;
     
     if (statusMessage) {
       statusMessage.textContent = `Tournament starting in ${timeLeft}...`;
@@ -197,8 +197,7 @@ export default async function Queuetournament() {
       if (timeLeft < 0) {
         clearInterval(intervalId);
         cleanupMatchmaking();
-        history.pushState(null, '', `/tournament?tournament_Id=${tournamentId}`);
-        window.dispatchEvent(new PopStateEvent('popstate'));
+        window.location.href = `/tournament?tournament_Id=${tournamentId}`;
       }
     }, 1000);
   }

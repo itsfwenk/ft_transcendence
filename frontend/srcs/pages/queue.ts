@@ -71,7 +71,6 @@ export default async function Queue() {
 	const currentPlayerId = userProfile.userId;
 	console.log("currentPlayerId:", currentPlayerId);
 
-	//const currentPlayerAvatar = await fetchUserAvatar(currentPlayerId);
 	const currentPlayerAvatar = getAvatarUrl(currentPlayerId);
 	console.log("Avatar de l'utilisateur actuel:", currentPlayerAvatar);
   
@@ -79,7 +78,6 @@ export default async function Queue() {
 		console.log("Rendu du joueur:", playerName, "avec l'avatar:", avatarUrl);
 
 		const boxId = `player-${playerId.slice(0, 8)}`;
-		// const playerInitial = playerName.charAt(0).toUpperCase();
 
 		if (avatarUrl) {
 			console.log("Test de l'URL de l'avatar:", avatarUrl);
@@ -121,7 +119,7 @@ export default async function Queue() {
 				<div class="w-16 h-16 bg-white rounded-md cube-3d"></div>
 				</div>
 			</div>
-			<p class="text-white font-inria font-bold pt-5 m-5">search players ...</p>
+			<p id="status-message" class="text-white font-inria font-bold pt-5 m-5">searching for opponent...</p>
 			</div>
 			<div id="backBtn" class='button w-24 h-13 mt-10 bg-gray-700 rounded-full cursor-pointer select-none
 			hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
@@ -150,16 +148,50 @@ export default async function Queue() {
 		}
 	}
 
-	function addPlayerBox(id: string, name: string, url: string) {
-		const grid  = document.getElementById('queue-list')!;
-		const boxId = `player-${id.slice(0, 8)}`;
-		if (document.getElementById(boxId)) return;          // déjà présent
-	  
-		grid.insertAdjacentHTML('beforeend', renderPlayerBox(id, name, url));
+	function updateOpponentDisplay(player: {userId: string; userName: string}) {
+		if (player.userId === currentPlayerId) return;
+		
+		const container = document.getElementById('player2-container');
+		if (container) {
+			const avatarUrl = getAvatarUrl(player.userId);
+			container.innerHTML = renderPlayerBox(player.userId, player.userName || "Opponent", avatarUrl);
+		}
+		
+		const statusMessage = document.getElementById('status-message');
+		if (statusMessage) {
+			statusMessage.textContent = "Opponent found! Get ready...";
+		}
 	}
-	  
-	function removePlayerBox(id: string) {
-		document.getElementById(`player-${id.slice(0, 8)}`)?.remove();
+
+	function startCountdown(gameSessionId: string, opponent?: {userId: string; userName: string}) {
+		if (opponent) {
+			updateOpponentDisplay(opponent);
+		}
+		
+		const backBtn = document.getElementById('backBtn');
+		const statusMessage = document.getElementById('status-message');
+		
+		if (backBtn) backBtn.classList.add('hidden');
+		
+		let timeLeft = 5;
+		
+		if (statusMessage) {
+			statusMessage.textContent = `Game starting in ${timeLeft}...`;
+		}
+		
+		const intervalId = setInterval(() => {
+			timeLeft--;
+			
+			if (statusMessage && timeLeft >= 0) {
+				statusMessage.textContent = `Game starting in ${timeLeft}...`;
+			}
+			
+			if (timeLeft < 0) {
+				clearInterval(intervalId);
+				cleanupMatchmaking();
+				window.location.href = `/game?gameSessionId=${gameSessionId}`;
+			}
+		}, 1000);
 	}
 
 	async function handleMessage(event: MessageEvent) {
@@ -171,19 +203,40 @@ export default async function Queue() {
 				case 'QUEUE_1V1_PLAYER_JOINED':
 					const { userId, userName } = msg.player;
 					if (!userId || userId === currentPlayerId) break;
-					const url = getAvatarUrl(userId);
-					addPlayerBox(userId, userName ?? 'Opponent', url);
+					
+					updateOpponentDisplay({userId, userName: userName || "Opponent"});
 					break;
+					
 				case 'QUEUE_1V1_PLAYER_LEFT':
-					removePlayerBox(msg.playerId);
+					const container = document.getElementById('player2-container');
+					if (container) {
+						container.innerHTML = `<div class="w-16 h-16 bg-white rounded-md cube-3d"></div>`;
+					}
+					
+					const statusMessage = document.getElementById('status-message');
+					if (statusMessage) {
+						statusMessage.textContent = "Opponent left. Searching for new opponent...";
+					}
 					break;
+					
 				case 'MATCH_START':
-      				history.pushState(null, '', `/game?gameSessionId=${msg.payload.gameSessionId}`);
-      				window.dispatchEvent(new PopStateEvent('popstate'));
+					const gameSessionId = msg.payload.gameSessionId;
+					const opponent = msg.payload.opponent || {
+						userId: msg.payload.opponentId, 
+						userName: "Opponent"
+					};
+					
+					startCountdown(gameSessionId, opponent);
 					break;
+					
 				case 'MATCH_END':
+					console.log("Message MATCH_END reçu:", msg.payload);
 					const {winner_Id, score1, score2} = msg.payload;
+					console.log("Identifiant du gagnant:", winner_Id);
+					console.log("Identifiant du joueur actuel:", currentPlayerId);
 					const isWinner = winner_Id === currentPlayerId;
+					console.log("Est-ce que je suis le gagnant?", isWinner);
+					console.log("Scores:", score1, score2);
 					show1v1ResultScreen(isWinner, {score1, score2});
 					break;
 			}		

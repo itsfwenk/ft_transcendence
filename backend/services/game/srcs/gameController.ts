@@ -1,9 +1,10 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId, updatePaddleDelta, updatePaddlesInDb, updateGameStatusInDb } from './gameDb.js'
+import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId, updatePaddleDelta, updatePaddlesInDb, updateGameStatusInDb, endGameForfeitInDb } from './gameDb.js'
 import { Ball } from '../gameInterfaces'
 import axios from 'axios';
 import { WebSocket } from "ws";
 import jwt from 'jsonwebtoken';
+import { isReturnStatement } from 'typescript';
 
 // const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
 // const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
@@ -271,6 +272,20 @@ export async function updateGames() {
 
 // const JWT_SECRET = "secret_key";
 
+async function markPlayerAsForfeit(quitterId : string): Promise<void> {
+	const	user = await getUserById(quitterId);
+	if (!user) return;
+	const	game = await getGamebyId(user.inGameId);
+	if (!game) return;
+
+	const winnerId = game.player1_id === quitterId ? game.player2_id : game.player1_id;
+	console.log("winnerID", winnerId);
+
+	game.status = 'finished';
+	game.winner_id = winnerId;
+	endGameForfeitInDb(game);
+}
+
 export async function websocketHandshake(fastify: FastifyInstance, connection: WebSocket, req: FastifyRequest) {
 	console.log('websocketHandshake called');
 
@@ -347,8 +362,7 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
                 updatePaddleDelta(gameId, userId, state === 'keydown' ? delta : 0);
 			}
 			else if (type === 'FORFEIT') {
-				markPlayerAsForfeit(playerId);
-				break;
+				markPlayerAsForfeit(userId);
 
 			}
         } catch (err) {

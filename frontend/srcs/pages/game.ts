@@ -10,6 +10,63 @@ import { Game } from '../../gameInterfaces'
 
 export default function game() {
 
+    let gameStarted = false;
+    function keydownHandler(e: KeyboardEvent) {
+        if (socket && socket.readyState === WebSocket.OPEN && gameStarted) {
+            let key = '';
+            if (e.key === 'ArrowUp' || e.key === 'w') {
+                key = 'ArrowUp';
+            } else if (e.key === 'ArrowDown' || e.key === 's') {
+                key = 'ArrowDown';
+            }
+            if (key) {
+                socket.send(JSON.stringify({ type: 'input', key: key, state: 'keydown' }));
+            }
+        }
+    }
+
+    function keyupHandler(e: KeyboardEvent) {
+        if (socket && socket.readyState === WebSocket.OPEN && gameStarted) {
+            let key = '';
+            if (e.key === 'ArrowUp' || e.key === 'w') {
+                key = 'ArrowUp';
+            } else if (e.key === 'ArrowDown' || e.key === 's') {
+                key = 'ArrowDown';
+            }
+            if (key) {
+                socket.send(JSON.stringify({ type: 'input', key: key, state: 'keyup' }));
+            }
+        }
+    }
+
+    function cleanup() {
+        console.log("Cleaning up...");
+        // Remove canvas if present
+        const canvas = document.getElementById('GameCanvas');
+        if (canvas) {
+            console.log("Removing canvas");
+            canvas.remove();
+        } else {
+            console.warn("No canvas to remove");
+        }
+
+        // Remove score display
+        const scoreDisplay = document.getElementById('scoreDisplayDiv');
+        if (scoreDisplay) {
+            scoreDisplay.remove(); 
+        } else {
+            console.warn("No scoreDisplay");
+        }
+
+        // Remove keyboard listeners
+        document.removeEventListener('keydown', keydownHandler);
+        document.removeEventListener('keyup', keyupHandler);
+
+        // Clear #app to avoid canvas stacking
+        const app = document.getElementById('app');
+        if (app) app.innerHTML = '';
+    }
+
     let wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:${window.location.port}/game/ws`;
         
     console.log(`wsUrl :`, wsUrl);
@@ -26,23 +83,25 @@ export default function game() {
 
     app.innerHTML = /*html*/'';
 
-    const timerDisplay = document.createElement('div');
-    timerDisplay.id = 'timer';
-    timerDisplay.style.fontSize = '2em';
-    timerDisplay.style.fontFamily = 'sans-serif';
-    timerDisplay.style.marginTop = '20px';
-    app.appendChild(timerDisplay);
+    // const timerDisplay = document.createElement('div');
+    // timerDisplay.id = 'timer';
+    // timerDisplay.style.fontSize = '2em';
+    // timerDisplay.style.fontFamily = 'sans-serif';
+    // timerDisplay.style.marginTop = '20px';
+    // app.appendChild(timerDisplay);
 
-    let timeLeft = 3;
-    timerDisplay.textContent = `Ready...`;
+    let timeLeft = 0;
+    // timerDisplay.textContent = `Ready...`;
     const intervalId = setInterval(() => {
-        timeLeft--;
-        timerDisplay.textContent = `Get set...`;
-        if (timeLeft === 1)
-            timerDisplay.textContent = 'GO !';
+        // timeLeft--;
+        // timerDisplay.textContent = `Get set...`;
+        // if (timeLeft === 1)
+            // timerDisplay.textContent = 'GO !';
         if (timeLeft === 0) {
             clearInterval(intervalId);
-            timerDisplay.style.display = 'none';
+            // timerDisplay.style.display = 'none';
+            // timerDisplay.textContent = 'GO !';
+            //timerDisplay.style.display = 'none';
 			/* ------------------------------------------------------------------
 				1.  CRÉATION DU BOUTON QUIT
 			------------------------------------------------------------------ */
@@ -71,17 +130,21 @@ export default function game() {
 				3.  BACKUP si l’onglet est fermé
 			------------------------------------------------------------------ */
 			window.addEventListener('beforeunload', doForfeit);          
-            timerDisplay.textContent = 'GO !';
+            //timerDisplay.textContent = 'GO !';
             if (socket && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({ type: 'ready_to_start' }));
             }
+
+            const existingCanvas = document.getElementById('GameCanvas');
+            if (existingCanvas) {
+                console.warn("Removing old canvas");
+                existingCanvas.remove();
+            }
+
             const canvas = document.createElement('canvas');
             canvas.id = 'GameCanvas';
             canvas.width = parseInt(import.meta.env.VITE_CANVAS_WIDTH as string, 10);
             canvas.height = parseInt(import.meta.env.VITE_CANVAS_HEIGHT as string, 10);
-            // console.log("canvas width:", canvas.width, "canvas height:", canvas.height);
-            // console.log('CANVAS_WIDTH:', process.env.CANVAS_WIDTH);
-            // console.log('CANVAS_HEIGHT:', process.env.CANVAS_HEIGHT);
             canvas.classList.add('border-2', 'border-gray-400', 'bg-white');
             app.appendChild(canvas);
         
@@ -91,7 +154,13 @@ export default function game() {
                 return;
             }
 
+            const existingScoreDisplay = document.getElementById('scoreDisplayDiv');
+            if (existingScoreDisplay) {
+                console.warn("Removing old scoreDisplay");
+                existingScoreDisplay.remove();
+            }
             const scoreDisplay = document.createElement('div');
+            scoreDisplay.id = 'scoreDisplayDiv'
             scoreDisplay.className = 'mt-4';
             scoreDisplay.innerHTML = 'Score: <span id="score1">0</span> - <span id="score2">0</span>';
             app.appendChild(scoreDisplay);
@@ -113,7 +182,8 @@ export default function game() {
             // const lancerBtn = document.getElementById('lancerBtn') as HTMLButtonElement;
             // const gameStateLabel = document.getElementById('gameState');
         
-            let gameStarted = false;
+            // let gameStarted = false;
+            
             // let currentGameState: Game;
         
             // socket.onopen = () => {
@@ -152,6 +222,7 @@ export default function game() {
                         //     gameStateLabel.textContent = "Partie terminée!";
                         // }
                         socket.close();
+                        cleanup();
                     }
                 } catch (error) {
                     console.error("Erreur lors du traitement du message WebSocket:", error);
@@ -176,33 +247,8 @@ export default function game() {
                 // });
             
                 // Keyboard event listeners for player input
-                  document.addEventListener('keydown', (e) => {
-                    if (socket && socket.readyState === WebSocket.OPEN && gameStarted) {
-                        let key = '';
-                        if (e.key === 'ArrowUp' || e.key === 'w') {
-                            key = 'ArrowUp';
-                        } else if (e.key === 'ArrowDown' || e.key === 's') {
-                            key = 'ArrowDown';
-                        }
-                        if (key) {
-                            socket.send(JSON.stringify({ type: 'input', key: key, state: 'keydown' }));
-                        }
-                    }
-                });
-            
-                document.addEventListener('keyup', (e) => {
-                    if (socket && socket.readyState === WebSocket.OPEN && gameStarted) {
-                        let key = '';
-                        if (e.key === 'ArrowUp' || e.key === 'w') {
-                            key = 'ArrowUp';
-                        } else if (e.key === 'ArrowDown' || e.key === 's') {
-                            key = 'ArrowDown';
-                        }
-                        if (key) {
-                            socket.send(JSON.stringify({ type: 'input', key: key, state: 'keyup' }));
-                        }
-                    }
-                });
+                document.addEventListener('keydown', keydownHandler);
+                document.addEventListener('keyup', keyupHandler);
             
                 function renderGame(state: Game) {
                     if (!ctx || !state || !gameStarted) return;

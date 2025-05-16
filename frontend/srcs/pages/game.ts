@@ -1,5 +1,5 @@
 // src/pages/Home.ts
-import { Game } from '../../gameInterfaces'
+//import { Game } from '../../gameInterfaces'
 
 // let gameState : Game;
 // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -7,6 +7,36 @@ import { Game } from '../../gameInterfaces'
 // const port = window.location.port;
 // const path = '/ws';
 
+export interface Ball {
+	x: number;
+	y: number;
+	radius: number;
+	dx: number;
+	dy: number
+}
+
+export interface Paddle {
+	x: number;
+	y: number;
+	dy: number
+}
+
+
+export interface Game {
+	gameId: string;
+	player1_id: string;
+	player2_id: string;
+	score1: number;
+	score2: number;
+	leftPaddle: Paddle;
+	rightPaddle: Paddle;
+	ball: Ball;
+	status: 'waiting' | 'ongoing' | 'finished';
+	winner_id?: string | null;
+	matchId?: string | null;
+	canvasWidth: number;
+	canvasHeight: number;
+}
 
 export default function game() {
 

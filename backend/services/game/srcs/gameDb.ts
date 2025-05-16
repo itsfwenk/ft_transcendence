@@ -57,7 +57,7 @@ db.exec(`
 	PRAGMA foreign_keys = OFF;  -- ✅ Désactiver les FK pour éviter les erreurs
 
 	CREATE TABLE IF NOT EXISTS games (
-	  gameId INTEGER PRIMARY KEY AUTOINCREMENT,
+	  gameId INTEGER DEFAULT 0,
 	  player1_id STRING NOT NULL,
 	  player2_id STRING NOT NULL,
 	  score1 INTEGER DEFAULT 0,
@@ -123,26 +123,26 @@ export async function getGamebyId(gameId: string): Promise<Game | null> {
 
 
 
-export function updateGameScore(gameId: string, score1: number, score2: number) {
-	const stmt = db.prepare (`
-		UPDATE games
-		SET score1 = ?, score2 = ?, status = ?
-		WHERE gameId = ?
-	`);
-	let result;
-	if (score1 < 5 && score2 < 5) {
-		result = stmt.run(score1, score2, 'ongoing', gameId);
-	}
-	else {
-		console.log("game finished in updateGameScore")
-		result = stmt.run(score1, score2, 'finished', gameId);
-	}
-	if (result.changes > 0) {
-		const updatedStmt = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
-		return updatedStmt.get(gameId);
-	}
-	return null;
-}
+// export function updateGameScore(gameId: string, score1: number, score2: number) {
+// 	const stmt = db.prepare (`
+// 		UPDATE games
+// 		SET score1 = ?, score2 = ?, status = ?
+// 		WHERE gameId = ?
+// 	`);
+// 	let result;
+// 	if (score1 < 5 && score2 < 5) {
+// 		result = stmt.run(score1, score2, 'ongoing', gameId);
+// 	}
+// 	else {
+// 		console.log("game finished in updateGameScore")
+// 		result = stmt.run(score1, score2, 'finished', gameId);
+// 	}
+// 	if (result.changes > 0) {
+// 		const updatedStmt = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
+// 		return updatedStmt.get(gameId);
+// 	}
+// 	return null;
+// }
 
 // export function updateGameCanvas(gameId: string, canvasWidth: number, canvasHeight: number) {
 // 	try {
@@ -158,49 +158,49 @@ export function updateGameScore(gameId: string, score1: number, score2: number) 
 // 	}
 // }
 
-export function endGameInDb(gameId: string): Game | null {
-	const game = db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | undefined;
-	if (!game) return null;
-	console.log("endGameInDB game", game);
-	if (game.status === 'finished' && game.winner_id != null) return game;
+// export function endGameInDb(gameId: string): Game | null {
+// 	const game = db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | undefined;
+// 	if (!game) return null;
+// 	console.log("endGameInDB game", game);
+// 	if (game.status === 'finished' && game.winner_id != null) return game;
 
-	let winner_id: string | null = null;
-	if (game.score1 > game.score2) winner_id = game.player1_id;
-	else if (game.score2 > game.score1) winner_id = game.player2_id;
+// 	let winner_id: string | null = null;
+// 	if (game.score1 > game.score2) winner_id = game.player1_id;
+// 	else if (game.score2 > game.score1) winner_id = game.player2_id;
 
-	const stmt = db.prepare (`
-		UPDATE games
-		SET status = 'finished', winner_id = ?
-		WHERE gameId = ?
-	`);
-	stmt.run(winner_id, gameId);
-	return db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | null;
-}
+// 	const stmt = db.prepare (`
+// 		UPDATE games
+// 		SET status = 'finished', winner_id = ?
+// 		WHERE gameId = ?
+// 	`);
+// 	stmt.run(winner_id, gameId);
+// 	return db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(gameId) as Game | null;
+// }
 
-export function endGameForfeitInDb(game: Game): Game | null {
-	console.log("endGameForteit", game);
-	const stmt = db.prepare (`
-		UPDATE games
-		SET status = 'finished', winner_id = ?
-		WHERE gameId = ?
-	`);
-	stmt.run(game.winner_id, game.gameId);
-	return db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(game.gameId) as Game | null;
-}
+// export function endGameForfeitInDb(game: Game): Game | null {
+// 	console.log("endGameForteit", game);
+// 	const stmt = db.prepare (`
+// 		UPDATE games
+// 		SET status = 'finished', winner_id = ?
+// 		WHERE gameId = ?
+// 	`);
+// 	stmt.run(game.winner_id, game.gameId);
+// 	return db.prepare(`SELECT * FROM games WHERE gameId = ?`).get(game.gameId) as Game | null;
+// }
 
-export async function updateBallPositionInDb(gameId: string, ball: Ball) {
-	try {
-		const updatedBallJSON = JSON.stringify(ball);
-		const stmt = db.prepare(`
-			UPDATE games
-			SET ball = ?
-			WHERE gameId = ?
-		`);
-		stmt.run(updatedBallJSON, gameId);
-	} catch (err) {
-	  console.error('Error updating game in the database:', err);
-	}
-}
+// export async function updateBallPositionInDb(gameId: string, ball: Ball) {
+// 	try {
+// 		const updatedBallJSON = JSON.stringify(ball);
+// 		const stmt = db.prepare(`
+// 			UPDATE games
+// 			SET ball = ?
+// 			WHERE gameId = ?
+// 		`);
+// 		stmt.run(updatedBallJSON, gameId);
+// 	} catch (err) {
+// 	  console.error('Error updating game in the database:', err);
+// 	}
+// }
 
 export async function getAllGamesId() : Promise<{ gameId: string }[]> {
 	try {
@@ -226,76 +226,113 @@ export async function updateGameStatusInDb(gameId: string, status: string) {
 	}
 }
 
-export async function updatePaddlesInDb(gameId: string) {
-	try {
-			const game = await getGamebyId(gameId);
-			const leftPaddle = game?.leftPaddle;
-			const rightPaddle = game?.rightPaddle;
-			if (leftPaddle && rightPaddle) {
-				leftPaddle.y = leftPaddle.y + leftPaddle.dy;
-				rightPaddle.y = rightPaddle.y + rightPaddle.dy;
+// export async function updatePaddlesInDb(gameId: string) {
+// 	try {
+// 			const game = await getGamebyId(gameId);
+// 			const leftPaddle = game?.leftPaddle;
+// 			const rightPaddle = game?.rightPaddle;
+// 			if (leftPaddle && rightPaddle) {
+// 				leftPaddle.y = leftPaddle.y + leftPaddle.dy;
+// 				rightPaddle.y = rightPaddle.y + rightPaddle.dy;
 
-				leftPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, leftPaddle.y));
-				rightPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, rightPaddle.y));
+// 				leftPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, leftPaddle.y));
+// 				rightPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, rightPaddle.y));
 
-				rightPaddle.x = game.canvasWidth - 10;
-			}
-			const stmt = db.prepare (`
-				UPDATE games
-				SET leftPaddle = ?, rightPaddle = ?
-				WHERE gameId = ?
-			`)
-			const leftPaddleJSON = JSON.stringify(leftPaddle);
-			const rightPaddleJSON = JSON.stringify(rightPaddle);
-			stmt.run(leftPaddleJSON, rightPaddleJSON, gameId);
+// 				rightPaddle.x = game.canvasWidth - 10;
+// 			}
+// 			const stmt = db.prepare (`
+// 				UPDATE games
+// 				SET leftPaddle = ?, rightPaddle = ?
+// 				WHERE gameId = ?
+// 			`)
+// 			const leftPaddleJSON = JSON.stringify(leftPaddle);
+// 			const rightPaddleJSON = JSON.stringify(rightPaddle);
+// 			stmt.run(leftPaddleJSON, rightPaddleJSON, gameId);
 
 
-	} catch (err) {
-	  console.error('Error updating paddles in the database:', err);
-	}
-}
+// 	} catch (err) {
+// 	  console.error('Error updating paddles in the database:', err);
+// 	}
+// }
 
-export async function updatePaddleDelta(gameId: string, playerId: string, delta: number) {
-	try {
-		const	game = await getGamebyId(gameId);
-		let		paddle;
-		if (game) {
-			if (playerId === game.player1_id) {
-				paddle = game.leftPaddle;
-				paddle.dy = delta;
-				updateEntirePaddleInDb(gameId, paddle, `left`);
-			}
-			else {
-				paddle = game.rightPaddle;
-				paddle.dy = delta;
-				updateEntirePaddleInDb(gameId, paddle, `right`);
-			}
-		}
-	} catch (err) {
- 		console.error('Error updating paddle delta in the database:', err);
-	}
-}
+// export async function updatePaddleDelta(gameId: string, playerId: string, delta: number) {
+// 	try {
+// 		const	game = await getGamebyId(gameId);
+// 		let		paddle;
+// 		if (game) {
+// 			if (playerId === game.player1_id) {
+// 				paddle = game.leftPaddle;
+// 				paddle.dy = delta;
+// 				updateEntirePaddleInDb(gameId, paddle, `left`);
+// 			}
+// 			else {
+// 				paddle = game.rightPaddle;
+// 				paddle.dy = delta;
+// 				updateEntirePaddleInDb(gameId, paddle, `right`);
+// 			}
+// 		}
+// 	} catch (err) {
+//  		console.error('Error updating paddle delta in the database:', err);
+// 	}
+// }
 
-function updateEntirePaddleInDb(gameId: string, paddle: Paddle, side: string) {
-	try {
-		const updatedPaddleJSON = JSON.stringify(paddle);
-		let stmt;
-		if (side === `left`) {
-			stmt = db.prepare(`
-				UPDATE games
-				SET leftPaddle = ?
-				WHERE gameId = ?
-			`);
-		}
-		else {
-			stmt = db.prepare(`
-				UPDATE games
-				SET rightPaddle = ?
-				WHERE gameId = ?
-			`);
-		};
-		stmt.run(updatedPaddleJSON, gameId);
-	} catch (err) {
-		console.error('Error updating paddle in the database:', err);
-	}
+// function updateEntirePaddleInDb(gameId: string, paddle: Paddle, side: string) {
+// 	try {
+// 		const updatedPaddleJSON = JSON.stringify(paddle);
+// 		let stmt;
+// 		if (side === `left`) {
+// 			stmt = db.prepare(`
+// 				UPDATE games
+// 				SET leftPaddle = ?
+// 				WHERE gameId = ?
+// 			`);
+// 		}
+// 		else {
+// 			stmt = db.prepare(`
+// 				UPDATE games
+// 				SET rightPaddle = ?
+// 				WHERE gameId = ?
+// 			`);
+// 		};
+// 		stmt.run(updatedPaddleJSON, gameId);
+// 	} catch (err) {
+// 		console.error('Error updating paddle in the database:', err);
+// 	}
+// }
+
+export async function saveGameInDb(game: Game) {
+	const stmt = db.prepare(`
+		INSERT INTO games (
+			gameId,
+			player1_id,
+			player2_id,
+			score1,
+			score2,
+			leftPaddle,
+			rightPaddle,
+			ball,
+			status,
+			winner_id,
+			matchId,
+			canvasWidth,
+			canvasHeight
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`);
+
+	stmt.run(
+		game.gameId,		
+		game.player1_id,
+		game.player2_id,
+		game.score1,
+		game.score2,
+		JSON.stringify(game.leftPaddle),
+		JSON.stringify(game.rightPaddle),
+		JSON.stringify(game.ball),
+		game.status,
+		game.winner_id,
+		game.matchId,
+		game.canvasWidth,
+		game.canvasHeight
+	);
+
 }

@@ -19,6 +19,12 @@ const app: FastifyInstance = Fastify( {
 const activeUsers = new Map<number, WebSocket>(); // userId -> WebSocket
 export default activeUsers;
 
+// Debug hook
+app.addHook('onRequest', (req, reply, done) => {
+    console.log('Global game request log:', req.method, req.url);
+    done();
+});
+
 app.register(fastifyJwt, {
 	secret: process.env.JWT_SECRET!,
 	cookie: {
@@ -73,7 +79,7 @@ app.register(async function (fastify) {
 	});
 });
 
-let intervalId: ReturnType<typeof setInterval> = setInterval(updateGames, 16);
+let intervalId: ReturnType<typeof setInterval> = setInterval(updateGames, 32);
 
 process.on("SIGINT", () => {
 	console.log("Shutting down server...");

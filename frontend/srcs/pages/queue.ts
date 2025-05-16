@@ -158,7 +158,7 @@ export default async function Queue() {
     }
   }
 
-  function startCountdown(gameSessionId: string, opponent?: {userId: string; userName: string}) {
+  function startCountdown1v1(gameSessionId: string, opponent?: {userId: string; userName: string}, delay?: number) {
     if (opponent) {
       updateOpponentDisplay(opponent);
     }
@@ -168,7 +168,7 @@ export default async function Queue() {
     
     if (backBtn) backBtn.classList.add('hidden');
     
-    let timeLeft = 3;
+    let timeLeft = delay ?? 5;
     
     if (statusMessage) {
       statusMessage.textContent = `Game starting in ${timeLeft}...`;
@@ -228,15 +228,18 @@ export default async function Queue() {
           }
           break;
           
-        case 'MATCH_START':
+        case 'MATCH_PREP':
           const gameSessionId = msg.payload.gameSessionId;
           const opponent = msg.payload.opponent || {
             userId: msg.payload.opponentId, 
             userName: "Opponent"
           };
-          
-          startCountdown(gameSessionId, opponent);
+		  const delay = msg.payload.delay;
+          startCountdown1v1(gameSessionId, opponent, delay);
           break;
+		case 'MATCH_START':
+			console.log("Le match commence");
+			break;
           
         case 'MATCH_END':
           console.log("Message MATCH_END reçu:", msg.payload);

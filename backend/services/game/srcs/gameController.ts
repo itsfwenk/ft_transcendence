@@ -43,9 +43,14 @@ interface EndGameRequest extends FastifyRequest {
 }
 */
 
+function wait(ms: number) {
+  return new Promise<void>(res => setTimeout(res, ms));
+}
+
 //demarrer une partie
-export async function startGame(req: FastifyRequest<{ Body: { player1_id: string; player2_id: string; matchId?: string } }>, reply: FastifyReply) {
-	const { player1_id, player2_id, matchId } = req.body;
+export async function startGame(req: FastifyRequest<{ Body: { player1_id: string; player2_id: string; matchId?: string; delay?:number } }>, reply: FastifyReply) {
+	const { player1_id, player2_id, matchId, delay = 0 } = req.body;
+	if (delay > 0) await wait(delay * 1_000);
 	const player1 = await getUserById(player1_id);
 	const player2 = await getUserById(player2_id);
 
@@ -56,11 +61,7 @@ export async function startGame(req: FastifyRequest<{ Body: { player1_id: string
 		return reply.status(400).send({error: "player 2 do not exist"})
 	}
     let newGame;
-    if (matchId) {
-        newGame = saveGame(player1_id, player2_id, matchId);
-    } else {
-        newGame = saveGame(player1_id, player2_id);
-    }
+    newGame = saveGame(player1_id, player2_id, matchId);
 	const gameId = { gameId: newGame.gameId };
 	await updateUserGameId(player1_id, gameId);
 	await updateUserGameId(player2_id, gameId);
@@ -155,8 +156,10 @@ export async function updateBallPosition(gameId: string) {
 			console.error(`Game ${gameId} not found`);
 			return;
 		}
-		if (game.status === `finished`)
-			return
+		if (game.status !== `ongoing`)
+			return;
+		// if (game.status === `finished`)
+		// 	return;
 		const ball: Ball = game.ball;
 		ball.x += ball.dx;
 		ball.y += ball.dy;

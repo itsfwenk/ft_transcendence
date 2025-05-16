@@ -55,14 +55,17 @@ async function onWsMessage(ev: MessageEvent) {
 	let msg;
 	try { msg = JSON.parse(ev.data); } catch { return; }
 	switch (msg.type) {
+		case 'MATCH_PREP':
+			const {gameSessionId, delay} = msg.payload;
+			console.log("MATCH_PREP");
+			startCountdown(delay, () => {
+				history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
+				window.dispatchEvent(new PopStateEvent('popstate'));
+			});
+			break;
 		case 'MATCH_START':
-		  // msg.payload = { gameSessionId }
-		  console.log("MATCH_START");
-		  startCountdown(5, () => {
-			history.pushState(null, '', `/game?gameSessionId=${msg.payload.gameSessionId}`);
-			window.dispatchEvent(new PopStateEvent('popstate'));
-		  });
-		  break;
+			console.log('Match is now officially started by the server');
+			break;
 	
 		// case 'MATCH_END':
 		// 	// msg.payload = { score1, score2, winnerId }
@@ -73,14 +76,14 @@ async function onWsMessage(ev: MessageEvent) {
 	
 		case 'PLAYER_STATE_UPDATE':
 		  // msg.payload = { state: 'eliminated' | 'waiting_next_round' | 'winner' }
-		  updatePlayerStateUI(msg.payload.state);
-		  break;
+			updatePlayerStateUI(msg.payload.state);
+			break;
 	
 	  }
 }
 
 
-function startCountdown(sec: number, onEnd: () => void) {
+export function startCountdown(sec: number, onEnd: () => void) {
 
   let stage = document.getElementById('stage') as HTMLElement | null;
 
@@ -95,12 +98,12 @@ function startCountdown(sec: number, onEnd: () => void) {
   stage.textContent = `Match starts in ${t}…`;
 
   const timer = setInterval(() => {
-    t--;
-    if (t === 0) {
-      clearInterval(timer);
-      stage.remove();
-      onEnd();
-      return;
+	  t--;
+	  if (t === 0) {
+		  clearInterval(timer);
+		  stage.remove();
+		  onEnd();
+		  return;
     }
     stage.textContent = `Match starts in ${t}…`;
   }, 1_000);

@@ -11,6 +11,9 @@ import { Game } from '../../gameInterfaces'
 export default function game() {
 
     let gameStarted = false;
+    let currentGameState: Game | null = null;
+    let animationFrameId: number | null = null;
+
     function keydownHandler(e: KeyboardEvent) {
         if (socket && socket.readyState === WebSocket.OPEN && gameStarted) {
             let key = '';
@@ -123,10 +126,13 @@ export default function game() {
 			function doForfeit() {                                       
 				if (socket.readyState === WebSocket.OPEN) {
 				socket.send(JSON.stringify({ type: 'FORFEIT' }));        
-				socket.close(1000, 'player quit');                       
+				socket.close(1000, 'player quit');
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                }                    
 				}
-				history.pushState(null, '', '/mode');                      
-				window.dispatchEvent(new PopStateEvent('popstate'));       
+				// history.pushState(null, '', '/mode');                      
+				// window.dispatchEvent(new PopStateEvent('popstate'));       
 			}                                                            
 
 			quitBtn.addEventListener('click', doForfeit);                
@@ -215,19 +221,30 @@ export default function game() {
                         // if (lancerBtn) {
                         //     lancerBtn.style.display = 'none'; // Hide the button once the game starts
                         // }
+                        currentGameState = data.game_state as Game;
+                        if (animationFrameId) {
+                            cancelAnimationFrame(animationFrameId);
+                        }
+                        animationFrameId = requestAnimationFrame(gameLoop);
                     } else if (data.type === 'game_update' && data.game_state.ball && data.game_state.status === 'ongoing') {
                         // currentGameState = data;
                         gameStarted = true;
-                        renderGame(data.game_state as Game); //  Call renderGame
+                        currentGameState = data.game_state as Game;
+                        // renderGame(data.game_state as Game); //  Call renderGame
                     } else if (data.type === 'game_update' && data.game_state.status === 'finished') {
                         // currentGameState = data;
-                        renderGame(data.game_state as Game);
+                        currentGameState = data.game_state as Game;
+                        renderGame(currentGameState);
                         console.log("Game finished");
                         // if (gameStateLabel) {
                         //     gameStateLabel.textContent = "Partie terminée!";
                         // }
                         socket.close();
                         cleanup();
+                        if (animationFrameId) {
+                            cancelAnimationFrame(animationFrameId);
+                            animationFrameId = null;
+                        }
                     }
                 } catch (error) {
                     console.error("Erreur lors du traitement du message WebSocket:", error);
@@ -272,7 +289,7 @@ export default function game() {
                     ctx.fillRect(canvasWidth - paddleWidth, state.rightPaddle.y, paddleWidth, paddleHeight);
             
                     ctx.beginPath();
-                    ctx.arc(state.ball.x, state.ball.y, ballRadius, 0, Math.PI * 2);
+                    ctx.arc(Math.round(state.ball.x), Math.round(state.ball.y), ballRadius, 0, Math.PI * 2);
                     ctx.fillStyle = 'black';
                     ctx.fill();
                     ctx.closePath();
@@ -284,6 +301,13 @@ export default function game() {
                     // if (gameStateLabel && state.status === 'finished') {
                     //     // gameStateLabel.textContent = "Partie terminée!";
                     // }
+                }
+                
+                function gameLoop() {
+                    if (currentGameState && gameStarted && ctx && canvas) {
+                        renderGame(currentGameState);
+                    }
+                    animationFrameId = requestAnimationFrame(gameLoop);
                 }
         }
     }, 1000);

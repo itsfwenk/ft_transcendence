@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { getGamebyId, saveGameInDb } from './gameDb.js'
+import { getGamebyId, getGameCount, saveGameInDb, updateGameInDb } from './gameDb.js'
 import { Game, Ball, Paddle } from '../gameInterfaces'
 import axios from 'axios';
 import { WebSocket } from "ws";
@@ -88,7 +88,8 @@ export async function startGame(req: FastifyRequest<{ Body: { player1_id: string
 		return reply.status(400).send({error: "player 2 do not exist"})
 	}
     let newGame : Game = {
-		gameId: (ongoingGames.size + 1).toString(),
+		gameId: (await getGameCount() + 1).toString(),
+		// gameId: (ongoingGames.size + 1).toString(),
 		player1_id: player1_id,
 		player2_id: player2_id,
 		score1: 0,
@@ -105,6 +106,8 @@ export async function startGame(req: FastifyRequest<{ Body: { player1_id: string
     if (matchId) {
         newGame.matchId = matchId;
     }
+	await saveGameInDb(newGame);
+	console.log('NEW GAME IS NUMBER :', newGame.gameId)
 	ongoingGames.set(newGame.gameId, newGame);
 	if (ongoingGames.has(newGame.gameId))
 		console.log('new game in ongoingGames')
@@ -371,7 +374,7 @@ export async function updateGames() {
 async function markPlayerAsForfeit(quitterId : string): Promise<void> {
 	const	user = await getUserById(quitterId);
 	if (!user) return;
-	const	game = ongoingGames.get(user.inGameId as string);
+	const	game = ongoingGames.get(user.inGameId.toString());
 	if (!game) return;
 
 	const winnerId = game.player1_id === quitterId ? game.player2_id : game.player1_id;
@@ -381,7 +384,8 @@ async function markPlayerAsForfeit(quitterId : string): Promise<void> {
 	game.winner_id = winnerId;
 	// endGameForfeitInDb(game);
 	// saveGameInDb(game);
-	ongoingGames.delete(game.gameId);
+	// ongoingGames.delete(game.gameId);
+	// endGameInOngoingGames(game.gameId);
 }
 
 export async function updatePaddleDeltaInOngoingGames(gameId: string, playerId: string, delta: number) {
@@ -402,7 +406,7 @@ export async function updatePaddleDeltaInOngoingGames(gameId: string, playerId: 
 			// console.log(game);
 		}
 		else {
-			console.log('game is', game);
+			console.log('game is', game, 'for gameId :', gameId);
 		}
 	} catch (err) {
 		console.error('Error updating paddle delta:', err);
@@ -410,22 +414,34 @@ export async function updatePaddleDeltaInOngoingGames(gameId: string, playerId: 
 }
 
 export function endGameInOngoingGames(gameId: string) {
-	const game = ongoingGames.get(gameId);
-	if (!game) 
+	const game = ongoingGames.get(gameId.toString());
+	if (!game) {
+		console.log('NO GAME FOUND IN endGameInOngoingGames');
 		return;
+	}
 	console.log("endGameInOngoingGames game", game);
-	if (game.status === 'finished' && game.winner_id != null) 
+	if (game.status !== 'finished' || game.winner_id === null) {
+		let winner_id: string | null = null;
+		if (game.score1 > game.score2) winner_id = game.player1_id;
+		else if (game.score2 > game.score1) winner_id = game.player2_id;
+		game.status = 'finished';
+		game.winner_id = winner_id;
+	}
+	if (game.status === 'finished' && game.winner_id != null) {
+		updateGameInDb(game);
+		console.log('ongoingGames size :', ongoingGames.size);
 		return game;
+	}
 
-	let winner_id: string | null = null;
-	if (game.score1 > game.score2) winner_id = game.player1_id;
-	else if (game.score2 > game.score1) winner_id = game.player2_id;
-
-
-	game.status = 'finished';
-	game.winner_id = winner_id;
-	saveGameInDb(game);
-	return game;
+	// let winner_id: string | null = null;
+	// if (game.score1 > game.score2) winner_id = game.player1_id;
+	// else if (game.score2 > game.score1) winner_id = game.player2_id;
+	// game.status = 'finished';
+	// game.winner_id = winner_id;
+	// saveGameInDb(game);
+	// console.log('ongoingGames size :', ongoingGames.size);
+	// ongoingGames.delete(gameId.toString());
+	// return game;
 }
 
 export async function websocketHandshake(fastify: FastifyInstance, connection: WebSocket, req: FastifyRequest) {
@@ -514,7 +530,7 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
             //     }
             // }
 			else if (type === 'input' && key) {
-				console.log('type === input received');
+				// console.log('type === input received');
                 const delta = (key === 'ArrowUp') ? -paddleSpeed : (key === 'ArrowDown') ? paddleSpeed : 0;
                 updatePaddleDeltaInOngoingGames(gameId, userId, state === 'keydown' ? delta : 0);
 			}
@@ -557,6 +573,7 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 			}
 			console.log("Game", gameId, "has finished.");
 			gameReadyPlayers.delete(gameId.toString());
+			ongoingGames.delete(gameId.toString());
 		}
 		console.log(`User ${userId} disconnected`);
 		connection.close(1003, 'Invalid message format');

@@ -79,7 +79,7 @@ app.register(async function (fastify) {
 	});
 });
 
-let intervalId: ReturnType<typeof setInterval> = setInterval(updateGames, 32);
+let intervalId: ReturnType<typeof setInterval> = setInterval(updateGames, 16);
 
 process.on("SIGINT", () => {
 	console.log("Shutting down server...");

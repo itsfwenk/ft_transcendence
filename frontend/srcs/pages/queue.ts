@@ -158,7 +158,7 @@ export default async function Queue() {
     }
   }
 
-  function startCountdown1v1(gameSessionId: string, opponent?: {userId: string; userName: string}, delay?: number) {
+  function startCountdown1v1(gameSessionId: string, opponent?: {userId: string; userName: string}) {
     if (opponent) {
       updateOpponentDisplay(opponent);
     }
@@ -168,7 +168,7 @@ export default async function Queue() {
     
     if (backBtn) backBtn.classList.add('hidden');
     
-    let timeLeft = delay ?? 5;
+    let timeLeft = 3;
     
     if (statusMessage) {
       statusMessage.textContent = `Game starting in ${timeLeft}...`;
@@ -234,8 +234,7 @@ export default async function Queue() {
             userId: msg.payload.opponentId, 
             userName: "Opponent"
           };
-		  const delay = msg.payload.delay;
-          startCountdown1v1(gameSessionId, opponent, delay);
+          startCountdown1v1(gameSessionId, opponent);
           break;
 		case 'MATCH_START':
 			console.log("Le match commence");

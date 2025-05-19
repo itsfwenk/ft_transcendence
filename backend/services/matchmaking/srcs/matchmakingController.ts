@@ -447,3 +447,34 @@ export async function handleMatchmakingMessage(
 			}
 	}
 }
+
+export async function getMatchTypeById(req: any, reply: any) {
+	try {
+		const { matchId } = req.params;
+
+		if (!matchId) {
+		return reply.status(400).send({ error: 'matchId est requis' });
+		}
+
+		const match = getMatchbyId(matchId);
+		
+		if (!match) {
+		return reply.status(404).send({ error: 'Match non trouvé' });
+		}
+		
+		let matchType = '';
+		
+		if (match.tournament_Id) {
+			if (match.round === 2) {
+				matchType = 'Tournament Final';
+			} else if (match.round === 1)
+				matchType = 'Tournament Semifinal';
+		} else {
+		matchType = '1v1 Match';
+		}		
+		return reply.send({ matchType });
+	} catch (error) {
+		console.error('Erreur lors de la récupération du type de match:', error);
+		return reply.status(500).send({ error: 'Erreur interne du serveur' });
+	}
+}

@@ -78,7 +78,6 @@ async function onWsMessage(ev: MessageEvent) {
 		  // msg.payload = { state: 'eliminated' | 'waiting_next_round' | 'winner' }
 			updatePlayerStateUI(msg.payload.state);
 			break;
-	
 	  }
 }
 

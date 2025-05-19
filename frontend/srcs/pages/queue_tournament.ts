@@ -3,6 +3,7 @@ import { fetchUserProfile } from "./mode";
 
 import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
+import { updatePlayerStateUI } from "./tournament";
 
 export default async function Queuetournament() {
 	const app = document.getElementById('app');
@@ -30,7 +31,18 @@ export default async function Queuetournament() {
 						userProfile.userName ?? 'You',
 						currentPlayerAvatar)}
 	</div>
-  
+
+	<!-- Minuteur de démarrage (🌑 caché par défaut) -->
+	<div id="tournament-timer"
+		class="hidden col-span-full mt-6 px-8 py-4 rounded-md
+				bg-violet-700 text-white flex-col items-center
+				transition-all duration-300">
+		<span class="text-3xl font-semibold">Tournament</span>
+		<span id="timer-value" class="mt-2 text-lg">
+		start in 5
+		</span>
+	</div>
+
 	<p class="text-gray-700 mb-12">Recherche des adversaires…</p>
   
 	<button id="backBtn"
@@ -39,7 +51,38 @@ export default async function Queuetournament() {
 	</button>
   `;
   	
+	let countdownHandle: number | null = null;
+	let time = Number(import.meta.env.VITE_TOURNAMENT_LAUNCH_DELAY ?? '5');
 
+	function startCountdown(delay: number, cb: () => void) {
+		const box   = document.getElementById('tournament-timer')!;
+		const label = document.getElementById('timer-value')!;
+
+		if (countdownHandle) 
+			clearInterval(countdownHandle);
+		box.classList.remove('hidden');
+		let seconds = delay > 0 ? delay : 5;
+		label.textContent = `start in ${seconds}`;
+
+		countdownHandle = window.setInterval(() => {
+			seconds--;
+			if (seconds > 0) {
+			label.textContent = `start in ${seconds}`;
+			} else {
+			clearInterval(countdownHandle!);
+			countdownHandle = null;
+			label.textContent = 'Starting…';
+			cb();
+			}
+		}, 1000);
+	}
+
+	function cancelCountdown() {
+	if (countdownHandle) 
+		clearInterval(countdownHandle);
+	countdownHandle = null;
+	document.getElementById('tournament-timer')?.classList.add('hidden');
+	}
 
 	function renderPlayerBox(playerId: string, playerName: string, avatarUrl: string) {
 		console.log("Rendu du joueur:", playerName, "avec l'avatar:", avatarUrl);
@@ -74,13 +117,18 @@ export default async function Queuetournament() {
 		}
 	}
 
-	function addPlayerBox(id: string, name: string, url: string) {
-		const grid  = document.getElementById('queue-list')!;
-		const boxId = `player-${id.slice(0, 8)}`;
-		if (document.getElementById(boxId)) return;
-	  
-		grid.insertAdjacentHTML('beforeend', renderPlayerBox(id, name, url));
-	}
+		function addPlayerBox(playerId: string, playerName: string, avatarUrl: string) {
+			const grid  = document.getElementById('queue-list')!;
+			const boxId = `player-${playerId.slice(0, 8)}`;
+
+			// évite les doublons
+			if (document.getElementById(boxId)) return;
+
+			grid.insertAdjacentHTML(
+				'beforeend',
+				renderPlayerBox(playerId, playerName, avatarUrl)
+			);
+		}
 	  
 	function removePlayerBox(id: string) {
 		document.getElementById(`player-${id.slice(0, 8)}`)?.remove();
@@ -100,6 +148,7 @@ export default async function Queuetournament() {
 				payload: {playerId: currentPlayerId}
 			}));
 			ws.removeEventListener('message', handleMessage);
+			cancelCountdown();
 		}
 	}
 	async function handleMessage(event: MessageEvent) {
@@ -121,18 +170,35 @@ export default async function Queuetournament() {
 					removePlayerBox(msg.playerId);
 					break;
 				case 'TOURNAMENT_LAUNCH':
-					cleanupMatchmaking();
-					const tournament_Id = msg.payload.tournament.id;
-					console.log("tournament_id", tournament_Id);
-					history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
-					window.dispatchEvent(new PopStateEvent('popstate'));
+					//cleanupMatchmaking();
+					//const tournament_Id = msg.payload.tournament.id;
+					// console.log("tournament_id", tournament_Id);
+					// history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
+					// window.dispatchEvent(new PopStateEvent('popstate'));
+
+					// startcountcdown, tournament start in 5, 
 					break;
 
-				// case 'MATCH_START':
-					
+				case 'MATCH_PREP':
+					console.log("msg MATch_prep", msg);
+					const gameSessionId = msg.payload.gameSessionId;
+					const round = msg.payload.round;
+					if (round === 2) {
+						history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
+						window.dispatchEvent(new PopStateEvent('popstate'));
+					} else {
+					startCountdown(time, () => {
+						history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
+						window.dispatchEvent(new PopStateEvent('popstate'));
+					});
+					}
+					break;
       			// 	history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
       			// 	window.dispatchEvent(new PopStateEvent('popstate'));
 				// 	break;
+				case 'PLAYER_STATE_UPDATE':
+					updatePlayerStateUI(msg.payload.state);
+					break;
 			}		
 		} catch (error) {
 			console.error("Erreur lors du traitement du message:", error);

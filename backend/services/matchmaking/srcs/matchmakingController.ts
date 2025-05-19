@@ -58,10 +58,12 @@ export async function fetchPublicProfile(playerId: string) {
 	return data as { userId: string; userName: string; avatarUrl: string };
 }
 
+
 //join tournament 1
 export async function joinTournamentQueue(playerId: string) {
 	if (queueTournament.has(playerId)) return;
 	queueTournament.add(playerId);
+	console.log("queueTouranment", queueTournament);
 	const playersList = await Promise.all(
 		[...queueTournament].map(async id => {
 		  const pub = await fetchPublicProfile(id);
@@ -73,7 +75,10 @@ export async function joinTournamentQueue(playerId: string) {
 		  };
 		})
 	);
-	console.log("playersList", playersList);
+	const ws = websocketClients.get(playerId);
+	if (ws?.readyState === WebSocket.OPEN) {
+    	ws.send(JSON.stringify({ type: 'QUEUE_SNAPSHOT', players: playersList }));
+  	}
 	// const ws = websocketClients.get(playerId);
 	// if (ws?.readyState === WebSocket.OPEN) {
 	// ws.send(
@@ -89,7 +94,7 @@ export async function joinTournamentQueue(playerId: string) {
 	// });
 		broadcastToQueue(queueTournament, {
 		type: 'QUEUE_TOURNAMENT_PLAYER_JOINED',
-		players: playersList
+		player : playersList.find(p => p.userId === playerId)!
 	});
 	console.log(`Joueur ${playerId} a rejoint de la queue Tournament`)
 	console.log(queueTournament);
@@ -105,12 +110,14 @@ export async function leaveTournamentQueue(playerId: string) {
 	console.log('Queue Tournament actuelle :', queueTournament);
 }
 
-function broadcastToQueue(setQueue: Set<string>, msg: unknown) {
+function broadcastToQueue(setQueue: Set<string>, msg: unknown, skipId?: string) {
 	const str = JSON.stringify(msg);
-  
-	setQueue.forEach(playerId => {
-	  const ws = websocketClients.get(playerId);
-	  if (ws && ws.readyState === WebSocket.OPEN) ws.send(str);
+	setQueue.forEach(id => {
+    if (id === skipId) 
+		return;
+    const ws = websocketClients.get(id);
+    if (ws?.readyState === WebSocket.OPEN)
+		ws.send(str);
 	});
 }
 
@@ -138,7 +145,8 @@ export async function  launchMatch(matchId: string, delay?:number): Promise<Matc
 				gameSessionId,
 				matchId: match.id,
 				opponentId: match.player2_Id,
-				delay
+				delay,
+				round: match.round
 			}
 		});
 		const message2 = JSON.stringify({
@@ -147,20 +155,21 @@ export async function  launchMatch(matchId: string, delay?:number): Promise<Matc
 				gameSessionId,
 				matchId: match.id,
 				opponentId: match.player1_Id,
-				delay
+				delay,
+				round: match.round
 			}
 		});
 		socket1?.send(message1);
 		socket2?.send(message2);
-		const d = delay ?? 0;
-		setTimeout(() => {
-		websocketClients.get(match.player1_Id)?.send(JSON.stringify({
-			type:'MATCH_START', payload:{ gameSessionId}
-		}));
-		websocketClients.get(match.player2_Id)?.send(JSON.stringify({
-			type:'MATCH_START', payload:{ gameSessionId}
-		}));
-		}, d * 1_000);
+		// const d = delay ?? 0;
+		// setTimeout(() => {
+		// websocketClients.get(match.player1_Id)?.send(JSON.stringify({
+		// 	type:'MATCH_START', payload:{ gameSessionId}
+		// }));
+		// websocketClients.get(match.player2_Id)?.send(JSON.stringify({
+		// 	type:'MATCH_START', payload:{ gameSessionId}
+		// }));
+		// }, d * 1_000);
 
 	}
 	console.log(` la game session est: ${gameSessionId}`)

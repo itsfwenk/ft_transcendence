@@ -35,7 +35,7 @@ async function fetchMatchType(matchId: string): Promise<string> {
   try {
     if (!matchId) {
       console.warn("Impossible de récupérer le type de match: matchId manquant");
-      return "1v1 Match";
+      return "1v1 online";
     }
 
     const baseUrl = window.location.origin;
@@ -46,15 +46,15 @@ async function fetchMatchType(matchId: string): Promise<string> {
     
     if (!response.ok) {
       console.warn(`Erreur lors de la récupération du type de match: ${response.status} ${response.statusText}`);
-      return "1v1 Match";
+      return "1v1 online";
     }
     
     const data = await response.json();
     console.log("Type de match récupéré:", data.matchType);
-    return data.matchType || "1v1 Match";
+    return data.matchType || "1v1 online";
   } catch (error) {
     console.error('Erreur lors de la récupération du type de match:', error);
-    return "1v1 Match";
+    return "1v1 online";
   }
 }
 
@@ -251,10 +251,10 @@ export default function game() {
 							updateMatchType(matchType);
 							} catch (error) {
 							console.warn("Impossible de récupérer le type de match:", error);
-							updateMatchType("1v1 Match");
+							updateMatchType("1v1 online");
 							}
 						} else {
-							updateMatchType("1v1 Match");
+							updateMatchType("1v1 online");
 						}
 						updatePlayerAvatars(player1Id, player2Id);
 						config = true;

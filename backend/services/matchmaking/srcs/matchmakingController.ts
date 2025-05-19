@@ -470,7 +470,7 @@ export async function getMatchTypeById(req: any, reply: any) {
 			} else if (match.round === 1)
 				matchType = 'Tournament Semifinal';
 		} else {
-		matchType = '1v1 Match';
+		matchType = '1v1 online';
 		}		
 		return reply.send({ matchType });
 	} catch (error) {

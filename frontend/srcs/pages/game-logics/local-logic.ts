@@ -15,7 +15,7 @@ export function initGame(){
         
         <div class="mt-4 space-x-2">
           <button id="pauseLocalBtn" class="p-3 mr-5 bg-red-500 text-white rounded hover:bg-red-600">Pause</button>
-          <a href="/menu" data-link id="btnHome" class="h-16 p-3 bg-blue-700 text-white rounded hover:bg-blue-800">Home</a>
+          <a href="/menu" data-link id="btnHome" class="h-16 p-3 py-2.5 px-5 bg-blue-700 text-white rounded-lg border border-solid border-transparent hover:bg-blue-800">Home</a>
         </div>
       </div>
     `;

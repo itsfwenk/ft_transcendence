@@ -1,3 +1,5 @@
+import { getAvatarUrl } from "./profile";
+
 // src/pages/Home.ts
 //import { Game } from '../../gameInterfaces'
 
@@ -43,7 +45,6 @@ export interface Game {
 
 
 export default function game() {
-
     let gameStarted = false;
 	let canvas: HTMLCanvasElement | null;
 	let ctx: CanvasRenderingContext2D | null;
@@ -105,7 +106,6 @@ export default function game() {
 		document.removeEventListener('click', doForfeit);
 
 
-        // Clear #app to avoid canvas stacking
         const app = document.getElementById('app');
         if (app) app.innerHTML = '';
     }
@@ -175,9 +175,9 @@ export default function game() {
 	}
 
     let wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:${window.location.port}/game/ws`;
-        
     console.log(`wsUrl :`, wsUrl);
     const socket = new WebSocket(wsUrl);
+    
     socket.onopen = () => {
         console.log("WebSocket connecté au serveur de jeu");
     };

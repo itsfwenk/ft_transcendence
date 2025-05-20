@@ -234,7 +234,7 @@ export default async function Queue() {
             userId: msg.payload.opponentId, 
             userName: "Opponent"
           };
-		  const delay = msg.payload.delay;
+		  const delay = Number(import.meta.env.VITE_1V1_LAUNCH_DELAY ?? '5');
           startCountdown1v1(gameSessionId, opponent, delay);
           break;
 		case 'MATCH_START':

@@ -112,7 +112,7 @@ export default function game() {
 		socket.close(1000, 'player quit');                       
 		}
 		history.pushState(null, '', '/mode');                      
-		window.dispatchEvent(new PopStateEvent('popstate'));       
+		window.dispatchEvent(new PopStateEvent('popstate'));
 	}                                                            
 
 	function setupUI(app: HTMLElement, doForfeit: () => void): void {

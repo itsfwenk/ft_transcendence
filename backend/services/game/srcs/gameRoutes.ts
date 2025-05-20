@@ -10,7 +10,6 @@ const startGameSchema: FastifySchema = {
 		player1_id: { type: 'string' },
 		player2_id: { type: 'string' },
 		matchId : { type: 'string' },
-		delay: {type: 'integer', minimum: 0 }
 	  }
 	}
 };

@@ -3,7 +3,6 @@ import { fetchUserProfile } from "./mode";
 
 import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
-import { updatePlayerStateUI } from "./tournament";
 
 export default async function Queuetournament() {
 	const app = document.getElementById('app');
@@ -117,18 +116,13 @@ export default async function Queuetournament() {
 		}
 	}
 
-		function addPlayerBox(playerId: string, playerName: string, avatarUrl: string) {
-			const grid  = document.getElementById('queue-list')!;
-			const boxId = `player-${playerId.slice(0, 8)}`;
-
-			// évite les doublons
-			if (document.getElementById(boxId)) return;
-
-			grid.insertAdjacentHTML(
-				'beforeend',
-				renderPlayerBox(playerId, playerName, avatarUrl)
-			);
-		}
+	function addPlayerBox(id: string, name: string, url: string) {
+		const grid  = document.getElementById('queue-list')!;
+		const boxId = `player-${id.slice(0, 8)}`;
+		if (document.getElementById(boxId)) return;
+	  
+		grid.insertAdjacentHTML('beforeend', renderPlayerBox(id, name, url));
+	}
 	  
 	function removePlayerBox(id: string) {
 		document.getElementById(`player-${id.slice(0, 8)}`)?.remove();
@@ -151,6 +145,63 @@ export default async function Queuetournament() {
 			cancelCountdown();
 		}
 	}
+	function updatePlayerStateUI(state: string) {
+		const app = document.getElementById('app');
+		if (!app) return;
+	
+		switch (state) {
+			case 'eliminated':
+				app.innerHTML = `
+					<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+						<h2 class="text-2xl font-bold mb-4">Dommage, vous êtes éliminé !</h2>
+						<p class="text-gray-600">Vous pourrez retenter votre chance la prochaine fois.</p>
+						<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
+					</div>
+				`;
+			break;
+		
+			case 'waiting_next_round':
+				app.innerHTML = `
+					<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+						<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
+						<p class="text-gray-600">En attente du prochain tour...</p>
+					</div>
+				`;
+			break;
+
+			case 'waiting_final_prep':
+				app.innerHTML = `
+					<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+						<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
+						<p class="text-gray-600">La finale est en preparation...</p>
+					</div>
+				`;
+			break;
+		
+			case 'winner':
+				app.innerHTML = `
+					<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+						<h2 class="text-2xl font-bold mb-4">Bravo, vous avez gagné le tournoi !</h2>
+						<p class="text-gray-600">Vous êtes le champion. Félicitations&nbsp;!</p>
+						<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
+					</div>
+				`;
+			break;
+		
+			default:
+				app.innerHTML = `
+					<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+						<h2 class="text-2xl font-bold mb-4">Votre état joueur : ${state}</h2>
+						<p class="text-gray-600">En attente d'informations supplémentaires.</p>
+					</div>
+				`;
+		}
+		const backToMenuBtn = document.getElementById('backToMenuBtn');
+		backToMenuBtn?.addEventListener('click', () => {
+			history.pushState(null, '', '/menu');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+		});
+  	}
 	async function handleMessage(event: MessageEvent) {
 		try {
 			const msg = JSON.parse(event.data);
@@ -159,6 +210,7 @@ export default async function Queuetournament() {
 			switch (msg.type) {
 				case 'QUEUE_TOURNAMENT_PLAYER_JOINED':
 					const list: {userId: string; userName: string}[] = msg.players;
+					console.log("playerlist", list);
 					for (const p of list) {
 					  if (p.userId === currentPlayerId) continue;
 					  //const url = await fetchUserAvatar(p.userId);
@@ -169,15 +221,15 @@ export default async function Queuetournament() {
 				case 'QUEUE_TOURNAMENT_PLAYER_LEFT':
 					removePlayerBox(msg.playerId);
 					break;
-				case 'TOURNAMENT_LAUNCH':
-					//cleanupMatchmaking();
-					//const tournament_Id = msg.payload.tournament.id;
-					// console.log("tournament_id", tournament_Id);
-					// history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
-					// window.dispatchEvent(new PopStateEvent('popstate'));
+				// case 'TOURNAMENT_LAUNCH':
+				// 	//cleanupMatchmaking();
+				// 	//const tournament_Id = msg.payload.tournament.id;
+				// 	// console.log("tournament_id", tournament_Id);
+				// 	// history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
+				// 	// window.dispatchEvent(new PopStateEvent('popstate'));
 
-					// startcountcdown, tournament start in 5, 
-					break;
+				// 	// startcountcdown, tournament start in 5, 
+				// 	break;
 
 				case 'MATCH_PREP':
 					console.log("msg MATch_prep", msg);

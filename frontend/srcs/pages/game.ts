@@ -1,6 +1,8 @@
 // src/pages/Home.ts
 //import { Game } from '../../gameInterfaces'
 
+import { getAvatarUrl } from "./profile";
+
 // let gameState : Game;
 // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 // const host = window.location.hostname;
@@ -45,8 +47,8 @@ export default function game() {
     let gameStarted = false;
 	let canvas: HTMLCanvasElement | null;
 	let ctx: CanvasRenderingContext2D | null;
-	let score1Display: HTMLElement | null;
-	let score2Display: HTMLElement | null;
+	// let score1Display: HTMLElement | null;
+	// let score2Display: HTMLElement | null;
 	let countdownInterval: number | null = null;
 
     function keydownHandler(e: KeyboardEvent) {
@@ -81,7 +83,7 @@ export default function game() {
 		if (countdownInterval) clearInterval(countdownInterval);
         console.log("Cleaning up...");
         // Remove canvas if present
-        const canvas = document.getElementById('GameCanvas');
+        const canvas = document.getElementById('game-canvas');
         if (canvas) {
             console.log("Removing canvas");
             canvas.remove();
@@ -90,16 +92,18 @@ export default function game() {
         }
 
         // Remove score display
-        const scoreDisplay = document.getElementById('scoreDisplayDiv');
-        if (scoreDisplay) {
-            scoreDisplay.remove(); 
-        } else {
-            console.warn("No scoreDisplay");
-        }
+        // const scoreDisplay = document.getElementById('scoreDisplayDiv');
+        // if (scoreDisplay) {
+        //     scoreDisplay.remove(); 
+        // } else {
+        //     console.warn("No scoreDisplay");
+        // }
 
         // Remove keyboard listeners
         document.removeEventListener('keydown', keydownHandler);
         document.removeEventListener('keyup', keyupHandler);
+		document.removeEventListener('click', doForfeit);
+
 
         // Clear #app to avoid canvas stacking
         const app = document.getElementById('app');
@@ -113,38 +117,61 @@ export default function game() {
 		}
 		history.pushState(null, '', '/mode');                      
 		window.dispatchEvent(new PopStateEvent('popstate'));
+	}
+
+	function updateMatchType(type: string) {
+        const matchType = document.getElementById('match-type');
+        if (matchType) {
+            matchType.textContent = type;
+        }
+    }
+
+	async function fetchMatchType(matchId: string): Promise<string> {
+		try {
+			if (!matchId) {
+			console.warn("Impossible de récupérer le type de match: matchId manquant");
+			return "1v1 online";
+			}
+
+			const baseUrl = window.location.origin;
+			const response = await fetch(`${baseUrl}/matchmaking/matches/${matchId}/type`, {
+			method: 'GET',
+			credentials: 'include'
+			});
+			
+			if (!response.ok) {
+			console.warn(`Erreur lors de la récupération du type de match: ${response.status} ${response.statusText}`);
+			return "1v1 online";
+			}
+			
+			const data = await response.json();
+			console.log("Type de match récupéré:", data.matchType);
+			return data.matchType || "1v1 online";
+		} catch (error) {
+			console.error('Erreur lors de la récupération du type de match:', error);
+			return "1v1 online";
+		}
+	}
+
+	function updatePlayerAvatars(player1Id: string, player2Id: string) {
+		const player1Avatar = document.getElementById('player1-avatar') as HTMLImageElement;
+		const player2Avatar = document.getElementById('player2-avatar') as HTMLImageElement;
+		
+		if (player1Avatar && player1Id) {
+			player1Avatar.src = getAvatarUrl(player1Id);
+		}
+		
+		if (player2Avatar && player2Id) {
+			player2Avatar.src = getAvatarUrl(player2Id);
+		}
 	}                                                            
 
-	function setupUI(app: HTMLElement, doForfeit: () => void): void {
-		// 1. Canvas
-		canvas?.remove();
-		canvas = document.createElement('canvas');
-		canvas.id = 'GameCanvas';
-		canvas.width  = +import.meta.env.VITE_CANVAS_WIDTH;
-		canvas.height = +import.meta.env.VITE_CANVAS_HEIGHT;
-		canvas.className = 'border-2 border-gray-400 bg-white';
-		app.appendChild(canvas);
-		ctx = canvas.getContext('2d');
+	function initGameUI() {
+		canvas   = document.getElementById('game-canvas') as HTMLCanvasElement;
+		ctx      = canvas?.getContext('2d') ?? null;
 
-		// Score
-		document.getElementById('scoreDisplayDiv')?.remove();
-		const score = document.createElement('div');
-		score.id = 'scoreDisplayDiv';
-		score.className = 'mt-4';
-		score.innerHTML = 'Score : <span id="score1">0</span> - <span id="score2">0</span>';
-		app.appendChild(score);
-		score1Display = document.getElementById('score1');
-		score2Display = document.getElementById('score2');
-
-		// 3. Bouton Quit
-		let quit = document.getElementById('quitBtn');
-		if (quit) quit.remove();
-		quit = document.createElement('button');
-		quit.id = 'quitBtn';
-		quit.textContent = 'Quitter la partie';
-		quit.className = 'mt-4 px-4 py-2 rounded bg-red-600 text-white hover:bg-red-500';
-		quit.addEventListener('click', doForfeit);
-		app.appendChild(quit);
+		const quitBtn = document.getElementById('quit-btn')!;
+		quitBtn.addEventListener('click', doForfeit);
 	}
 
     let wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:${window.location.port}/game/ws`;
@@ -160,9 +187,46 @@ export default function game() {
         console.error("Error retrieving app");
         return;
     }
-	app.classList.add('relative');
-    app.innerHTML = /*html*/'';
-	setupUI(app, doForfeit);
+	//app.classList.add('relative');
+    app.innerHTML = /*html*//*html*/`
+		<!-- En-tête avec titre et photos de profil -->
+		<div class="flex justify-center items-center mb-2">
+			<!-- Photo de profil joueur 1 -->
+			<div class="w-30 h-30 mr-20 bg-pink-500 rounded-md flex items-center justify-center text-white">
+				<img id="player1-avatar" src="/avatars/default.png" alt="Joueur 1" 
+						class="w-full h-full object-cover rounded-md"
+						onerror="this.src='/avatars/default.png'">
+			</div>
+			
+			<!-- Titre du jeu -->
+			<div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">Pong Game</div>
+
+			<!-- Photo de profil joueur 2 -->
+			<div class="w-30 h-30 ml-20 bg-yellow-500 rounded-md flex items-center justify-center text-white">
+				<img id="player2-avatar" src="/avatars/default.png" alt="Joueur 2" 
+						class="w-full h-full object-cover rounded-md"
+						onerror="this.src='/avatars/default.png'">
+			</div>
+		</div>
+		
+		<!-- Sous-titre indiquant le type de match -->
+		<div class="text-left text-gray-600 text-2xl mb-2 ml-3 font-jaro" id="match-type">chargement...</div>
+		
+		<!-- Conteneur du canvas avec bordure -->
+			<div class="relative">
+				<div class="border-4 border-black bg-white">
+					<canvas id="game-canvas" width="800" height="400" class="w-full"></canvas>
+				</div>
+				<!-- Statut du jeu en haut -->
+				<div id="game-status" class="absolute top-2 right-4 px-2 py-0.5 bg-black bg-opacity-50 text-white text-xs rounded hidden">
+				En attente...
+				</div>
+			</div>
+			<div class="flex justify-center mt-4">
+				<button id="quit-btn" class="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700">Quitter</button>
+			</div>
+		`;
+	initGameUI();
 
 	let countdown = Number(import.meta.env.VITE_GAME_LAUNCH_DELAY ?? '5');
 	if (Number.isNaN(countdown) || countdown <= 0) countdown = 5;
@@ -188,9 +252,31 @@ export default function game() {
       		}
 		}
 	}, 1000);
-        
-	socket.onmessage = (event) => {
+    
+	let config = false;
+	socket.onmessage = async (event) => {
 		const data = JSON.parse(event.data);
+		if (!config && data.type != 'game_start') {
+			console.log("Ajout des AVATAR");
+			const player1Id = data.game_state.player1_id;
+			const player2Id = data.game_state.player2_id;
+			console.log("player1Id", player1Id);
+
+			const matchId = data.game_state?.matchId || data.matchId;
+			if (matchId) {
+				try {
+				const matchType = await fetchMatchType(matchId);
+				updateMatchType(matchType);
+				} catch (error) {
+				console.warn("Impossible de récupérer le type de match:", error);
+				updateMatchType("1v1 online");
+				}
+			} else {
+				updateMatchType("1v1 online");
+			}
+			updatePlayerAvatars(player1Id, player2Id);
+			config = true;
+		}
 		switch (data.type) {
 			case 'game_start':
 			gameStarted = true;
@@ -214,27 +300,53 @@ export default function game() {
 
 	document.addEventListener('keydown', keydownHandler);
 	document.addEventListener('keyup', keyupHandler);
+
             
 	function renderGame(state: Game) {
-			if (!ctx || !canvas || !gameStarted) return;
-		const paddleWidth  = +import.meta.env.VITE_PADDLE_WIDTH;
-		const paddleHeight = +import.meta.env.VITE_PADDLE_HEIGHT;
-		const ballRadius   = +import.meta.env.VITE_BALL_RADIUS;
-
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.fillStyle = 'blue';
+		if (!ctx || !canvas || !gameStarted) return;
+		const canvasWidth = canvas.width;
+		const canvasHeight = canvas.height;
+		const paddleWidth = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
+		const paddleHeight = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
+		const ballRadius = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
+		
+		ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+		
+		// Dessiner la ligne centrale
+		ctx.beginPath();
+		ctx.setLineDash([5, 5]); // Ligne en pointillé
+		ctx.moveTo(canvasWidth / 2, 0);
+		ctx.lineTo(canvasWidth / 2, canvasHeight);
+		ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+		ctx.lineWidth = 1;
+		ctx.stroke();
+		ctx.setLineDash([]);
+		
+		
+		// Dessiner la raquette gauche
+		ctx.fillStyle = '#4F46E5';
 		ctx.fillRect(0, state.leftPaddle.y, paddleWidth, paddleHeight);
-		ctx.fillStyle = 'red';
-		ctx.fillRect(canvas.width - paddleWidth, state.rightPaddle.y, paddleWidth, paddleHeight);
+		
+		// Dessiner la raquette droite
+		ctx.fillStyle = '#DC2626';
+		ctx.fillRect(canvasWidth - paddleWidth, state.rightPaddle.y, paddleWidth, paddleHeight);
+		
+		// Dessiner les scores
+		ctx.font = 'bold 120px Arial';
+		ctx.fillStyle = 'rgba(200, 200, 200, 0.7)';
+		ctx.textAlign = 'center';
+		
+		// Score gauche
+		ctx.fillText(state.score1.toString(), canvasWidth / 4, canvasHeight / 2 + 40);
+		
+		// Score droit
+		ctx.fillText(state.score2.toString(), (canvasWidth / 4) * 3, canvasHeight / 2 + 40);
 
+		// Dessiner la balle en noir au centre
 		ctx.beginPath();
 		ctx.arc(state.ball.x, state.ball.y, ballRadius, 0, Math.PI * 2);
 		ctx.fillStyle = 'black';
 		ctx.fill();
 		ctx.closePath();
-
-		score1Display!.textContent = String(state.score1);
-		score2Display!.textContent = String(state.score2);
 	}
-
 }

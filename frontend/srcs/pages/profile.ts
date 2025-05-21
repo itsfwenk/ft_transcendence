@@ -1,3 +1,5 @@
+import i18n, { changeLanguage, supportedLanguages, t } from '../i18n';
+
 export interface UserData {
 	user: {
 		userName: string;
@@ -182,8 +184,8 @@ export function renderFriendsList(friends: Friend[]) {
 	if (friends.length === 0) {
 		friendsListElement.innerHTML = `
 			<div class="text-center text-gray-300 mt-8">
-				<p>Vous n'avez pas encore d'amis</p>
-				<p class="mt-2 text-sm">Utilisez le bouton "Add Friend" pour en ajouter</p>
+				<p>${i18n.t('profile.noFriends')}</p>
+				<p class="mt-2 text-sm">${i18n.t('profile.useAddButton')}</p>
 			</div>
 		`;
 		return;
@@ -208,7 +210,7 @@ export function renderFriendsList(friends: Friend[]) {
 				</div>
 				<div class="flex-grow">
 					<div class="font-bold select-none">${friend.userName}</div>
-					<div class="text-xs text-gray-300 select-none">${isOnline ? 'En ligne' : 'Hors ligne'}</div>
+					<div class="text-xs text-gray-300 select-none">${isOnline ? t('profile.online') : t('profile.offline')}</div>
 				</div>
 			</div>
 		`;
@@ -255,15 +257,41 @@ export function toggleFriendSearch(show: boolean) {
 	}
 }
 
+function createLanguageSelector(): string {
+	const currentLang = i18n.language || 'en';
+	
+	const options = supportedLanguages.map(lang => {
+		const selected = lang.code === currentLang ? 'selected' : '';
+		return `<option value="${lang.code}" ${selected}>${lang.name}</option>`;
+	}).join('');
+	
+	return `
+		<div class="flex justify-end mb-4">
+			<div class="relative group">
+				<select id="language-selector" class="appearance-none bg-blue-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 pr-8 cursor-pointer transition-colors duration-200 hover:bg-blue-700">
+					${options}
+				</select>
+				<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+					<svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+						<path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+					</svg>
+				</div>
+			</div>
+		</div>
+	`;
+}
+
 export default function Profile() {
 	const app = document.getElementById('app');
 	if (app) {
 		app.innerHTML = /*html*/`
-		<div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">Pong Game</div>
+		${createLanguageSelector()}
+		
+		<div class="text-black font-jaro text-9xl mt-10 mb-16 select-none">${i18n.t('general.pongGame')}</div>
 		
 		<div id="friendSearchContainer" class="hidden flex justify-center items-center mb-12 gap-10">
 			<div class="flex items-center bg-white rounded-md shadow-md w-1/3">
-				<input type="text" id="friendSearchInput" class="flex-grow py-2 px-4 rounded-l-md focus:outline-none text-black" placeholder="Rechercher un utilisateur par nom..." />
+				<input type="text" id="friendSearchInput" class="flex-grow py-2 px-4 rounded-l-md focus:outline-none text-black" placeholder="${i18n.t('profile.searchUser')}" />
 				<button id="confirmFriendSearch" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -284,33 +312,33 @@ export default function Profile() {
 					<div id="img" class="w-28 h-28 rounded-lg bg-gray-300 mr-4 overflow-hidden">
 						<img id="profileImage" src="/avatars/default.png" alt="Profile" class="w-full h-full object-cover select-none"/>
 					</div>
-					<div id="username" class="flex justify-center items-center text-xl font-bold font-jaro bg-white text-black rounded-lg pl-2 pr-2 pb-0.5 select-none">Chargement...</div>
+					<div id="username" class="flex justify-center items-center text-xl font-bold font-jaro bg-white text-black rounded-lg pl-2 pr-2 pb-0.5 select-none">${i18n.t('general.loading')}</div>
 				</div>
-				<div id="email" class="flex mb-3 font-jaro select-none">Chargement...</div>
+				<div id="email" class="flex mb-3 font-jaro select-none">${i18n.t('general.loading')}</div>
 				<div id="totalGames" class="flex mb-2">
-					<div class="font-jaro text-2xl select-none">Total games: </div>
+					<div class="font-jaro text-2xl select-none">${i18n.t('profile.totalGames')}: </div>
 					<div id="nbGames" class="ml-2 pt-0.5 font-jaro text-xl">0</div>
 				</div>
 				<div id="stats" class="flex justify-around items-center mt-3 text-center">
 					<div id="win" class="flex flex-col items-center gap-4">
-						<div class="font-bold font-jaro text-2xl select-none">Win</div>
+						<div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.win')}</div>
 						<div id="statWin" class="text-xl font-jaro select-none">0</div>
 					</div>
 					<div id="losses" class="flex flex-col items-center gap-4">
-						<div class="font-bold font-jaro text-2xl select-none">Losses</div>
+						<div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.losses')}</div>
 						<div id="statLosses" class="text-xl font-jaro select-none">0</div>
 					</div>
 					<div id="winrate" class="flex flex-col items-center gap-4">
-						<div class="font-bold font-jaro text-2xl select-none">WinRate</div>
+						<div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.winRate')}</div>
 						<div id="statWinRate" class="text-xl font-jaro select-none">0%</div>
 					</div>
 				</div>
 			</div>
 	
 			<div id="friendBox" class="h-80 w-1/3 bg-red-700 rounded-lg p-4 text-white">
-				<div class="text-xl font-bold mb-4 font-jaro select-none">Friends</div>
+				<div class="text-xl font-bold mb-4 font-jaro select-none">${i18n.t('profile.friends')}</div>
 				<div id="friendsList" class="overflow-y-auto h-64 pr-2">
-					<div class="text-center text-gray-300 mt-10">Chargement de la liste d'amis...</div>
+					<div class="text-center text-gray-300 mt-10">${i18n.t('general.loading')}</div>
 				</div>
 			</div>
 		</div>
@@ -325,7 +353,7 @@ export default function Profile() {
 			hover:border-b-[0px]
 			transition-all duration-150 [box-shadow:0_10px_0_0_#787f8e,0_15px_0_0_#1b70f841]
 			border-b-[1px] border-gray-300'>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>Edit Profile</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t('profile.editProfile')}</span>
 			</div>
 	
 			<div id="historyBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-yellow-500 rounded-lg cursor-pointer select-none
@@ -333,7 +361,7 @@ export default function Profile() {
 			hover:border-b-[0px]
 			transition-all duration-150 [box-shadow:0_10px_0_0_#d49218,0_15px_0_0_#1b70f841]
 			border-b-[1px] border-yellow-200'>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>Match History</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t('profile.matchHistory')}</span>
 			</div>
 	
 			<div id="addFriendBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-green-600 rounded-lg cursor-pointer select-none
@@ -341,7 +369,7 @@ export default function Profile() {
 			hover:border-b-[0px]
 			transition-all duration-150 [box-shadow:0_10px_0_0_#15803d,0_15px_0_0_#1b70f841]
 			border-b-[1px] border-green-400'>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>Add Friend</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t('profile.addFriend')}</span>
 			</div>
 	
 		</div>
@@ -351,7 +379,7 @@ export default function Profile() {
 			hover:border-b-[0px]
 			transition-all duration-150 [box-shadow:0_10px_0_0_#181818,0_15px_0_0_#1b70f841]
 			border-b-[1px] border-gray-400'>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro'>Back</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('general.back')}</span>
 			</div>
 		</div>
 		</div>
@@ -376,6 +404,20 @@ async function setupProfilePage() {
 }
 
 function setupEventListeners() {
+	const languageSelector = document.getElementById('language-selector');
+	if (languageSelector) {
+		languageSelector.addEventListener('change', (event) => {
+			const target = event.target as HTMLSelectElement;
+			const selectedLang = target.value;
+			
+			changeLanguage(selectedLang).then(() => {
+				window.location.reload();
+			}).catch(error => {
+				console.error("Erreur lors du changement de langue:", error);
+			});
+		});
+	}
+
 	const backBtn = document.getElementById('backBtn');
 	if (backBtn) {
 		backBtn.addEventListener('click', () => {
@@ -394,10 +436,10 @@ function setupEventListeners() {
 
 	const historyBtn = document.getElementById('historyBtn');
 	if (historyBtn) {
-	historyBtn.addEventListener('click', () => {
-		history.pushState(null, '', '/history');
-		window.dispatchEvent(new PopStateEvent('popstate'));
-	});
+		historyBtn.addEventListener('click', () => {
+			history.pushState(null, '', '/history');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+		});
 	}
 
 	const addFriendBtn = document.getElementById('addFriendBtn');

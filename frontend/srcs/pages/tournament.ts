@@ -1,6 +1,6 @@
-
 import { getMatchmakingSocket } from "../wsClient";
 import { fetchUserProfile } from "./mode";
+import i18n from '../i18n';
 
 let ws: WebSocket;
 let cleanupDone = false;
@@ -11,20 +11,20 @@ export default async function Tournament_mgt() {
 	const userProfile = await fetchUserProfile();
 	console.log(userProfile);
 	if (!userProfile) {
-		console.error("Aucun utilisateur connecté");
+		console.error(i18n.t('profile.noUserConnected'));
 		return;
 	}
 	const currentPlayerId =  userProfile.userId;
-	console.log("currentPlayerId:", currentPlayerId);
+	console.log(`${i18n.t('profile.currentPlayerId')}:`, currentPlayerId);
 	attachWebSocketHandlers();
 
     if (app) {
       app.innerHTML = /*html*/`
 		<div id="tournament-root" class="flex flex-col items-center justify-center min-h-screen">
-		<h1 class="text-4xl font-bold mb-6">Tournament</h1>
+		<h1 class="text-4xl font-bold mb-6">${i18n.t('tournament.title')}</h1>
 		<div id="stage" class="text-2xl"></div>   <!-- zone mutable -->
 		<button id="leaveBtn" class="mt-8 bg-gray-700 px-4 py-2 rounded text-white">
-			Leave
+			${i18n.t('tournament.leave')}
 		</button>
 		</div>
 	`;
@@ -57,14 +57,14 @@ async function onWsMessage(ev: MessageEvent) {
 	switch (msg.type) {
 		case 'MATCH_PREP':
 			const {gameSessionId, delay} = msg.payload;
-			console.log("MATCH_PREP");
+			console.log(i18n.t('tournament.matchPrep'));
 			startCountdown(delay, () => {
 				history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
 				window.dispatchEvent(new PopStateEvent('popstate'));
 			});
 			break;
 		case 'MATCH_START':
-			console.log('Match is now officially started by the server');
+			console.log(i18n.t('tournament.matchOfficiallyStarted'));
 			break;
 	
 		// case 'MATCH_END':
@@ -95,7 +95,7 @@ export function startCountdown(sec: number, onEnd: () => void) {
   }
 
   let t = sec;
-  stage.textContent = `Match starts in ${t}…`;
+  stage.textContent = i18n.t('tournament.matchStartsIn', { seconds: t });
 
   const timer = setInterval(() => {
 	  t--;
@@ -105,7 +105,7 @@ export function startCountdown(sec: number, onEnd: () => void) {
 		  onEnd();
 		  return;
     }
-    stage.textContent = `Match starts in ${t}…`;
+    stage.textContent = i18n.t('tournament.matchStartsIn', { seconds: t });
   }, 1_000);
 }
 
@@ -142,9 +142,9 @@ export function updatePlayerStateUI(state: string) {
 		case 'eliminated':
 			app.innerHTML = `
 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-					<h2 class="text-2xl font-bold mb-4">Dommage, vous êtes éliminé !</h2>
-					<p class="text-gray-600">Vous pourrez retenter votre chance la prochaine fois.</p>
-					<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
+					<h2 class="text-2xl font-bold mb-4">${i18n.t('tournament.playerEliminated')}</h2>
+					<p class="text-gray-600">${i18n.t('tournament.tryAgainNextTime')}</p>
+					<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">${i18n.t('tournament.backToMenu')}</button>
 				</div>
 			`;
 		  break;
@@ -152,8 +152,8 @@ export function updatePlayerStateUI(state: string) {
 		case 'waiting_next_round':
 			app.innerHTML = `
 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-					<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
-					<p class="text-gray-600">En attente du prochain tour...</p>
+					<h2 class="text-2xl font-bold mb-4">${i18n.t('tournament.congratsMatchWin')}</h2>
+					<p class="text-gray-600">${i18n.t('tournament.waitingNextRound')}</p>
 				</div>
 			`;
 		  break;
@@ -161,8 +161,8 @@ export function updatePlayerStateUI(state: string) {
 		case 'waiting_final_prep':
 			app.innerHTML = `
 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-					<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
-					<p class="text-gray-600">La finale est en preparation...</p>
+					<h2 class="text-2xl font-bold mb-4">${i18n.t('tournament.congratsMatchWin')}</h2>
+					<p class="text-gray-600">${i18n.t('tournament.finalPreparation')}</p>
 				</div>
 			`;
 		  break;
@@ -170,9 +170,9 @@ export function updatePlayerStateUI(state: string) {
 		case 'winner':
 			app.innerHTML = `
 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-					<h2 class="text-2xl font-bold mb-4">Bravo, vous avez gagné le tournoi !</h2>
-					<p class="text-gray-600">Vous êtes le champion. Félicitations&nbsp;!</p>
-					<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
+					<h2 class="text-2xl font-bold mb-4">${i18n.t('tournament.congratsTournamentWin')}</h2>
+					<p class="text-gray-600">${i18n.t('tournament.championCongrats')}</p>
+					<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">${i18n.t('tournament.backToMenu')}</button>
 				</div>
 			`;
 		  break;
@@ -180,8 +180,8 @@ export function updatePlayerStateUI(state: string) {
 		default:
 			app.innerHTML = `
 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-					<h2 class="text-2xl font-bold mb-4">Votre état joueur : ${state}</h2>
-					<p class="text-gray-600">En attente d'informations supplémentaires.</p>
+					<h2 class="text-2xl font-bold mb-4">${i18n.t('tournament.playerState', { state })}</h2>
+					<p class="text-gray-600">${i18n.t('tournament.waitingForInfo')}</p>
 				</div>
 			`;
 	}
@@ -198,4 +198,3 @@ export function updatePlayerStateUI(state: string) {
 // 	console.log("Nouveau playerState =", currentPlayerState);
 // 	updatePlayerStateUI(currentPlayerState);
 //   }
-  

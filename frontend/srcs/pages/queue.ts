@@ -1,6 +1,7 @@
 import { getMatchmakingSocket } from "../wsClient";
 import { fetchUserProfile } from "./mode";
 import { getAvatarUrl } from "./profile";
+import i18n from '../i18n';
 
 let cleanupMatchmakingFn: () => void;
 
@@ -12,22 +13,22 @@ export async function fetchUserAvatar(userId: string): Promise<string> {
     });
     
     if (!response.ok) {
-      console.warn(`Erreur lors de la récupération de l'avatar (${response.status}): ${response.statusText}`);
+      console.warn(`${i18n.t('queue.errorFetchingAvatar')} (${response.status}): ${response.statusText}`);
       return "";
     }
     
     const data = await response.json();
-    console.log("Données d'avatar reçues:", data);
+    console.log(`${i18n.t('queue.avatarDataReceived')}:`, data);
     
     if (data.avatarUrl) {
-      console.log("URL d'avatar trouvée:", data.avatarUrl);
+      console.log(`${i18n.t('queue.avatarUrlFound')}:`, data.avatarUrl);
       return data.avatarUrl;
     } else {
-      console.warn("Aucune URL d'avatar trouvée dans la réponse");
+      console.warn(i18n.t('queue.noAvatarUrlInResponse'));
       return "";
     }
   } catch (error) {
-    console.error("Erreur lors de la récupération de l'avatar:", error);
+    console.error(`${i18n.t('queue.errorFetchingAvatar')}:`, error);
     return "";
   }
 }
@@ -46,14 +47,14 @@ function show1v1ResultScreen(
   app.innerHTML = `
     <div class="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
       <h2 class="text-3xl font-bold mb-4">
-        ${isWinner ? '🎉 Victoire !' : '😢 Défaite'}
+        ${isWinner ? i18n.t('result.victory') : i18n.t('result.defeat')}
       </h2>
   
-      <p class="mb-6 text-lg">Score : ${scores.score1} – ${scores.score2}</p>
+      <p class="mb-6 text-lg">${i18n.t('result.score', { score1: scores.score1, score2: scores.score2 })}</p>
   
       <button id="backBtn"
           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">
-        Retour au menu
+        ${i18n.t('result.backToMenu')}
       </button>
     </div>
   `;
@@ -70,23 +71,23 @@ export default async function Queue() {
   
   const userProfile = await fetchUserProfile();
   if (!userProfile) {
-    console.error("Aucun utilisateur connecté");
+    console.error(i18n.t('profile.noUserConnected'));
     return;
   }
   
   const currentPlayerId = userProfile.userId;
-  console.log("currentPlayerId:", currentPlayerId);
+  console.log(`${i18n.t('profile.currentPlayerId')}:`, currentPlayerId);
 
   const currentPlayerAvatar = getAvatarUrl(currentPlayerId);
-  console.log("Avatar de l'utilisateur actuel:", currentPlayerAvatar);
+  console.log(`${i18n.t('profile.currentPlayerAvatar')}:`, currentPlayerAvatar);
   
   function renderPlayerBox(playerId: string, playerName: string, avatarUrl: string) {
-    console.log("Rendu du joueur:", playerName, "avec l'avatar:", avatarUrl);
+    console.log(`${i18n.t('queue.renderingPlayer')}:`, playerName, `${i18n.t('queue.withAvatar')}:`, avatarUrl);
 
     const boxId = `player-${playerId.slice(0, 8)}`;
 
     if (avatarUrl) {
-      console.log("Test de l'URL de l'avatar:", avatarUrl);
+      console.log(`${i18n.t('queue.testingAvatarURL')}:`, avatarUrl);
       
       return `
       <div id="${boxId}" class="w-16 h-16 bg-blue-600 text-white flex items-center justify-center text-2xl rounded-md cube-3d">
@@ -94,8 +95,8 @@ export default async function Queue() {
         src="${avatarUrl}" 
         alt="${playerName}" 
         class="w-full h-full object-cover"
-        onload="console.log('Image chargée avec succès:', '${avatarUrl}')"
-        onerror="console.log('Erreur de chargement image:', '${avatarUrl}'); this.onerror=null; this.src='/avatars/default.png';"
+        onload="console.log('${i18n.t('queue.imageLoadedSuccessfully')}:', '${avatarUrl}')"
+        onerror="console.log('${i18n.t('queue.errorLoadingImage')}:', '${avatarUrl}'); this.onerror=null; this.src='/avatars/default.png';"
         />
       </div>
       `;
@@ -113,33 +114,33 @@ export default async function Queue() {
   }
   
   app.innerHTML = /*html*/`
-    <div class="text-black font-jaro text-9xl mt-16 mb-36 select-none">Pong Game</div>
+    <div class="text-black font-jaro text-9xl mt-16 mb-36 select-none">${i18n.t('general.pongGame')}</div>
     <div class="flex flex-col items-center justify-center">
       <div class="flex flex-col items-center justify-center w-1/3 bg-blue-700 rounded-md">
-      <h1 class="text-6xl mb-9 pt-2 font-jaro">1v1 online</h1>
+      <h1 class="text-6xl mb-9 pt-2 font-jaro">${i18n.t('gameMode.1v1Online')}</h1>
       <div class="flex items-center justify-center gap-3">
         <div id="player1-container">
-        ${renderPlayerBox(currentPlayerId ,userProfile.userName || "You", currentPlayerAvatar)}
+        ${renderPlayerBox(currentPlayerId, userProfile.userName || i18n.t('queue.you'), currentPlayerAvatar)}
         </div>
         <div id="player2-container">
         <div class="w-16 h-16 bg-white rounded-md cube-3d"></div>
         </div>
       </div>
-      <p id="status-message" class="text-white font-inria font-bold pt-5 m-5">searching for opponent...</p>
+      <p id="status-message" class="text-white font-inria font-bold pt-5 m-5">${i18n.t('queue.searchingOpponent')}</p>
       </div>
       <div id="backBtn" class='button w-24 h-13 mt-10 bg-gray-700 rounded-full cursor-pointer select-none
       hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
       hover:border-b-[0px]
       transition-all duration-150 [box-shadow:0_10px_0_0_#181818,0_15px_0_0_#1b70f841]
       border-b-[1px] border-gray-400'>
-      <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>Back</span>
+      <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('general.back')}</span>
       </div>
     </div>
   `;
 
   const ws = getMatchmakingSocket();
   if (!ws || ws.readyState !== WebSocket.OPEN) {
-    console.error("Pas de connexion WebSocket disponible");
+    console.error(i18n.t('gameMode.socketNotConnected'));
     return;
   }
 
@@ -149,12 +150,12 @@ export default async function Queue() {
     const container = document.getElementById('player2-container');
     if (container) {
       const avatarUrl = getAvatarUrl(player.userId);
-      container.innerHTML = renderPlayerBox(player.userId, player.userName || "Opponent", avatarUrl);
+      container.innerHTML = renderPlayerBox(player.userId, player.userName || i18n.t('queue.opponent'), avatarUrl);
     }
     
     const statusMessage = document.getElementById('status-message');
     if (statusMessage) {
-      statusMessage.textContent = "Opponent found! Get ready...";
+      statusMessage.textContent = i18n.t('queue.opponentFound');
     }
   }
 
@@ -171,14 +172,14 @@ export default async function Queue() {
     let timeLeft = 3;
     
     if (statusMessage) {
-      statusMessage.textContent = `Game starting in ${timeLeft}...`;
+      statusMessage.textContent = i18n.t('queue.gameStartingIn', { seconds: timeLeft });
     }
     
     const intervalId = setInterval(() => {
       timeLeft--;
       
       if (statusMessage && timeLeft >= 0) {
-        statusMessage.textContent = `Game starting in ${timeLeft}...`;
+        statusMessage.textContent = i18n.t('queue.gameStartingIn', { seconds: timeLeft });
       }
       
       if (timeLeft < 0) {
@@ -192,7 +193,7 @@ export default async function Queue() {
   // Définir la fonction de nettoyage
   function cleanupMatchmaking() {
     if (ws && ws.readyState === WebSocket.OPEN) {
-      console.log("Envoi du message de départ de la file d'attente");
+      console.log(i18n.t('queue.sendingQueueLeaveMessage'));
       ws.send(JSON.stringify({
         action: 'QUEUE_LEAVE_1V1',
         payload: {playerId: currentPlayerId}
@@ -206,14 +207,14 @@ export default async function Queue() {
   function handleMessage(event: MessageEvent) {
     try {
       const msg = JSON.parse(event.data);
-      console.log("Message reçu:", msg);
+      console.log(`${i18n.t('queue.messageReceived')}:`, msg);
 
       switch (msg.type) {
         case 'QUEUE_1V1_PLAYER_JOINED':
           const { userId, userName } = msg.player;
           if (!userId || userId === currentPlayerId) break;
           
-          updateOpponentDisplay({userId, userName: userName || "Opponent"});
+          updateOpponentDisplay({userId, userName: userName || i18n.t('queue.opponent')});
           break;
           
         case 'QUEUE_1V1_PLAYER_LEFT':
@@ -224,7 +225,7 @@ export default async function Queue() {
           
           const statusMessage = document.getElementById('status-message');
           if (statusMessage) {
-            statusMessage.textContent = "Opponent left. Searching for new opponent...";
+            statusMessage.textContent = i18n.t('queue.opponentLeft');
           }
           break;
           
@@ -232,27 +233,27 @@ export default async function Queue() {
           const gameSessionId = msg.payload.gameSessionId;
           const opponent = msg.payload.opponent || {
             userId: msg.payload.opponentId, 
-            userName: "Opponent"
+            userName: i18n.t('queue.opponent')
           };
           startCountdown1v1(gameSessionId, opponent);
           break;
 		case 'MATCH_START':
-			console.log("Le match commence");
+			console.log(i18n.t('queue.matchStarting'));
 			break;
           
         case 'MATCH_END':
-          console.log("Message MATCH_END reçu:", msg.payload);
+          console.log(`${i18n.t('queue.matchEndMessageReceived')}:`, msg.payload);
           const {winner_Id, score1, score2} = msg.payload;
-          console.log("Identifiant du gagnant:", winner_Id);
-          console.log("Identifiant du joueur actuel:", currentPlayerId);
+          console.log(`${i18n.t('queue.winnerId')}:`, winner_Id);
+          console.log(`${i18n.t('queue.currentPlayerId')}:`, currentPlayerId);
           const isWinner = winner_Id === currentPlayerId;
-          console.log("Est-ce que je suis le gagnant?", isWinner);
-          console.log("Scores:", score1, score2);
+          console.log(`${i18n.t('queue.amIWinner')}:`, isWinner);
+          console.log(`${i18n.t('queue.scores')}:`, score1, score2);
           show1v1ResultScreen(isWinner, {score1, score2});
           break;
       }    
     } catch (error) {
-      console.error("Erreur lors du traitement du message:", error);
+      console.error(`${i18n.t('queue.errorProcessingMessage')}:`, error);
     }
   }
 

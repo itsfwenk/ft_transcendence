@@ -1,4 +1,5 @@
 import { getAvatarUrl } from "./profile";
+import i18n from '../i18n';
 
 // src/pages/Home.ts
 interface Ball {
@@ -35,7 +36,7 @@ async function fetchMatchType(matchId: string): Promise<string> {
   try {
     if (!matchId) {
       console.warn("Impossible de récupérer le type de match: matchId manquant");
-      return "1v1 online";
+      return i18n.t('gameMode.1v1Online');
     }
 
     const baseUrl = window.location.origin;
@@ -46,16 +47,36 @@ async function fetchMatchType(matchId: string): Promise<string> {
     
     if (!response.ok) {
       console.warn(`Erreur lors de la récupération du type de match: ${response.status} ${response.statusText}`);
-      return "1v1 online";
+      return i18n.t('gameMode.1v1Online');
     }
     
     const data = await response.json();
     console.log("Type de match récupéré:", data.matchType);
-    return data.matchType || "1v1 online";
+    
+    const matchTypeKey = mapMatchTypeToI18nKey(data.matchType);
+    return i18n.t(matchTypeKey);
   } catch (error) {
     console.error('Erreur lors de la récupération du type de match:', error);
-    return "1v1 online";
+    return i18n.t('gameMode.1v1Online');
   }
+}
+
+function mapMatchTypeToI18nKey(matchType: string): string {
+  if (!matchType) return 'gameMode.1v1Online';
+  
+  const lowerCaseType = matchType.toLowerCase();
+  
+  if (lowerCaseType.includes('tournament') && lowerCaseType.includes('semifinal')) {
+    return 'tournament.semifinalMatch';
+  } else if (lowerCaseType.includes('tournament') && lowerCaseType.includes('final')) {
+    return 'tournament.finalMatch';
+  } else if (lowerCaseType.includes('1v1') && lowerCaseType.includes('online')) {
+    return 'gameMode.1v1Online';
+  } else if (lowerCaseType.includes('1v1') && lowerCaseType.includes('local')) {
+    return 'gameMode.1v1Local';
+  }
+  
+  return 'gameMode.commonMatchType';
 }
 
 export default function game() {
@@ -112,11 +133,11 @@ export default function game() {
         const gameStatus = document.getElementById('game-status');
         if (gameStatus) {
             if (status === 'ongoing') {
-                gameStatus.textContent = "En cours";
+                gameStatus.textContent = i18n.t('game.statusOngoing');
             } else if (status === 'waiting') {
-                gameStatus.textContent = "En attente...";
+                gameStatus.textContent = i18n.t('game.statusWaiting');
             } else if (status === 'finished') {
-                gameStatus.textContent = "Terminé";
+                gameStatus.textContent = i18n.t('game.statusFinished');
             }
         }
     }
@@ -147,24 +168,24 @@ export default function game() {
 		<div class="flex justify-center items-center mb-2">
 			<!-- Photo de profil joueur 1 -->
 			<div class="w-30 h-30 mr-20 bg-pink-500 rounded-md flex items-center justify-center text-white">
-				<img id="player1-avatar" src="/avatars/default.png" alt="Joueur 1" 
+				<img id="player1-avatar" src="/avatars/default.png" alt="${i18n.t('game.player1')}" 
 						class="w-full h-full object-cover rounded-md"
 						onerror="this.src='/avatars/default.png'">
 			</div>
 			
 			<!-- Titre du jeu -->
-			<div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">Pong Game</div>
+			<div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">${i18n.t('general.pongGame')}</div>
 
 			<!-- Photo de profil joueur 2 -->
 			<div class="w-30 h-30 ml-20 bg-yellow-500 rounded-md flex items-center justify-center text-white">
-				<img id="player2-avatar" src="/avatars/default.png" alt="Joueur 2" 
+				<img id="player2-avatar" src="/avatars/default.png" alt="${i18n.t('game.player2')}" 
 						class="w-full h-full object-cover rounded-md"
 						onerror="this.src='/avatars/default.png'">
 			</div>
 		</div>
 		
 		<!-- Sous-titre indiquant le type de match -->
-		<div class="text-left text-gray-600 text-2xl mb-2 ml-3 font-jaro" id="match-type">chargement...</div>
+		<div class="text-left text-gray-600 text-2xl mb-2 ml-3 font-jaro" id="match-type">${i18n.t('general.loading')}</div>
 		
 		<!-- Conteneur du canvas avec bordure -->
 			<div class="relative">
@@ -173,11 +194,11 @@ export default function game() {
 				</div>
 				<!-- Statut du jeu en haut -->
 				<div id="game-status" class="absolute top-2 right-4 px-2 py-0.5 bg-black bg-opacity-50 text-white text-xs rounded hidden">
-				En attente...
+				${i18n.t('game.statusWaiting')}
 				</div>
 			</div>
 			<div class="flex justify-center mt-4">
-				<button id="quit-btn" class="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700">Quitter</button>
+				<button id="quit-btn" class="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700">${i18n.t('game.quit')}</button>
 			</div>
 		`;
 
@@ -251,10 +272,10 @@ export default function game() {
 							updateMatchType(matchType);
 							} catch (error) {
 							console.warn("Impossible de récupérer le type de match:", error);
-							updateMatchType("1v1 online");
+							updateMatchType(i18n.t('gameMode.1v1Online'));
 							}
 						} else {
-							updateMatchType("1v1 online");
+							updateMatchType(i18n.t('gameMode.1v1Online'));
 						}
 						updatePlayerAvatars(player1Id, player2Id);
 						config = true;

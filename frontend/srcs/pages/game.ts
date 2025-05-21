@@ -1,10 +1,5 @@
 import { getAvatarUrl } from "./profile";
 
-// src/pages/Home.ts
-//import { Game } from '../../gameInterfaces'
-
-import { getAvatarUrl } from "./profile";
-
 // let gameState : Game;
 // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 // const host = window.location.hostname;
@@ -82,32 +77,22 @@ export default function game() {
 
     function cleanup() {
 		if (countdownInterval) clearInterval(countdownInterval);
-        console.log("Cleaning up...");
-        // Remove canvas if present
-        const canvas = document.getElementById('game-canvas');
-        if (canvas) {
-            console.log("Removing canvas");
-            canvas.remove();
-        } else {
-            console.warn("No canvas to remove");
-        }
-
-        // Remove score display
-        // const scoreDisplay = document.getElementById('scoreDisplayDiv');
-        // if (scoreDisplay) {
-        //     scoreDisplay.remove(); 
+        // console.log("Cleaning up...");
+        // const canvas = document.getElementById('game-canvas');
+        // if (canvas) {
+        //     console.log("Removing canvas");
+        //     canvas.remove();
         // } else {
-        //     console.warn("No scoreDisplay");
+        //     console.warn("No canvas to remove");
         // }
 
-        // Remove keyboard listeners
         document.removeEventListener('keydown', keydownHandler);
         document.removeEventListener('keyup', keyupHandler);
 		document.removeEventListener('click', doForfeit);
 
 
-        const app = document.getElementById('app');
-        if (app) app.innerHTML = '';
+        // const app = document.getElementById('app');
+        // if (app) app.innerHTML = '';
     }
 
 	function doForfeit() {                                       
@@ -209,22 +194,28 @@ export default function game() {
 			</div>
 		</div>
 		
-		<!-- Sous-titre indiquant le type de match -->
-		<div class="text-left text-gray-600 text-2xl mb-2 ml-3 font-jaro" id="match-type">chargement...</div>
+
 		
 		<!-- Conteneur du canvas avec bordure -->
-			<div class="relative">
-				<div class="border-4 border-black bg-white">
-					<canvas id="game-canvas" width="800" height="400" class="w-full"></canvas>
-				</div>
-				<!-- Statut du jeu en haut -->
-				<div id="game-status" class="absolute top-2 right-4 px-2 py-0.5 bg-black bg-opacity-50 text-white text-xs rounded hidden">
-				En attente...
-				</div>
+		<div id = "game-wrapper" class="relative inline-block">
+			<!-- Sous-titre indiquant le type de match -->
+			<div class="text-left text-gray-600 text-2xl mb-2 ml-3 font-jaro" id="match-type">chargement...</div>
+			<div class="border-4 border-black bg-white">
+				<canvas id="game-canvas" width="800" height="400" class="w-full"></canvas>
 			</div>
-			<div class="flex justify-center mt-4">
-				<button id="quit-btn" class="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700">Quitter</button>
+			<!-- Statut du jeu en haut -->
+			<div id="game-status" class="absolute top-2 right-4 px-2 py-0.5 bg-black bg-opacity-50 text-white text-xs rounded hidden">
+			En attente...
 			</div>
+			<div id="result-overlay"
+				class="hidden absolute inset-0
+						flex-col items-center justify-center
+						text-center rounded-md">
+			</div>
+		</div>
+		<div class="flex justify-center mt-4">
+			<button id="quit-btn" class="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700">Quitter</button>
+		</div>
 		`;
 	initGameUI();
 
@@ -279,13 +270,13 @@ export default function game() {
 		}
 		switch (data.type) {
 			case 'game_start':
-			gameStarted = true;
-			break;
+				gameStarted = true;
+				break;
 			case 'game_update':
-			renderGame(data.game_state as Game);
-			if (data.game_state.status === 'finished') {
-				socket.close(); cleanup();
-			}
+				renderGame(data.game_state as Game);
+				if (data.game_state.status === 'finished') {
+					socket.close(); cleanup();
+				}
 			break;
 		}
 	};
@@ -349,4 +340,43 @@ export default function game() {
 		ctx.fill();
 		ctx.closePath();
 	}
+
+
+}
+
+export function showResultOverlay(state: 'eliminated'|'waiting_next_round'|'waiting_final'|'winner') {
+	const overlay = document.getElementById('result-overlay')!;
+	overlay.classList.remove('hidden');
+
+	let title = '';
+	let subtitle = '';
+	let color = '';
+
+	switch (state) {
+		case 'waiting_next_round':
+		title = 'You Win!';
+		subtitle = 'waiting your opponent…';
+		color = 'text-green-600';
+		break;
+		case 'eliminated':
+		title = 'You Lose!';
+		subtitle = 'Next time...';
+		color = 'text-red-600';
+		break;
+		case 'waiting_final':
+		title = 'You Win!';
+		subtitle = 'final in preparation';
+		color = 'text-green-600';
+		break;
+		case 'winner':
+		title = 'Champion!';
+		subtitle = 'You won the tournament!';
+		color = 'text-green-600';
+		break;
+	}
+
+	overlay.innerHTML = `
+		<h2 class="text-6xl font-bold mb-2 ${color}">${title}</h2>
+		<p class="text-xl text-black">${subtitle}</p>
+	`;
 }

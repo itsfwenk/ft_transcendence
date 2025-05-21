@@ -1,6 +1,7 @@
 import { fetchUserProfile } from "./mode";
 import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
+import { showResultOverlay } from "./game";
 
 export default async function Queuetournament() {
 	const app = document.getElementById('app');
@@ -37,16 +38,6 @@ export default async function Queuetournament() {
       <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>Back</span>
       </div>
     </div>
-
-	<div id="tournament-timer"
-		class="hidden col-span-full mt-6 px-8 py-4 rounded-md
-				bg-violet-700 text-white flex-col items-center
-				transition-all duration-300">
-		<span class="text-3xl font-semibold">Tournament</span>
-		<span id="timer-value" class="mt-2 text-lg">
-		start in 5
-		</span>
-	</div>
   `;
 
 	const queueList = document.getElementById('queue-list')!;
@@ -94,34 +85,37 @@ export default async function Queuetournament() {
 	let countdownHandle: number | null = null;
 	let time = Number(import.meta.env.VITE_TOURNAMENT_LAUNCH_DELAY ?? '5');
 
+
 	function startCountdown(delay: number, cb: () => void) {
-		const box   = document.getElementById('tournament-timer')!;
-		const label = document.getElementById('timer-value')!;
+		//const box   = document.getElementById('tournament-timer')!;
+		//const label = document.getElementById('timer-value')!;
+		const statusMessage = document.getElementById('status-message');
 
 		if (countdownHandle) 
 			clearInterval(countdownHandle);
-		box.classList.remove('hidden');
+		//box.classList.remove('hidden');
 		let seconds = delay > 0 ? delay : 5;
-		label.textContent = `start in ${seconds}`;
+		if (statusMessage) {
+			statusMessage.textContent = `Tournament starts in ${seconds}`;
+		}
 
 		countdownHandle = window.setInterval(() => {
 			seconds--;
-			if (seconds > 0) {
-			label.textContent = `start in ${seconds}`;
+			if (seconds > 0 && statusMessage) {
+				statusMessage.textContent = `Tournament starts in ${seconds}`;
 			} else {
-			clearInterval(countdownHandle!);
-			countdownHandle = null;
-			label.textContent = 'Starting…';
-			cb();
+				clearInterval(countdownHandle!);
+				countdownHandle = null;
+				cb();
 			}
 		}, 1000);
 	}
 
 	function cancelCountdown() {
-	if (countdownHandle) 
-		clearInterval(countdownHandle);
-	countdownHandle = null;
-	document.getElementById('tournament-timer')?.classList.add('hidden');
+		if (countdownHandle) 
+			clearInterval(countdownHandle);
+		countdownHandle = null;
+		document.getElementById('tournament-timer')?.classList.add('hidden');
 	}
 
 	const ws = getMatchmakingSocket();
@@ -141,63 +135,63 @@ export default async function Queuetournament() {
 			cancelCountdown();
 		}
 	}
-	function updatePlayerStateUI(state: string) {
-		const app = document.getElementById('app');
-		if (!app) return;
+	// function updatePlayerStateUI(state: string) {
+	// 	const app = document.getElementById('app');
+	// 	if (!app) return;
 	
-		switch (state) {
-			case 'eliminated':
-				app.innerHTML = `
-					<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-						<h2 class="text-2xl font-bold mb-4">Dommage, vous êtes éliminé !</h2>
-						<p class="text-gray-600">Vous pourrez retenter votre chance la prochaine fois.</p>
-						<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
-					</div>
-				`;
-			break;
+	// 	switch (state) {
+	// 		case 'eliminated':
+	// 			app.innerHTML = `
+	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+	// 					<h2 class="text-2xl font-bold mb-4">Dommage, vous êtes éliminé !</h2>
+	// 					<p class="text-gray-600">Vous pourrez retenter votre chance la prochaine fois.</p>
+	// 					<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
+	// 				</div>
+	// 			`;
+	// 		break;
 		
-			case 'waiting_next_round':
-				app.innerHTML = `
-					<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-						<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
-						<p class="text-gray-600">En attente du prochain tour...</p>
-					</div>
-				`;
-			break;
+	// 		case 'waiting_next_round':
+	// 			app.innerHTML = `
+	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+	// 					<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
+	// 					<p class="text-gray-600">En attente du prochain tour...</p>
+	// 				</div>
+	// 			`;
+	// 		break;
 
-			case 'waiting_final_prep':
-				app.innerHTML = `
-					<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-						<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
-						<p class="text-gray-600">La finale est en preparation...</p>
-					</div>
-				`;
-			break;
+	// 		case 'waiting_final_prep':
+	// 			app.innerHTML = `
+	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+	// 					<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
+	// 					<p class="text-gray-600">La finale est en preparation...</p>
+	// 				</div>
+	// 			`;
+	// 		break;
 		
-			case 'winner':
-				app.innerHTML = `
-					<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-						<h2 class="text-2xl font-bold mb-4">Bravo, vous avez gagné le tournoi !</h2>
-						<p class="text-gray-600">Vous êtes le champion. Félicitations&nbsp;!</p>
-						<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
-					</div>
-				`;
-			break;
+	// 		case 'winner':
+	// 			app.innerHTML = `
+	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+	// 					<h2 class="text-2xl font-bold mb-4">Bravo, vous avez gagné le tournoi !</h2>
+	// 					<p class="text-gray-600">Vous êtes le champion. Félicitations&nbsp;!</p>
+	// 					<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
+	// 				</div>
+	// 			`;
+	// 		break;
 		
-			default:
-				app.innerHTML = `
-					<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-						<h2 class="text-2xl font-bold mb-4">Votre état joueur : ${state}</h2>
-						<p class="text-gray-600">En attente d'informations supplémentaires.</p>
-					</div>
-				`;
-		}
-		const backToMenuBtn = document.getElementById('backToMenuBtn');
-		backToMenuBtn?.addEventListener('click', () => {
-			history.pushState(null, '', '/menu');
-			window.dispatchEvent(new PopStateEvent('popstate'));
-		});
-  	}
+	// 		default:
+	// 			app.innerHTML = `
+	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+	// 					<h2 class="text-2xl font-bold mb-4">Votre état joueur : ${state}</h2>
+	// 					<p class="text-gray-600">En attente d'informations supplémentaires.</p>
+	// 				</div>
+	// 			`;
+	// 	}
+	// 	const backToMenuBtn = document.getElementById('backToMenuBtn');
+	// 	backToMenuBtn?.addEventListener('click', () => {
+	// 		history.pushState(null, '', '/menu');
+	// 		window.dispatchEvent(new PopStateEvent('popstate'));
+	// 	});
+  	// }
 	addPlayerToSlot({
 		userId: currentPlayerId,
 		userName: userProfile.userName ?? 'You',
@@ -210,7 +204,7 @@ export default async function Queuetournament() {
 
 			switch (msg.type) {
 				case 'QUEUE_TOURNAMENT_PLAYER_JOINED':
-					const list = msg.players as QueuePlayer[];      // tableau envoyé par le serveur
+					const list = msg.players as QueuePlayer[];
 					list.forEach(p => addPlayerToSlot({
 					userId: p.userId,
 					userName: p.userName ?? 'Opponent',
@@ -237,7 +231,7 @@ export default async function Queuetournament() {
 					}
 					break;
 				case 'PLAYER_STATE_UPDATE':
-					updatePlayerStateUI(msg.payload.state);
+					showResultOverlay(msg.payload.state);
 					break;
 			}		
 		} catch (error) {

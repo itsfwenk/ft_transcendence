@@ -100,10 +100,8 @@ export default function game() {
 		socket.send(JSON.stringify({ type: 'FORFEIT' }));        
 		socket.close(1000, 'player quit');                       
 		}
-		setTimeout(() => {
-			history.pushState(null, '', '/mode');
-			window.dispatchEvent(new PopStateEvent('popstate'));
-		}, 3000);
+		history.pushState(null, '', '/mode');
+		window.dispatchEvent(new PopStateEvent('popstate'));
 	}
 
 	function updateMatchType(type: string) {

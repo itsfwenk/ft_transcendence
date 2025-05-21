@@ -1,6 +1,6 @@
 // srcs/pages/local.ts
 
-import { initGame } from './game-logics/local-logic'; // Assuming you'll create this file
+import { initGame } from './game-logics/local-logic';
 
 export default function LocalGamePage() {
   const app = document.getElementById('app');

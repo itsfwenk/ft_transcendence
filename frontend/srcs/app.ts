@@ -1,6 +1,6 @@
-import { initGame } from '../game.ts';
-import { pauseGame } from '../game.ts';
-import { initOnlineGame } from '../game-online.ts';
+import { initGame, pauseGame } from './pages/game-logics/local-logic';
+// import { pauseGame } from '../game.ts';
+import game from './pages/game';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Define types for HTML elements
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
       gameModeTitle.textContent = 'Online Multiplayer';
       showPage(gamePage);
     //   startRemoteGame(gameCanvas);
-      initOnlineGame();
+      game();
     });
   
     pauseBtn?.addEventListener('click', () => {

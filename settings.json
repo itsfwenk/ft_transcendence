@@ -1,0 +1,6 @@
+{
+    "editor.autoIndent": "keep",
+    "editor.formatOnPaste": false,
+    "editor.detectIndentation": false,  // verrouille le style choisi
+    "editor.insertSpaces": false        // ou true, selon ton projet
+}

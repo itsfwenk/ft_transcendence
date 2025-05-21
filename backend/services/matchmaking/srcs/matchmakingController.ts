@@ -338,17 +338,21 @@ export function onMatchCompleted(matchId: string): void {
 		console.log("1v1_Match_end", match);
 		const winnersocket = websocketClients.get(winner_Id);
 		const losersocket = websocketClients.get(loserId);
-		const payload = {
-			type: 'MATCH_END',
+		const payloadwinner = {
+			type: 'PLAYER_STATE_UPDATE',
 			payload: {
-			  matchId,
-			  winner_Id,
-			  score1,
-			  score2
+			  state: 'winner'
 			}
-		  };
-		winnersocket?.send(JSON.stringify(payload));
-		losersocket?.send(JSON.stringify(payload));
+		};
+		const payloadloser = {
+			type: 'PLAYER_STATE_UPDATE',
+			payload: {
+			  state: 'eliminated'
+			}
+		};
+		
+		winnersocket?.send(JSON.stringify(payloadwinner));
+		losersocket?.send(JSON.stringify(payloadloser));
 
 	}
 }

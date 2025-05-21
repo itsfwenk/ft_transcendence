@@ -100,8 +100,10 @@ export default function game() {
 		socket.send(JSON.stringify({ type: 'FORFEIT' }));        
 		socket.close(1000, 'player quit');                       
 		}
-		history.pushState(null, '', '/mode');                      
-		window.dispatchEvent(new PopStateEvent('popstate'));
+		setTimeout(() => {
+			history.pushState(null, '', '/mode');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+		}, 3000);
 	}
 
 	function updateMatchType(type: string) {
@@ -197,22 +199,37 @@ export default function game() {
 
 		
 		<!-- Conteneur du canvas avec bordure -->
-		<div id = "game-wrapper" class="relative inline-block">
-			<!-- Sous-titre indiquant le type de match -->
-			<div class="text-left text-gray-600 text-2xl mb-2 ml-3 font-jaro" id="match-type">chargement...</div>
-			<div class="border-4 border-black bg-white">
-				<canvas id="game-canvas" width="800" height="400" class="w-full"></canvas>
+		<div id="game-wrapper" class="inline-block">
+			<!-- Sous-titre -->
+			<div id="match-type"
+				class="text-left text-gray-600 text-2xl mb-2 ml-3 font-jaro">
+				chargement…
 			</div>
-			<!-- Statut du jeu en haut -->
-			<div id="game-status" class="absolute top-2 right-4 px-2 py-0.5 bg-black bg-opacity-50 text-white text-xs rounded hidden">
-			En attente...
+
+			<!-- === Bloc canvas + overlay ==================================== -->
+			<div id="canvas-box"
+					class="relative inline-block border-4 border-black bg-white">
+				<canvas id="game-canvas" width="800" height="400" class="block"></canvas>
+
+				<!-- Mini-overlay SCORE, centré sur le canvas -->
+				<div id="result-overlay"
+					class="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+							w-[320px]                               <!-- largeur fixe, adapte -->
+							max-w-[70%] px-6 py-4
+							bg-gray-200/90 rounded-md
+							text-center pointer-events-none">
+					<!-- contenu injecté dynamiquement -->
+				</div>
 			</div>
-			<div id="result-overlay"
-				class="hidden absolute inset-0
-						flex-col items-center justify-center
-						text-center rounded-md">
+
+			<!-- badge statut (facultatif, reste au même niveau que le canvas) -->
+			<div id="game-status"
+				class="absolute top-2 right-4 px-2 py-0.5
+						bg-black/70 text-white text-xs rounded hidden">
+				En attente…
 			</div>
 		</div>
+
 		<div class="flex justify-center mt-4">
 			<button id="quit-btn" class="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700">Quitter</button>
 		</div>
@@ -224,25 +241,38 @@ export default function game() {
 
 	console.log("countdown", countdown);
 
+	const overlay = document.getElementById('result-overlay')!;
 
-	const overlay = document.createElement('div');
-  	overlay.className =  'absolute inset-0 z-20 flex items-center justify-center ' +
-  'pointer-events-none text-black text-3xl font-bold';
-	overlay.textContent = `Begin in ${countdown}`;
-	app.appendChild(overlay);
-    countdownInterval = window.setInterval(() => {
-		countdown--;
-		if (countdown > 0) {
-			overlay.textContent =
-        `Begin in ${countdown}`;
-		} else {
-			clearInterval(countdownInterval!);
-			overlay.remove();
-			if (socket.readyState === WebSocket.OPEN) {
-        		socket.send(JSON.stringify({ type: 'ready_to_start' }));
-      		}
-		}
-	}, 1000);
+	function showOverlay(title: string, subtitle = '', color = 'text-black') {
+	overlay.innerHTML = `
+		<h2 class="text-5xl font-bold mb-2 ${color}">${title}</h2>
+		${subtitle ? `<p class="text-lg ${color}">${subtitle}</p>` : ''}
+	`;
+	overlay.classList.remove('hidden');
+	}
+
+
+	function hideOverlay() {
+		overlay.classList.add('hidden');
+	}
+
+
+	if (overlay) {
+		overlay.textContent = `Begin in ${countdown}`;
+		app.appendChild(overlay);
+		countdownInterval = window.setInterval(() => {
+			countdown--;
+			if (countdown > 0) {
+				showOverlay('Begin in', String(countdown), 'text-black');
+			} else {
+				clearInterval(countdownInterval!);
+				hideOverlay();
+				if (socket.readyState === WebSocket.OPEN) {
+					socket.send(JSON.stringify({ type: 'ready_to_start' }));
+				}
+			}
+		}, 1000);
+	}
     
 	let config = false;
 	socket.onmessage = async (event) => {
@@ -354,25 +384,25 @@ export function showResultOverlay(state: 'eliminated'|'waiting_next_round'|'wait
 
 	switch (state) {
 		case 'waiting_next_round':
-		title = 'You Win!';
-		subtitle = 'waiting your opponent…';
-		color = 'text-green-600';
-		break;
+			title = 'You Win!';
+			subtitle = 'waiting your opponent…';
+			color = 'text-green-600';
+			break;
 		case 'eliminated':
-		title = 'You Lose!';
-		subtitle = 'Next time...';
-		color = 'text-red-600';
-		break;
+			title = 'You Lose!';
+			subtitle = 'Next time...';
+			color = 'text-red-600';
+			break;
 		case 'waiting_final':
-		title = 'You Win!';
-		subtitle = 'final in preparation';
-		color = 'text-green-600';
-		break;
+			title = 'You Win!';
+			subtitle = 'final in preparation';
+			color = 'text-green-600';
+			break;
 		case 'winner':
-		title = 'Champion!';
-		subtitle = 'You won the tournament!';
-		color = 'text-green-600';
-		break;
+			title = 'You Win!';
+			subtitle = 'Congratulation!';
+			color = 'text-green-600';
+			break;
 	}
 
 	overlay.innerHTML = `

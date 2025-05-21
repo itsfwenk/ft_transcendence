@@ -1,8 +1,9 @@
 import { getMatchmakingSocket } from "../wsClient";
+import { showResultOverlay } from "./game";
 import { fetchUserProfile } from "./mode";
 import { getAvatarUrl } from "./profile";
 
-let cleanupMatchmakingFn: () => void;
+//let cleanupMatchmakingFn: () => void;
 
 export async function fetchUserAvatar(userId: string): Promise<string> {
   try {
@@ -32,37 +33,37 @@ export async function fetchUserAvatar(userId: string): Promise<string> {
   }
 }
 
-function show1v1ResultScreen(
-  isWinner: boolean,
-  scores: { score1: number; score2: number }
-) {
-  const app = document.getElementById('app');
-  if (!app) return;
+// function show1v1ResultScreen(
+//   isWinner: boolean,
+//   scores: { score1: number; score2: number }
+// ) {
+//   const app = document.getElementById('app');
+//   if (!app) return;
   
-  if (cleanupMatchmakingFn) {
-    cleanupMatchmakingFn();
-  }
+//   if (cleanupMatchmakingFn) {
+//     cleanupMatchmakingFn();
+//   }
   
-  app.innerHTML = `
-    <div class="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
-      <h2 class="text-3xl font-bold mb-4">
-        ${isWinner ? '🎉 Victoire !' : '😢 Défaite'}
-      </h2>
+//   app.innerHTML = `
+//     <div class="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
+//       <h2 class="text-3xl font-bold mb-4">
+//         ${isWinner ? '🎉 Victoire !' : '😢 Défaite'}
+//       </h2>
   
-      <p class="mb-6 text-lg">Score : ${scores.score1} – ${scores.score2}</p>
+//       <p class="mb-6 text-lg">Score : ${scores.score1} – ${scores.score2}</p>
   
-      <button id="backBtn"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">
-        Retour au menu
-      </button>
-    </div>
-  `;
+//       <button id="backBtn"
+//           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">
+//         Retour au menu
+//       </button>
+//     </div>
+//   `;
   
-  document.getElementById('backBtn')?.addEventListener('click', () => {
-    history.pushState(null, '', '/menu');
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  });
-}
+//   document.getElementById('backBtn')?.addEventListener('click', () => {
+//     history.pushState(null, '', '/menu');
+//     window.dispatchEvent(new PopStateEvent('popstate'));
+//   });
+// }
 
 export default async function Queue() {
   const app = document.getElementById('app');
@@ -201,7 +202,7 @@ export default async function Queue() {
     }
   }
   
-  cleanupMatchmakingFn = cleanupMatchmaking;
+  //cleanupMatchmakingFn = cleanupMatchmaking;
 
   function handleMessage(event: MessageEvent) {
     try {
@@ -241,16 +242,9 @@ export default async function Queue() {
 			console.log("Le match commence");
 			break;
           
-        case 'MATCH_END':
-          console.log("Message MATCH_END reçu:", msg.payload);
-          const {winner_Id, score1, score2} = msg.payload;
-          console.log("Identifiant du gagnant:", winner_Id);
-          console.log("Identifiant du joueur actuel:", currentPlayerId);
-          const isWinner = winner_Id === currentPlayerId;
-          console.log("Est-ce que je suis le gagnant?", isWinner);
-          console.log("Scores:", score1, score2);
-          show1v1ResultScreen(isWinner, {score1, score2});
-          break;
+        case 'PLAYER_STATE_UPDATE':
+			showResultOverlay(msg.payload.state)
+			break;
       }    
     } catch (error) {
       console.error("Erreur lors du traitement du message:", error);

@@ -1,3 +1,4 @@
+import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
 
 // let gameState : Game;
@@ -36,6 +37,9 @@ export interface Game {
 	canvasWidth: number;
 	canvasHeight: number;
 }
+
+//let cleanupMatchmakingFn: () => void;
+
 
 
 
@@ -100,9 +104,12 @@ export default function game() {
 		socket.send(JSON.stringify({ type: 'FORFEIT' }));        
 		socket.close(1000, 'player quit');                       
 		}
-		history.pushState(null, '', '/mode');
-		window.dispatchEvent(new PopStateEvent('popstate'));
+  		makeBackButton(); 
 	}
+
+
+
+
 
 	function updateMatchType(type: string) {
         const matchType = document.getElementById('match-type');
@@ -320,6 +327,8 @@ export default function game() {
 	document.addEventListener('keydown', keydownHandler);
 	document.addEventListener('keyup', keyupHandler);
 
+
+
             
 	function renderGame(state: Game) {
 		if (!ctx || !canvas || !gameStarted) return;
@@ -369,42 +378,110 @@ export default function game() {
 		ctx.closePath();
 	}
 
+	function handleMessage(event: MessageEvent) {
+		try {
+		const msg = JSON.parse(event.data);
+		console.log("Message reçu:", msg);
 
-}
+		switch (msg.type) {
+			case 'PLAYER_STATE_UPDATE':
+				showResultOverlay(msg.payload.state)
+				break;
+			case 'MATCH_PREP':
+				const gameSessionId = msg.payload.gameSessionId;
+				history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
+				window.dispatchEvent(new PopStateEvent('popstate'));
+				break;
+		}    
+		} catch (error) {
+		console.error("Erreur lors du traitement du message:", error);
+		}
+ 	}
 
-export function showResultOverlay(state: 'eliminated'|'waiting_next_round'|'waiting_final'|'winner') {
-	const overlay = document.getElementById('result-overlay')!;
-	overlay.classList.remove('hidden');
 
-	let title = '';
-	let subtitle = '';
-	let color = '';
+	function cleanupMatchmaking() {
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			console.log("Cleanup matchmaking game");
+			ws.removeEventListener('message', handleMessage);
+		}
+	}
+	
+	const handlePageUnload = () => {
+		cleanupMatchmaking();
+	};
 
-	switch (state) {
-		case 'waiting_next_round':
-			title = 'You Win!';
-			subtitle = 'waiting your opponent…';
-			color = 'text-green-600';
-			break;
-		case 'eliminated':
-			title = 'You Lose!';
-			subtitle = 'Next time...';
-			color = 'text-red-600';
-			break;
-		case 'waiting_final':
-			title = 'You Win!';
-			subtitle = 'final in preparation';
-			color = 'text-green-600';
-			break;
-		case 'winner':
-			title = 'You Win!';
-			subtitle = 'Congratulation!';
-			color = 'text-green-600';
-			break;
+	const ws = getMatchmakingSocket();
+
+	if (!ws || ws.readyState !== WebSocket.OPEN) {
+		console.error("Pas de connexion WebSocket disponible");
+		return;
+	}
+	ws.removeEventListener('message', handleMessage);
+
+	window.addEventListener('beforeunload', handlePageUnload);
+
+	ws.onmessage = handleMessage;
+	//ws.addEventListener('message', handleMessage);
+
+
+	function makeBackButton() {
+		const btn = document.getElementById('quit-btn') as HTMLButtonElement;
+		if (!btn) return;
+
+		const newBtn = btn.cloneNode(true) as HTMLButtonElement;
+		btn.parentNode!.replaceChild(newBtn, btn);
+
+		newBtn.id = 'back-btn';
+		newBtn.textContent = 'Retour';
+		newBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+		newBtn.classList.add   ('bg-gray-700', 'hover:bg-gray-800');
+
+		newBtn.addEventListener('click', () => {
+			history.pushState(null, '', '/mode');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+		});
 	}
 
-	overlay.innerHTML = `
-		<h2 class="text-6xl font-bold mb-2 ${color}">${title}</h2>
-		<p class="text-xl text-black">${subtitle}</p>
-	`;
+	function showResultOverlay(state: 'eliminated'|'waiting_next_round'|'waiting_final'|'winner') {
+		const overlay = document.getElementById('result-overlay')!;
+		overlay.classList.remove('hidden');
+		makeBackButton()
+
+		let title = '';
+		let subtitle = '';
+		let color = '';
+
+		switch (state) {
+			case 'waiting_next_round':
+				title = 'You Win!';
+				subtitle = 'waiting your opponent…';
+				color = 'text-green-600';
+				break;
+			case 'eliminated':
+				title = 'You Lose!';
+				subtitle = 'Next time...';
+				color = 'text-red-600';
+				break;
+			case 'waiting_final':
+				title = 'You Win!';
+				subtitle = 'final in preparation';
+				color = 'text-green-600';
+				break;
+			case 'winner':
+				title = 'You Win!';
+				subtitle = 'Congratulation!';
+				color = 'text-green-600';
+				break;
+		}
+
+		overlay.innerHTML = `
+			<h2 class="text-6xl font-bold mb-2 ${color}">${title}</h2>
+			<p class="text-xl text-black">${subtitle}</p>
+		`;
+	}
+
+
 }
+
+
+

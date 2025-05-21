@@ -1,5 +1,4 @@
 import { getMatchmakingSocket } from "../wsClient";
-import { showResultOverlay } from "./game";
 import { fetchUserProfile } from "./mode";
 import { getAvatarUrl } from "./profile";
 
@@ -66,29 +65,26 @@ export async function fetchUserAvatar(userId: string): Promise<string> {
 // }
 
 export default async function Queue() {
-  const app = document.getElementById('app');
-  if (!app) return;
+	const app = document.getElementById('app');
+	if (!app) return;
   
-  const userProfile = await fetchUserProfile();
-  if (!userProfile) {
-    console.error("Aucun utilisateur connecté");
-    return;
-  }
+	const userProfile = await fetchUserProfile();
+	if (!userProfile) {
+		console.error("Aucun utilisateur connecté");
+		return;
+	}
   
-  const currentPlayerId = userProfile.userId;
-  console.log("currentPlayerId:", currentPlayerId);
+	const currentPlayerId = userProfile.userId;
+	console.log("currentPlayerId:", currentPlayerId);
 
-  const currentPlayerAvatar = getAvatarUrl(currentPlayerId);
-  console.log("Avatar de l'utilisateur actuel:", currentPlayerAvatar);
+	const currentPlayerAvatar = getAvatarUrl(currentPlayerId);
+	console.log("Avatar de l'utilisateur actuel:", currentPlayerAvatar);
   
   function renderPlayerBox(playerId: string, playerName: string, avatarUrl: string) {
-    console.log("Rendu du joueur:", playerName, "avec l'avatar:", avatarUrl);
 
     const boxId = `player-${playerId.slice(0, 8)}`;
 
-    if (avatarUrl) {
-      console.log("Test de l'URL de l'avatar:", avatarUrl);
-      
+    if (avatarUrl) {  
       return `
       <div id="${boxId}" class="w-16 h-16 bg-blue-600 text-white flex items-center justify-center text-2xl rounded-md cube-3d">
         <img 
@@ -143,6 +139,7 @@ export default async function Queue() {
     console.error("Pas de connexion WebSocket disponible");
     return;
   }
+  ws.removeEventListener('message', handleMessage);
 
   function updateOpponentDisplay(player: {userId: string; userName: string}) {
     if (player.userId === currentPlayerId) return; 
@@ -184,6 +181,7 @@ export default async function Queue() {
       
       if (timeLeft < 0) {
         clearInterval(intervalId);
+		cleanupMatchmaking(); 
         history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
         window.dispatchEvent(new PopStateEvent('popstate'));
       }
@@ -193,11 +191,7 @@ export default async function Queue() {
   // Définir la fonction de nettoyage
   function cleanupMatchmaking() {
     if (ws && ws.readyState === WebSocket.OPEN) {
-      console.log("Envoi du message de départ de la file d'attente");
-      ws.send(JSON.stringify({
-        action: 'QUEUE_LEAVE_1V1',
-        payload: {playerId: currentPlayerId}
-      }));
+      console.log("Cleanup matchmaking queue1v1");
       ws.removeEventListener('message', handleMessage);
     }
   }
@@ -238,13 +232,6 @@ export default async function Queue() {
 		  const delay = Number(import.meta.env.VITE_1V1_LAUNCH_DELAY ?? '5');
           startCountdown1v1(gameSessionId, opponent, delay);
           break;
-		case 'MATCH_START':
-			console.log("Le match commence");
-			break;
-          
-        case 'PLAYER_STATE_UPDATE':
-			showResultOverlay(msg.payload.state)
-			break;
       }    
     } catch (error) {
       console.error("Erreur lors du traitement du message:", error);
@@ -257,7 +244,9 @@ export default async function Queue() {
 
   window.addEventListener('beforeunload', handlePageUnload);
 
-  ws.addEventListener('message', handleMessage);
+	//ws.addEventListener('message', handleMessage);
+	ws.onmessage = handleMessage;
+
 
   ws.send(JSON.stringify({
     action: "QUEUE_JOIN_1V1",

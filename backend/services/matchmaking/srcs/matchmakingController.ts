@@ -308,7 +308,7 @@ export function onMatchCompleted(matchId: string): void {
 			winnersocket?.send(JSON.stringify({
 				type: 'PLAYER_STATE_UPDATE',
 				payload: {
-					state: 'waiting_final_prep',
+					state: 'waiting_final',
 					tournament
 				}
 			}));

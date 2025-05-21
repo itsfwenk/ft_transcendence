@@ -1,7 +1,7 @@
 import { fetchUserProfile } from "./mode";
 import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
-import { showResultOverlay } from "./game";
+
 
 export default async function Queuetournament() {
 	const app = document.getElementById('app');
@@ -123,14 +123,11 @@ export default async function Queuetournament() {
 		console.error("Pas de connexion WebSocket disponible");
 		return;
 	}
+	ws.removeEventListener('message', handleMessage);
 	
 	function cleanupMatchmaking() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
-			console.log("Envoi du message de départ de la file d'attente");
-			ws.send(JSON.stringify({
-				action: 'QUEUE_LEAVE_TOURNAMENT',
-				payload: {playerId: currentPlayerId}
-			}));
+			console.log("CleanupMatchmaking Tournament");
 			ws.removeEventListener('message', handleMessage);
 			cancelCountdown();
 		}
@@ -214,10 +211,7 @@ export default async function Queuetournament() {
 				case 'QUEUE_TOURNAMENT_PLAYER_LEFT':
 					removePlayerFromSlot(msg.playerId as string);
 					break;
-
-
 				case 'MATCH_PREP':
-					console.log("msg MATch_prep", msg);
 					const gameSessionId = msg.payload.gameSessionId;
 					const round = msg.payload.round;
 					if (round === 2) {
@@ -229,9 +223,6 @@ export default async function Queuetournament() {
 						window.dispatchEvent(new PopStateEvent('popstate'));
 					});
 					}
-					break;
-				case 'PLAYER_STATE_UPDATE':
-					showResultOverlay(msg.payload.state);
 					break;
 			}		
 		} catch (error) {
@@ -245,7 +236,9 @@ export default async function Queuetournament() {
 	
 		window.addEventListener('beforeunload', handlePageUnload);
 	
-		ws.addEventListener('message', handleMessage);
+		ws.onmessage = handleMessage;
+		//ws.addEventListener('message', handleMessage);
+
 	
 		ws.send(JSON.stringify({
 			action: "QUEUE_JOIN_TOURNAMENT",

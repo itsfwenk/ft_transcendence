@@ -11,6 +11,7 @@ WORKDIR /app
 COPY backend/services/game/package*.json ./
 COPY backend/services/game/tsconfig.json ./
 COPY ./gameInterfaces.ts ./
+COPY backend/services/game/srcs ./srcs
 
 ENV npm_config_build_from_source=true
 ENV npm_config_prebuild_install=false

@@ -253,6 +253,10 @@ export default function game() {
         
             socket.onclose = () => {
                 console.log("WebSocket déconnecté du serveur de jeu");
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
             };
         
             socket.onerror = (error) => {

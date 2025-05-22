@@ -58,6 +58,7 @@ services:
     ports:
       - "0.0.0.0:8080:80"
       - "0.0.0.0:8443:8443"
+      - "0.0.0.0:2019:2019"
       # - "${FRONTEND_PORT}"
       # - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
       # - "${GAME_SERVICE_PORT}:${GAME_SERVICE_PORT}"
@@ -76,7 +77,7 @@ services:
     restart: always
   
   prometheus:
-    image: prom/prometheus:v2.51.2
+    image: prom/prometheus:latest
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=15d'
@@ -91,11 +92,40 @@ services:
       - user
       - game
       - matchmaking
+  node-exporter:
+   image: prom/node-exporter:latest
+   restart: always
+   pid: host
+   networks:
+      - app-network
+   command:
+      - '--path.rootfs=/host'
+   volumes:
+      - /:/host:ro,rslave
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    restart: always
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PWD}
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - app-network
+    depends_on:
+      - prometheus
+  
+   
 
 volumes:
   caddy_data:
   caddy_config:
   prometheus_data:
+  grafana_data:
 
 networks:
   app-network:

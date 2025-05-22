@@ -10,7 +10,12 @@ module.exports = {
 		fontFamily: {
 			'jaro': ['Jaro', 'Jost', 'sans-serif'],
 			'inria': ['Inria Sans', 'sans-serif'],
+			'arcade': ['"Press Start 2P"', 'monospace'],
 		  },
+		colors: {
+			player1: '#6868ff',
+    		player2: '#ff6868',
+		}
 	  }
 	},
 	plugins: []

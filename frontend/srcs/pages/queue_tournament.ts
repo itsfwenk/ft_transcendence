@@ -1,6 +1,4 @@
 import { fetchUserProfile } from "./mode";
-//import { fetchUserAvatar } from "./queue";
-
 import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
 import i18n from '../i18n';
@@ -18,73 +16,106 @@ export default async function Queuetournament() {
 	const currentPlayerId = userProfile.userId;
 	console.log(`${i18n.t('profile.currentPlayerId')}:`, currentPlayerId);
 
-	//const currentPlayerAvatar = await fetchUserAvatar(currentPlayerId);
 	const currentPlayerAvatar = getAvatarUrl(currentPlayerId);
 	console.log(`${i18n.t('profile.currentPlayerAvatar')}:`, currentPlayerAvatar);
   
 	app.innerHTML = /*html*/ `
-	<div class="text-black font-jaro text-9xl mt-10 select-none">${i18n.t('queue.tournamentQueue')}</div>
-  
-	<!-- Grille des avatars -->
-	<div id="queue-list" class="flex gap-3 flex-wrap justify-center">
-	  ${renderPlayerBox(currentPlayerId,
-						userProfile.userName ?? i18n.t('queue.you'),
-						currentPlayerAvatar)}
-	</div>
-  
-	<p class="text-gray-700 mb-12">${i18n.t('queue.searchingOpponents')}</p>
-  
-	<button id="backBtn"
-			class="px-6 py-2 rounded bg-gray-700 text-white hover:bg-gray-600">
-	  ${i18n.t('general.back')}
-	</button>
+	<div class="text-black font-jaro text-9xl mt-16 mb-36 select-none">Pong Game</div>
+    <div class="flex flex-col items-center justify-center">
+      <div class="flex flex-col items-center justify-center w-1/3 bg-blue-700 rounded-md">
+      <h1 class="text-6xl mb-9 pt-2 font-jaro">Tournament</h1>
+      <div id="queue-list" class="flex flex-wrap justify-center gap-3">
+	  
+	  
+      </div>
+      <p id="status-message" class="text-white font-inria font-bold pt-5 m-5">searching for opponents...</p>
+      </div>
+      <div id="backBtn" class='button w-24 h-13 mt-10 bg-gray-700 rounded-full cursor-pointer select-none
+      hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
+      hover:border-b-[0px]
+      transition-all duration-150 [box-shadow:0_10px_0_0_#181818,0_15px_0_0_#1b70f841]
+      border-b-[1px] border-gray-400'>
+      <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>Back</span>
+      </div>
+    </div>
   `;
+
+	const queueList = document.getElementById('queue-list')!;
+	for (let i = 0; i < 4; i++) {
+		queueList.insertAdjacentHTML(
+			'beforeend',
+			`<div class="slot w-16 h-16 bg-white rounded-md cube-3d overflow-hidden"
+				data-filled="false"></div>`
+		);
+	}
+	type QueuePlayer = { userId: string; userName: string; avatarUrl: string };
+
+	const slots = Array.from(
+	document.querySelectorAll<HTMLDivElement>('#queue-list .slot')
+	);
+
+	function addPlayerToSlot(p: QueuePlayer) {
+	if (document.querySelector(`[data-user-id="${p.userId}"]`)) return;
+
+	const slot = slots.find(s => s.dataset.filled === 'false');
+	if (!slot) return; // queue full
+
+	slot.dataset.filled = 'true';
+	slot.dataset.userId = p.userId;
+
+	slot.innerHTML = `
+		<img src="${p.avatarUrl || '/avatars/default.png'}"
+			alt="${p.userName}"
+			class="w-full h-full object-cover" />`;
+	}
+
+	function removePlayerFromSlot(userId: string) {
+	const slot = document.querySelector<HTMLDivElement>(
+		`.slot[data-user-id="${userId}"]`
+	);
+	if (!slot) return;
+
+	slot.dataset.filled = 'false';
+	slot.removeAttribute('data-user-id');
+	slot.innerHTML = '';
+	}
+
+
   	
+	let countdownHandle: number | null = null;
+	let time = Number(import.meta.env.VITE_TOURNAMENT_LAUNCH_DELAY ?? '5');
 
 
-	function renderPlayerBox(playerId: string, playerName: string, avatarUrl: string) {
-		console.log(`${i18n.t('queue.renderingPlayer')}:`, playerName, `${i18n.t('queue.withAvatar')}:`, avatarUrl);
+	function startCountdown(delay: number, cb: () => void) {
+		//const box   = document.getElementById('tournament-timer')!;
+		//const label = document.getElementById('timer-value')!;
+		const statusMessage = document.getElementById('status-message');
 
-		const boxId = `player-${playerId.slice(0, 8)}`;
-		// const playerInitial = playerName.charAt(0).toUpperCase();
-
-		if (avatarUrl) {
-			console.log(`${i18n.t('queue.testingAvatarURL')}:`, avatarUrl);
-			
-			return `
-			<div id="${boxId}" class="w-16 h-16 bg-blue-600 text-white flex items-center justify-center text-2xl rounded-md cube-3d">
-				<img 
-				src="${avatarUrl}" 
-				alt="${playerName}" 
-				class="w-full h-full object-cover"
-				onload="console.log('${i18n.t('queue.imageLoadedSuccessfully')}:', '${avatarUrl}')"
-				onerror="console.log('${i18n.t('queue.errorLoadingImage')}:', '${avatarUrl}'); this.onerror=null; this.src='/avatars/default.png';"
-				/>
-			</div>
-			`;
-		} else {
-			return `
-			<div class="w-16 h-16 bg-blue-600 rounded-md cube-3d flex items-center justify-center text-white text-2xl">
-				<img 
-				src="/avatars/default.png" 
-				alt="${playerName}" 
-				class="w-full h-full object-cover"
-				/>
-			</div>
-			`;
+		if (countdownHandle) 
+			clearInterval(countdownHandle);
+		//box.classList.remove('hidden');
+		let seconds = delay > 0 ? delay : 5;
+		if (statusMessage) {
+			statusMessage.textContent = `Tournament starts in ${seconds}`;
 		}
+
+		countdownHandle = window.setInterval(() => {
+			seconds--;
+			if (seconds > 0 && statusMessage) {
+				statusMessage.textContent = `Tournament starts in ${seconds}`;
+			} else {
+				clearInterval(countdownHandle!);
+				countdownHandle = null;
+				cb();
+			}
+		}, 1000);
 	}
 
-	function addPlayerBox(id: string, name: string, url: string) {
-		const grid  = document.getElementById('queue-list')!;
-		const boxId = `player-${id.slice(0, 8)}`;
-		if (document.getElementById(boxId)) return;
-	  
-		grid.insertAdjacentHTML('beforeend', renderPlayerBox(id, name, url));
-	}
-	  
-	function removePlayerBox(id: string) {
-		document.getElementById(`player-${id.slice(0, 8)}`)?.remove();
+	function cancelCountdown() {
+		if (countdownHandle) 
+			clearInterval(countdownHandle);
+		countdownHandle = null;
+		document.getElementById('tournament-timer')?.classList.add('hidden');
 	}
 
 	const ws = getMatchmakingSocket();
@@ -92,17 +123,77 @@ export default async function Queuetournament() {
 		console.error(i18n.t('gameMode.socketNotConnected'));
 		return;
 	}
+	ws.removeEventListener('message', handleMessage);
 	
 	function cleanupMatchmaking() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
-			console.log(i18n.t('queue.sendingQueueLeaveMessage'));
-			ws.send(JSON.stringify({
-				action: 'QUEUE_LEAVE_TOURNAMENT',
-				payload: {playerId: currentPlayerId}
-			}));
+			console.log("CleanupMatchmaking Tournament");
 			ws.removeEventListener('message', handleMessage);
+			cancelCountdown();
 		}
 	}
+	// function updatePlayerStateUI(state: string) {
+	// 	const app = document.getElementById('app');
+	// 	if (!app) return;
+	
+	// 	switch (state) {
+	// 		case 'eliminated':
+	// 			app.innerHTML = `
+	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+	// 					<h2 class="text-2xl font-bold mb-4">Dommage, vous êtes éliminé !</h2>
+	// 					<p class="text-gray-600">Vous pourrez retenter votre chance la prochaine fois.</p>
+	// 					<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
+	// 				</div>
+	// 			`;
+	// 		break;
+		
+	// 		case 'waiting_next_round':
+	// 			app.innerHTML = `
+	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+	// 					<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
+	// 					<p class="text-gray-600">En attente du prochain tour...</p>
+	// 				</div>
+	// 			`;
+	// 		break;
+
+	// 		case 'waiting_final_prep':
+	// 			app.innerHTML = `
+	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+	// 					<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
+	// 					<p class="text-gray-600">La finale est en preparation...</p>
+	// 				</div>
+	// 			`;
+	// 		break;
+		
+	// 		case 'winner':
+	// 			app.innerHTML = `
+	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+	// 					<h2 class="text-2xl font-bold mb-4">Bravo, vous avez gagné le tournoi !</h2>
+	// 					<p class="text-gray-600">Vous êtes le champion. Félicitations&nbsp;!</p>
+	// 					<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
+	// 				</div>
+	// 			`;
+	// 		break;
+		
+	// 		default:
+	// 			app.innerHTML = `
+	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
+	// 					<h2 class="text-2xl font-bold mb-4">Votre état joueur : ${state}</h2>
+	// 					<p class="text-gray-600">En attente d'informations supplémentaires.</p>
+	// 				</div>
+	// 			`;
+	// 	}
+	// 	const backToMenuBtn = document.getElementById('backToMenuBtn');
+	// 	backToMenuBtn?.addEventListener('click', () => {
+	// 		history.pushState(null, '', '/menu');
+	// 		window.dispatchEvent(new PopStateEvent('popstate'));
+	// 	});
+  	// }
+	addPlayerToSlot({
+		userId: currentPlayerId,
+		userName: userProfile.userName ?? 'You',
+		avatarUrl: currentPlayerAvatar
+	});
 	async function handleMessage(event: MessageEvent) {
 		try {
 			const msg = JSON.parse(event.data);
@@ -110,30 +201,29 @@ export default async function Queuetournament() {
 
 			switch (msg.type) {
 				case 'QUEUE_TOURNAMENT_PLAYER_JOINED':
-					const list: {userId: string; userName: string}[] = msg.players;
-					for (const p of list) {
-					  if (p.userId === currentPlayerId) continue;
-					  //const url = await fetchUserAvatar(p.userId);
-					  const url = getAvatarUrl(p.userId);
-					  addPlayerBox(p.userId, p.userName ?? i18n.t('queue.opponent'), url);
-					}
+					const list = msg.players as QueuePlayer[];
+					list.forEach(p => addPlayerToSlot({
+					userId: p.userId,
+					userName: p.userName ?? 'Opponent',
+					avatarUrl: getAvatarUrl(p.userId)
+					}));
 					break;
 				case 'QUEUE_TOURNAMENT_PLAYER_LEFT':
-					removePlayerBox(msg.playerId);
+					removePlayerFromSlot(msg.playerId as string);
 					break;
-				case 'TOURNAMENT_LAUNCH':
-					cleanupMatchmaking();
-					const tournament_Id = msg.payload.tournament.id;
-					console.log(`${i18n.t('queue.tournamentId')}:`, tournament_Id);
-					history.pushState(null, '', `/tournament?tournament_Id=${tournament_Id}`);
-					window.dispatchEvent(new PopStateEvent('popstate'));
+				case 'MATCH_PREP':
+					const gameSessionId = msg.payload.gameSessionId;
+					const round = msg.payload.round;
+					if (round === 2) {
+						history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
+						window.dispatchEvent(new PopStateEvent('popstate'));
+					} else {
+					startCountdown(time, () => {
+						history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
+						window.dispatchEvent(new PopStateEvent('popstate'));
+					});
+					}
 					break;
-
-				// case 'MATCH_START':
-					
-      			// 	history.pushState(null, '', `/game?gameSessionId=${msg.gameSessionId}`);
-      			// 	window.dispatchEvent(new PopStateEvent('popstate'));
-				// 	break;
 			}		
 		} catch (error) {
 			console.error(`${i18n.t('queue.errorProcessingMessage')}:`, error);
@@ -146,7 +236,9 @@ export default async function Queuetournament() {
 	
 		window.addEventListener('beforeunload', handlePageUnload);
 	
-		ws.addEventListener('message', handleMessage);
+		ws.onmessage = handleMessage;
+		//ws.addEventListener('message', handleMessage);
+
 	
 		ws.send(JSON.stringify({
 			action: "QUEUE_JOIN_TOURNAMENT",

@@ -8,7 +8,6 @@ import loginSuccess from './pages/googleSuccess';
 import menu from './pages/menu';
 import mode from './pages/mode';
 import Queuetournament from './pages/queue_tournament';
-import Tournament_mgt from './pages/tournament';
 import Local from './pages/local';
 import editProfile from './pages/editProfile';
 import historyProfile from './pages/history';
@@ -24,7 +23,6 @@ const routes: { [key: string]: () => void } = {
   '/local': Local,
   '/queue': Queue,
   '/queue_tournament': Queuetournament,
-  '/tournament': Tournament_mgt,
   '/create_account': createAccount,
   '/login_error': loginError,
   '/login_success': loginSuccess,

@@ -3,7 +3,7 @@ import { fetchUserProfile } from "./mode";
 import { getAvatarUrl } from "./profile";
 import i18n from '../i18n';
 
-let cleanupMatchmakingFn: () => void;
+//let cleanupMatchmakingFn: () => void;
 
 export async function fetchUserAvatar(userId: string): Promise<string> {
   try {
@@ -33,41 +33,41 @@ export async function fetchUserAvatar(userId: string): Promise<string> {
   }
 }
 
-function show1v1ResultScreen(
-  isWinner: boolean,
-  scores: { score1: number; score2: number }
-) {
-  const app = document.getElementById('app');
-  if (!app) return;
+// function show1v1ResultScreen(
+//   isWinner: boolean,
+//   scores: { score1: number; score2: number }
+// ) {
+//   const app = document.getElementById('app');
+//   if (!app) return;
   
-  if (cleanupMatchmakingFn) {
-    cleanupMatchmakingFn();
-  }
+//   if (cleanupMatchmakingFn) {
+//     cleanupMatchmakingFn();
+//   }
   
-  app.innerHTML = `
-    <div class="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
-      <h2 class="text-3xl font-bold mb-4">
-        ${isWinner ? i18n.t('result.victory') : i18n.t('result.defeat')}
-      </h2>
+//   app.innerHTML = `
+//     <div class="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
+//       <h2 class="text-3xl font-bold mb-4">
+//         ${isWinner ? '🎉 Victoire !' : '😢 Défaite'}
+//       </h2>
   
-      <p class="mb-6 text-lg">${i18n.t('result.score', { score1: scores.score1, score2: scores.score2 })}</p>
+//       <p class="mb-6 text-lg">Score : ${scores.score1} – ${scores.score2}</p>
   
-      <button id="backBtn"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">
-        ${i18n.t('result.backToMenu')}
-      </button>
-    </div>
-  `;
+//       <button id="backBtn"
+//           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded">
+//         Retour au menu
+//       </button>
+//     </div>
+//   `;
   
-  document.getElementById('backBtn')?.addEventListener('click', () => {
-    history.pushState(null, '', '/menu');
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  });
-}
+//   document.getElementById('backBtn')?.addEventListener('click', () => {
+//     history.pushState(null, '', '/menu');
+//     window.dispatchEvent(new PopStateEvent('popstate'));
+//   });
+// }
 
 export default async function Queue() {
-  const app = document.getElementById('app');
-  if (!app) return;
+	const app = document.getElementById('app');
+	if (!app) return;
   
   const userProfile = await fetchUserProfile();
   if (!userProfile) {
@@ -143,6 +143,7 @@ export default async function Queue() {
     console.error(i18n.t('gameMode.socketNotConnected'));
     return;
   }
+  ws.removeEventListener('message', handleMessage);
 
   function updateOpponentDisplay(player: {userId: string; userName: string}) {
     if (player.userId === currentPlayerId) return; 
@@ -159,7 +160,7 @@ export default async function Queue() {
     }
   }
 
-  function startCountdown1v1(gameSessionId: string, opponent?: {userId: string; userName: string}) {
+  function startCountdown1v1(gameSessionId: string, opponent?: {userId: string; userName: string}, delay?: number) {
     if (opponent) {
       updateOpponentDisplay(opponent);
     }
@@ -169,7 +170,7 @@ export default async function Queue() {
     
     if (backBtn) backBtn.classList.add('hidden');
     
-    let timeLeft = 3;
+    let timeLeft = delay ?? 5;
     
     if (statusMessage) {
       statusMessage.textContent = i18n.t('queue.gameStartingIn', { seconds: timeLeft });
@@ -184,6 +185,7 @@ export default async function Queue() {
       
       if (timeLeft < 0) {
         clearInterval(intervalId);
+		cleanupMatchmaking(); 
         history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
         window.dispatchEvent(new PopStateEvent('popstate'));
       }
@@ -202,7 +204,7 @@ export default async function Queue() {
     }
   }
   
-  cleanupMatchmakingFn = cleanupMatchmaking;
+  //cleanupMatchmakingFn = cleanupMatchmaking;
 
   function handleMessage(event: MessageEvent) {
     try {
@@ -235,21 +237,8 @@ export default async function Queue() {
             userId: msg.payload.opponentId, 
             userName: i18n.t('queue.opponent')
           };
-          startCountdown1v1(gameSessionId, opponent);
-          break;
-		case 'MATCH_START':
-			console.log(i18n.t('queue.matchStarting'));
-			break;
-          
-        case 'MATCH_END':
-          console.log(`${i18n.t('queue.matchEndMessageReceived')}:`, msg.payload);
-          const {winner_Id, score1, score2} = msg.payload;
-          console.log(`${i18n.t('queue.winnerId')}:`, winner_Id);
-          console.log(`${i18n.t('queue.currentPlayerId')}:`, currentPlayerId);
-          const isWinner = winner_Id === currentPlayerId;
-          console.log(`${i18n.t('queue.amIWinner')}:`, isWinner);
-          console.log(`${i18n.t('queue.scores')}:`, score1, score2);
-          show1v1ResultScreen(isWinner, {score1, score2});
+		  const delay = Number(import.meta.env.VITE_1V1_LAUNCH_DELAY ?? '5');
+          startCountdown1v1(gameSessionId, opponent, delay);
           break;
       }    
     } catch (error) {
@@ -263,7 +252,9 @@ export default async function Queue() {
 
   window.addEventListener('beforeunload', handlePageUnload);
 
-  ws.addEventListener('message', handleMessage);
+	//ws.addEventListener('message', handleMessage);
+	ws.onmessage = handleMessage;
+
 
   ws.send(JSON.stringify({
     action: "QUEUE_JOIN_1V1",

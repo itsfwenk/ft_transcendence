@@ -58,14 +58,15 @@ export async function fetchPublicProfile(playerId: string) {
 	return data as { userId: string; userName: string; avatarUrl: string };
 }
 
+
 //join tournament 1
 export async function joinTournamentQueue(playerId: string) {
 	if (queueTournament.has(playerId)) return;
 	queueTournament.add(playerId);
+	console.log("queueTouranment", queueTournament);
 	const playersList = await Promise.all(
 		[...queueTournament].map(async id => {
 		  const pub = await fetchPublicProfile(id);
-		  console.log("pub", pub);
 		  return {
 			userId   : pub.userId,
 			userName : pub.userName,
@@ -73,23 +74,10 @@ export async function joinTournamentQueue(playerId: string) {
 		  };
 		})
 	);
-	console.log("playersList", playersList);
-	// const ws = websocketClients.get(playerId);
-	// if (ws?.readyState === WebSocket.OPEN) {
-	// ws.send(
-	// 	JSON.stringify({
-	// 	type   : 'QUEUE_SNAPSHOT',
-	// 	players: playersList
-	// 	})
-	// );
-	// }
-	// broadcastToQueue(queueTournament, {
-	// 	type: 'QUEUE_TOURNAMENT_PLAYER_JOINED',
-	// 	playerId
-	// });
-		broadcastToQueue(queueTournament, {
+	console.log("joinTQueue", playersList);
+	broadcastToQueue(queueTournament, {
 		type: 'QUEUE_TOURNAMENT_PLAYER_JOINED',
-		players: playersList
+		players : playersList
 	});
 	console.log(`Joueur ${playerId} a rejoint de la queue Tournament`)
 	console.log(queueTournament);
@@ -107,14 +95,16 @@ export async function leaveTournamentQueue(playerId: string) {
 
 function broadcastToQueue(setQueue: Set<string>, msg: unknown) {
 	const str = JSON.stringify(msg);
-  
+
 	setQueue.forEach(playerId => {
-	  const ws = websocketClients.get(playerId);
-	  if (ws && ws.readyState === WebSocket.OPEN) ws.send(str);
+		console.log("broadcastplayerid", playerId);
+		const ws = websocketClients.get(playerId);
+		if (ws && ws.readyState === WebSocket.OPEN)
+			ws.send(str);
 	});
 }
 
-export async function  launchMatch(matchId: string, delay?:number): Promise<Match | undefined> {
+export async function  launchMatch(matchId: string): Promise<Match | undefined> {
 	const match = getMatchbyId(matchId);
 	if (!match) {
 		throw new Error("Aucun match avec cet id.");
@@ -138,7 +128,7 @@ export async function  launchMatch(matchId: string, delay?:number): Promise<Matc
 				gameSessionId,
 				matchId: match.id,
 				opponentId: match.player2_Id,
-				delay
+				round: match.round
 			}
 		});
 		const message2 = JSON.stringify({
@@ -147,21 +137,11 @@ export async function  launchMatch(matchId: string, delay?:number): Promise<Matc
 				gameSessionId,
 				matchId: match.id,
 				opponentId: match.player1_Id,
-				delay
+				round: match.round
 			}
 		});
 		socket1?.send(message1);
 		socket2?.send(message2);
-		const d = delay ?? 0;
-		setTimeout(() => {
-		websocketClients.get(match.player1_Id)?.send(JSON.stringify({
-			type:'MATCH_START', payload:{ gameSessionId}
-		}));
-		websocketClients.get(match.player2_Id)?.send(JSON.stringify({
-			type:'MATCH_START', payload:{ gameSessionId}
-		}));
-		}, d * 1_000);
-
 	}
 	console.log(` la game session est: ${gameSessionId}`)
 	match.status = 'in_progress';
@@ -170,12 +150,12 @@ export async function  launchMatch(matchId: string, delay?:number): Promise<Matc
 	return (match);
 }
 
-export async function createGameSession(player1_id:string, player2_id:string, matchId:string, delay?:number): Promise<string | undefined> {
+export async function createGameSession(player1_id:string, player2_id:string, matchId:string): Promise<string | undefined> {
 	try {
 		const baseUrl = process.env.GAME_SERVICE_BASE_URL || 'http://game:4002';
 		let response;
 		console.log(matchId);
-		response = await axios.post(`${baseUrl}/game/start`, {player1_id, player2_id, matchId, delay});
+		response = await axios.post(`${baseUrl}/game/start`, {player1_id, player2_id, matchId});
 		console.log('Partie creee:', response.data);
 		return response.data.game.gameId;
 	} catch (error) {
@@ -251,17 +231,17 @@ export async function attemptTournament(): Promise<Tournament | undefined> {
 			if (!tournament) {
 				throw Error ("No tournament created");
 			}
-			const message = JSON.stringify({
-				type: 'TOURNAMENT_LAUNCH',
-				payload: {tournament}
-			});
-			players.forEach((playerId) => {
-				const socket = websocketClients.get(playerId!);
-				if (socket && socket.readyState === WebSocket.OPEN) {
-					socket.send(message);
-				}
-			});
-			console.log("Tournoi cree:", tournament);
+			// const message = JSON.stringify({
+			// 	type: 'TOURNAMENT_LAUNCH',
+			// 	payload: {tournament}
+			// });
+			// players.forEach((playerId) => {
+			// 	const socket = websocketClients.get(playerId!);
+			// 	if (socket && socket.readyState === WebSocket.OPEN) {
+			// 		socket.send(message);
+			// 	}
+			// });
+			// console.log("Tournoi cree:", tournament);
 			return (tournament);
 		}
 	} 
@@ -328,7 +308,7 @@ export function onMatchCompleted(matchId: string): void {
 			winnersocket?.send(JSON.stringify({
 				type: 'PLAYER_STATE_UPDATE',
 				payload: {
-					state: 'waiting_final_prep',
+					state: 'waiting_final',
 					tournament
 				}
 			}));
@@ -339,7 +319,7 @@ export function onMatchCompleted(matchId: string): void {
 			const final_match = updatedtournament.matches.find(m => m.round === 2);
 			console.log("final_match", final_match);
 			if (final_match?.id) {
-				launchMatch(final_match.id, 5);
+				launchMatch(final_match.id);
 			} else {
 				console.error("Finale non trouvee");
 			}
@@ -358,17 +338,21 @@ export function onMatchCompleted(matchId: string): void {
 		console.log("1v1_Match_end", match);
 		const winnersocket = websocketClients.get(winner_Id);
 		const losersocket = websocketClients.get(loserId);
-		const payload = {
-			type: 'MATCH_END',
+		const payloadwinner = {
+			type: 'PLAYER_STATE_UPDATE',
 			payload: {
-			  matchId,
-			  winner_Id,
-			  score1,
-			  score2
+			  state: 'winner'
 			}
-		  };
-		winnersocket?.send(JSON.stringify(payload));
-		losersocket?.send(JSON.stringify(payload));
+		};
+		const payloadloser = {
+			type: 'PLAYER_STATE_UPDATE',
+			payload: {
+			  state: 'eliminated'
+			}
+		};
+		
+		winnersocket?.send(JSON.stringify(payloadwinner));
+		losersocket?.send(JSON.stringify(payloadloser));
 
 	}
 }
@@ -412,22 +396,20 @@ export async function handleMatchmakingMessage(
 			joinQueue1v1(playerId);
 			const match = await attemptMatchv2();
 			if (match) {
-					launchMatch(match.id, 5);
+					launchMatch(match.id);
 			}
 			break;
 	  
 		case 'QUEUE_JOIN_TOURNAMENT':
 			console.log(`[MM] ${playerId} rejoint la file tournoi`);
-			joinTournamentQueue(playerId);
+			await joinTournamentQueue(playerId);
 			const tournament = await attemptTournament();
 			if (tournament) {
-				// tournament.state = 'tournament_launch';
-				// broadcastTournamentState(tournament);
 				const semiFinals = tournament.matches.filter(m => m.round === 1);
 				console.log("voici les demis finales", semiFinals);
 				for (const match of semiFinals) {
 					console.log("match qui va etre lance", match.id);
-					launchMatch(match.id, 5);
+					launchMatch(match.id);
 				}
 			}
 			break;		

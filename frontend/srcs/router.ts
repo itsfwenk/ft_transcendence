@@ -11,6 +11,7 @@ import Queuetournament from './pages/queue_tournament';
 import Local from './pages/local';
 import editProfile from './pages/editProfile';
 import historyProfile from './pages/history';
+import customGame from './pages/customGame';
 
 // Définir vos routes sous forme d'un objet
 const routes: { [key: string]: () => void } = {
@@ -27,6 +28,7 @@ const routes: { [key: string]: () => void } = {
   '/login_success': loginSuccess,
   '/edit_profile': editProfile,
   '/history': historyProfile,
+  '/customGame': customGame,
 };
 
 export function initRouter() {

@@ -73,13 +73,29 @@ services:
       - user
       - game
       - matchmaking
-
     restart: always
   
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
+    volumes:
+      - prometheus_data:/prometheus
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - app-network
+    depends_on:
+      - user
+      - game
+      - matchmaking
 
 volumes:
   caddy_data:
   caddy_config:
+  prometheus_data:
 
 networks:
   app-network:

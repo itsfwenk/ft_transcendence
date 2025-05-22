@@ -56,7 +56,7 @@ app.register(fastifyCookie, {
 // 	credentials: true,
 //   });
 
-
+app.register(require('fastify-metrics'), { routeMetrics:true });
 
 app.register(swaggerUI, {
   routePrefix: '/docs',

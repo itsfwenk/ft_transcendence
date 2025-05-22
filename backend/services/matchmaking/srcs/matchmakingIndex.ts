@@ -13,6 +13,7 @@ const app = Fastify();
 (async () => {
 	app.register(websocket);
 	
+	app.register(require('fastify-metrics'), { routeMetrics:true });
 	
 	// Configurer Swagger
 	app.register(swagger, {
@@ -30,10 +31,11 @@ const app = Fastify();
 	staticCSP: true
 	});
 
+
+
 	// Enregistrer les routes utilisateur
 	app.register(matchmakingRoutes, { prefix: '/matchmaking' });
 
-	app.register(require('fastify-metrics'), { routeMetrics:true })
 
 	app.listen({port: 4003 , host: '0.0.0.0'}, () => {
 		console.log('Matchmaking Service running on http://localhost:4003');

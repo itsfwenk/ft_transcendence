@@ -17,6 +17,7 @@ declare module 'fastify' {
 
 export default async function googleAuthRoutes(fastify: FastifyInstance) {
 	// const baseUrl = window.location.origin;
+	const baseUrl = process.env.USER_SERVICE_BASE_URL || 'http://user:4001';
 	// console.log(`${baseUrl}/user/auth/google/callback`);
 	fastify.register(oauthPlugin, {
 		name: 'googleOAuth2',
@@ -28,7 +29,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
 			auth: oauthPlugin.GOOGLE_CONFIGURATION
 		},
 		startRedirectPath: '/auth/google',
-		callbackUri: 'http://localhost:4000/api-user/auth/google/callback',
+		callbackUri: `https://localhost:8443/user/auth/google/callback`,
 		scope: ['profile', 'email']
 	});
 

@@ -99,7 +99,8 @@ export default  async function login() {
 
 	  const googleLoginBtn = document.getElementById('googleLoginBtn');
 	  googleLoginBtn?.addEventListener('click', () => {
-		window.location.href = 'http://localhost:4000/api-user/auth/google';
+		const baseUrl = window.location.origin;
+		window.location.href = `${baseUrl}/user/auth/google`;
 	  });
 	}
   }

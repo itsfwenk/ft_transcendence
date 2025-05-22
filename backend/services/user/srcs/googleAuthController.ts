@@ -74,9 +74,9 @@ export async function handlerGoogleCallback(this: GoogleOAuthContext, req: Fasti
 				{ userId: user.userId },
 				{ expiresIn: '24h' }
 			);
-			reply.redirect(`http://localhost:5173/login_success?token=${jwt}&new=${isNewUser}`);
+			reply.redirect(`https://localhost:8443/login_success?token=${jwt}&new=${isNewUser}`);
 		} else {
-			reply.redirect('http://localhost:5173/login_error?reason=user_creation_failed');
+			reply.redirect('https://localhost:8443/login_error?reason=user_creation_failed');
 		}
 	} catch (error) {
 		console.error('OAuth callback error:', error);

@@ -178,9 +178,8 @@ export function updateProfileBoxUI(userData: UserData | null) {
 
 export function renderFriendsList(friends: Friend[]) {
 	const friendsListElement = document.getElementById('friendsList');
-	
 	if (!friendsListElement) return;
-	
+
 	if (friends.length === 0) {
 		friendsListElement.innerHTML = `
 			<div class="text-center text-gray-300 mt-8">
@@ -190,8 +189,9 @@ export function renderFriendsList(friends: Friend[]) {
 		`;
 		return;
 	}
-	
-	const friendsHTML = friends.map(friend => {
+
+	// Créer toute la structure d'un coup avec des placeholders
+	const friendsHTML = friends.map((friend, index) => {
 		const isOnline = friend.status === 'online';
 		const statusColor = isOnline ? 'bg-green-500' : 'bg-gray-500';
 		
@@ -201,7 +201,7 @@ export function renderFriendsList(friends: Friend[]) {
 					<div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
 						<img 
 							src="${getAvatarUrl(friend.userId)}" 
-							alt="${friend.userName}" 
+							alt="User avatar"
 							class="w-full h-full object-cover select-none"
 							onerror="this.onerror=null; this.src='/avatars/default.png';"
 						/>
@@ -209,14 +209,21 @@ export function renderFriendsList(friends: Friend[]) {
 					<div class="absolute bottom-0 right-0 w-3 h-3 ${statusColor} border-2 border-red-800 rounded-full select-none"></div>
 				</div>
 				<div class="flex-grow">
-					<div class="font-bold select-none">${friend.userName}</div>
+					<div class="font-bold select-none" data-username="${index}"></div>
 					<div class="text-xs text-gray-300 select-none">${isOnline ? t('profile.online') : t('profile.offline')}</div>
 				</div>
 			</div>
 		`;
 	}).join('');
-	
+
 	friendsListElement.innerHTML = friendsHTML;
+
+	friends.forEach((friend, index) => {
+		const usernameElement = document.querySelector(`[data-username="${index}"]`);
+		if (usernameElement) {
+			usernameElement.textContent = friend.userName;
+		}
+	});
 }
 
 export function showFriendStatus(message: string, isSuccess: boolean) {

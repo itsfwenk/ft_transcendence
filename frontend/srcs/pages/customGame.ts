@@ -6,12 +6,12 @@ export default function customGame() {
             <div class="text-black font-jaro text-9xl mt-16 mb-36 select-none">Game Customization</div>
             <div class="flex flex-col justify-center items-center gap-6">
 
-                <h2 class="text-3xl font-bold text-black mb-4">Select a theme:</h2>
+                <h2 class="text-3xl font-bold text-black font-jaro mb-4">Select a theme:</h2>
 
                 <div class="flex gap-4 mb-8">
                     <button
                         id="defaultTheme"
-                        class="px-6 py-3 rounded-md bg-grey-500 text-white font-semibold shadow-md hover:bg-grey-600 focus:outline-none focus:ring-2 focus:ring-grey-500 focus:ring-opacity-50"
+                        class="px-6 py-3 rounded-md bg-gray-500 text-white font-jaro font-semibold shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-grey-500 focus:ring-opacity-50"
                         data-canvas-color="#FF5733"
                     >
                         Default Theme
@@ -19,7 +19,7 @@ export default function customGame() {
 
                     <button
                         id="themeRedBtn"
-                        class="px-6 py-3 rounded-md bg-red-500 text-white font-semibold shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                        class="px-6 py-3 rounded-md bg-red-500 text-white font-jaro font-semibold shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
                         data-canvas-color="#FF5733"
                     >
                         Inferno Theme
@@ -27,7 +27,7 @@ export default function customGame() {
 
                     <button
                         id="themeBlueBtn"
-                        class="px-6 py-3 rounded-md bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                        class="px-6 py-3 rounded-md bg-blue-500 text-white font-jaro font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                         data-canvas-color="#337AFF"
                     >
                         Oceanic Theme
@@ -35,7 +35,7 @@ export default function customGame() {
 
                     <button
                         id="themeGreenBtn"
-                        class="px-6 py-3 rounded-md bg-green-500 text-white font-semibold shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                        class="px-6 py-3 rounded-md bg-green-500 text-white font-jaro font-semibold shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
                         data-canvas-color="#33FF57"
                     >
                         Forest Theme

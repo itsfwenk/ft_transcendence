@@ -28,6 +28,7 @@ window.addEventListener("load", async () => {
 				window.dispatchEvent(new PopStateEvent('popstate'));
 			} else {
 				const userId = localStorage.getItem("userId");
+				console.log("userId ==>", userId);
 				if (userId) {
 					matchmakingWebSocket(userId);
 					if (currentPath === '/') {

@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import bcrypt from 'bcrypt';
-import { getUserByEmail, saveUser, getUserById } from './userDb.js';
+import { getUserByEmail, saveUser, getUserById, updateUserStatus } from './userDb.js';
 import { linkAccount, getLinkedAccount, unlinkAccount } from './accountDb.js';
 
 interface AuthenticatedRequest extends FastifyRequest {
@@ -62,6 +62,8 @@ export async function handlerGoogleCallback(this: GoogleOAuthContext, req: Fasti
 		console.log("resultat saveUser:", user);
 
 		if (user) {
+			updateUserStatus(user.userId, 'online');
+
 			await linkAccount(
 				user.userId,
 				'google',
@@ -74,9 +76,18 @@ export async function handlerGoogleCallback(this: GoogleOAuthContext, req: Fasti
 				{ userId: user.userId },
 				{ expiresIn: '24h' }
 			);
-			reply.redirect(`http://localhost:5173/login_success?token=${jwt}&new=${isNewUser}`);
+			
+			reply.setCookie('authToken', jwt, {
+				signed: true,
+				httpOnly: true,
+				secure: process.env.NODE_ENV === 'production',
+				sameSite: 'lax',
+				path: '/',
+			});
+
+			reply.redirect(`https://localhost:8443/login_success?token=${jwt}&new=${isNewUser}`);
 		} else {
-			reply.redirect('http://localhost:5173/login_error?reason=user_creation_failed');
+			reply.redirect('https://localhost:8443/login_error?reason=user_creation_failed');
 		}
 	} catch (error) {
 		console.error('OAuth callback error:', error);

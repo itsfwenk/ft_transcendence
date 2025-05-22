@@ -3,8 +3,6 @@ import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
 import i18n from '../i18n';
 
-// Faire trad !!!!!!!!!!!
-
 export default async function Queuetournament() {
 	const app = document.getElementById('app');
 	if (!app) return;
@@ -22,22 +20,22 @@ export default async function Queuetournament() {
 	console.log(`${i18n.t('profile.currentPlayerAvatar')}:`, currentPlayerAvatar);
   
 	app.innerHTML = /*html*/ `
-	<div class="text-black font-jaro text-9xl mt-16 mb-36 select-none">Pong Game</div>
+	<div class="text-black font-jaro text-9xl mt-16 mb-36 select-none">${i18n.t('general.pongGame')}</div>
     <div class="flex flex-col items-center justify-center">
       <div class="flex flex-col items-center justify-center w-1/3 bg-blue-700 rounded-md">
-      <h1 class="text-6xl mb-9 pt-2 font-jaro">Tournament</h1>
+      <h1 class="text-6xl mb-9 pt-2 font-jaro">${i18n.t('tournament.title')}</h1>
       <div id="queue-list" class="flex flex-wrap justify-center gap-3">
 	  
 	  
       </div>
-      <p id="status-message" class="text-white font-inria font-bold pt-5 m-5">searching for opponents...</p>
+      <p id="status-message" class="text-white font-inria font-bold pt-5 m-5">${i18n.t('queue.searchingOpponents')}</p>
       </div>
       <div id="backBtn" class='button w-24 h-13 mt-10 bg-gray-700 rounded-full cursor-pointer select-none
       hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
       hover:border-b-[0px]
       transition-all duration-150 [box-shadow:0_10px_0_0_#181818,0_15px_0_0_#1b70f841]
       border-b-[1px] border-gray-400'>
-      <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>Back</span>
+      <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('general.back')}</span>
       </div>
     </div>
   `;
@@ -98,13 +96,13 @@ export default async function Queuetournament() {
 		//box.classList.remove('hidden');
 		let seconds = delay > 0 ? delay : 5;
 		if (statusMessage) {
-			statusMessage.textContent = `Tournament starts in ${seconds}`;
+			statusMessage.textContent = i18n.t('tournament.startsIn', { seconds });
 		}
 
 		countdownHandle = window.setInterval(() => {
 			seconds--;
 			if (seconds > 0 && statusMessage) {
-				statusMessage.textContent = `Tournament starts in ${seconds}`;
+				statusMessage.textContent = i18n.t('tournament.startsIn', { seconds });
 			} else {
 				clearInterval(countdownHandle!);
 				countdownHandle = null;
@@ -129,7 +127,7 @@ export default async function Queuetournament() {
 	
 	function cleanupMatchmaking() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
-			console.log("CleanupMatchmaking Tournament");
+			console.log(i18n.t('tournament.cleanupMatchmaking'));
 			ws.removeEventListener('message', handleMessageTournament);
 			cancelCountdown();
 		}
@@ -193,7 +191,7 @@ export default async function Queuetournament() {
   	// }
 	addPlayerToSlot({
 		userId: currentPlayerId,
-		userName: userProfile.userName ?? 'You',
+		userName: userProfile.userName ?? i18n.t('queue.you'),
 		avatarUrl: currentPlayerAvatar
 	});
 	async function handleMessageTournament(event: MessageEvent) {
@@ -206,7 +204,7 @@ export default async function Queuetournament() {
 					const list = msg.players as QueuePlayer[];
 					list.forEach(p => addPlayerToSlot({
 					userId: p.userId,
-					userName: p.userName ?? 'Opponent',
+					userName: p.userName ?? i18n.t('queue.opponent'),
 					avatarUrl: getAvatarUrl(p.userId)
 					}));
 					break;

@@ -14,7 +14,6 @@ export function waitForI18n(): Promise<void> {
   if (!initPromise) {
     initPromise = new Promise<void>((resolve, reject) => {
       i18next.on('initialized', () => {
-        console.log('✅ i18n initialized via waitForI18n()');
         resolve();
       });
       
@@ -86,13 +85,11 @@ function initializeI18n(): Promise<void> {
         }
       })
       .then(() => {
-        console.log('✅ i18n initialized successfully!');
         isInitialized = true;
         
         i18next.on('languageChanged', (lang) => {
           const event = new CustomEvent(LANGUAGE_CHANGED_EVENT, { detail: { language: lang } });
           document.dispatchEvent(event);
-          console.log(`🌐 Langue changée en: ${lang}`);
         });
         
         resolve();

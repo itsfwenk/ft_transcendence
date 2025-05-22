@@ -31,6 +31,8 @@ export default async function login() {
 	// 	console.error("No on-going session:", error);
 	// }
 
+	
+
 	const app = document.getElementById('app');
 	if (app) {
 	  app.innerHTML = /*html*/`
@@ -100,7 +102,9 @@ export default async function login() {
 
 	  const googleLoginBtn = document.getElementById('googleLoginBtn');
 	  googleLoginBtn?.addEventListener('click', () => {
-		window.location.href = 'http://localhost:4000/api-user/auth/google';
+		const baseUrl = window.location.origin;
+		window.location.href = `${baseUrl}/user/auth/google`; // a voir
+		// window.location.href = 'http://localhost:4000/api-user/auth/google';
 	  });
 	}
 }

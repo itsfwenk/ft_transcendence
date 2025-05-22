@@ -19,4 +19,4 @@ export default function loginError() {
 		window.dispatchEvent(new PopStateEvent('popstate'));
 	  });
 	}
-}
+  }

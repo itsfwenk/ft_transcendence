@@ -1,21 +1,14 @@
 import './styles.css'
 import { matchmakingWebSocket } from "./wsClient";
 import './i18n';
-import { debugI18nInDocker } from './i18n-debug';
 import { waitForI18n } from './i18n';
 // import { handleDisconnect } from './pages/menu';
 // import { fetchUserProfile } from './pages/mode';
 
 async function initApp() {
-  console.log("🚀 Démarrage de l'application - Attente initialisation i18n");
-  
   try {
-    // IMPORTANT: Attendre que i18n soit complètement initialisé
     await waitForI18n();
     
-    console.log("✅ i18n initialisé avec succès, démarrage du routeur");
-    
-    // Importer et initialiser le routeur APRÈS que i18n soit prêt
     const { initRouter } = await import('./router');
     initRouter();
     
@@ -24,10 +17,8 @@ async function initApp() {
   }
 }
 
-// Démarrer l'initialisation de l'application
 initApp();
 
-debugI18nInDocker();
 
 // window.addEventListener('beforeunload', () => {
 //     handleDisconnect()

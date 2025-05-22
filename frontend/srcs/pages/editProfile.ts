@@ -1,4 +1,5 @@
 import { UserData, fetchUserProfile, getAvatarUrl, updateProfileBoxUI } from './profile';
+import i18n from '../i18n';
 
 function showNotification(message: string, isSuccess: boolean, duration: number = 3000) {
   let notificationElement = document.getElementById('notification');
@@ -22,7 +23,11 @@ function showNotification(message: string, isSuccess: boolean, duration: number 
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
        </svg>`;
   
-  notificationElement.innerHTML = iconSvg + message;
+  const messageSpan = document.createElement('span');
+  messageSpan.textContent = message;
+  
+  notificationElement.innerHTML = iconSvg;
+  notificationElement.appendChild(messageSpan);
   
   notificationElement.classList.remove('hidden');
   
@@ -56,7 +61,7 @@ export default function EditProfile() {
   const app = document.getElementById('app');
   if (app) {
     app.innerHTML = /*html*/`
-    <div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">Pong Game</div>
+    <div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">${i18n.t('general.pongGame')}</div>
     <div>
       <div id="twoBox" class="flex justify-center items-center mb-10 gap-5">
         <div id="profilBox" class="h-80 w-1/3 bg-blue-700 rounded-lg p-4 text-white">
@@ -73,7 +78,7 @@ export default function EditProfile() {
             </div>
             <div class="flex flex-col">
               <div id="usernameContainer" class="flex items-center">
-                <div id="username" class="flex justify-center items-center text-xl font-bold font-jaro bg-white text-black rounded-lg pl-2 pr-2 pb-0.5 select-none">Chargement...</div>
+                <div id="username" class="flex justify-center items-center text-xl font-bold font-jaro bg-white text-black rounded-lg pl-2 pr-2 pb-0.5 select-none">${i18n.t('general.loading')}</div>
                 <button id="editUsernameBtn" class="ml-2 text-white hover:text-gray-200">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -81,7 +86,7 @@ export default function EditProfile() {
                 </button>
               </div>
               <div id="usernameEditContainer" class="hidden flex items-center mt-1">
-                <input type="text" id="usernameInput" maxlength="7" class="bg-white text-black rounded-md w-1/2 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Max 7 caractères" />
+                <input type="text" id="usernameInput" maxlength="7" class="bg-white text-black rounded-md w-1/2 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="${i18n.t('editProfile.maxCharsUsername')}" />
                 <button id="saveUsernameBtn" class="ml-1 bg-green-500 hover:bg-green-600 text-white rounded-md px-2 py-1 text-sm">✓</button>
                 <button id="cancelUsernameBtn" class="ml-1 bg-red-500 hover:bg-red-600 text-white rounded-md px-2 py-1 text-sm">✗</button>
               </div>
@@ -89,7 +94,7 @@ export default function EditProfile() {
           </div>
           
           <div id="emailContainer" class="flex items-center mb-3">
-            <div id="email" class="flex font-jaro select-none">Chargement...</div>
+            <div id="email" class="flex font-jaro select-none">${i18n.t('general.loading')}</div>
             <button id="editEmailBtn" class="ml-2 text-white hover:text-gray-200">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -97,26 +102,26 @@ export default function EditProfile() {
             </button>
           </div>
           <div id="emailEditContainer" class="hidden flex items-center mb-3">
-            <input type="email" id="emailInput" class="bg-white text-black rounded-md px-2 py-1 text-sm w-full mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nouvel email" />
+            <input type="email" id="emailInput" class="bg-white text-black rounded-md px-2 py-1 text-sm w-full mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="${i18n.t('editProfile.newEmail')}" />
             <button id="saveEmailBtn" class="ml-1 bg-green-500 hover:bg-green-600 text-white rounded-md px-2 py-1 text-sm">✓</button>
             <button id="cancelEmailBtn" class="ml-1 bg-red-500 hover:bg-red-600 text-white rounded-md px-2 py-1 text-sm">✗</button>
           </div>
           
           <div id="totalGames" class="flex mb-2">
-            <div class="font-jaro text-2xl select-none">Total games: </div>
+            <div class="font-jaro text-2xl select-none">${i18n.t('profile.totalGames')}: </div>
             <div id="nbGames" class="ml-2 pt-0.5 font-jaro text-xl">0</div>
           </div>
           <div id="stats" class="flex justify-around items-center mt-3 text-center">
             <div id="win" class="flex flex-col items-center gap-4">
-              <div class="font-bold font-jaro text-2xl select-none">Win</div>
+              <div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.win')}</div>
               <div id="statWin" class="text-xl font-jaro select-none">0</div>
             </div>
             <div id="losses" class="flex flex-col items-center gap-4">
-              <div class="font-bold font-jaro text-2xl select-none">Losses</div>
+              <div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.losses')}</div>
               <div id="statLosses" class="text-xl font-jaro select-none">0</div>
             </div>
             <div id="winrate" class="flex flex-col items-center gap-4">
-              <div class="font-bold font-jaro text-2xl select-none">WinRate</div>
+              <div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.winRate')}</div>
               <div id="statWinRate" class="text-xl font-jaro select-none">0%</div>
             </div>
           </div>
@@ -125,30 +130,30 @@ export default function EditProfile() {
       
       <div id="passwordChangeContainer" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
         <div class="bg-white rounded-lg p-6 shadow-xl w-96 text-black">
-          <h3 class="text-xl font-bold mb-4 font-jaro">Changer de mot de passe</h3>
+          <h3 class="text-xl font-bold mb-4 font-jaro">${i18n.t('editProfile.changePassword')}</h3>
           
           <div class="mb-4">
-            <label for="oldPassword" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe actuel</label>
-            <input type="password" id="oldPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez votre mot de passe actuel" />
+            <label for="oldPassword" class="block text-sm font-medium text-gray-700 mb-1">${i18n.t('editProfile.currentPassword')}</label>
+            <input type="password" id="oldPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="${i18n.t('editProfile.enterCurrentPassword')}" />
           </div>
           
           <div class="mb-4">
-            <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe</label>
-            <input type="password" id="newPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Entrez votre nouveau mot de passe" />
-            <p class="text-xs text-gray-500 mt-1">Le mot de passe doit comporter au moins 6 caractères.</p>
+            <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">${i18n.t('editProfile.newPassword')}</label>
+            <input type="password" id="newPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="${i18n.t('editProfile.enterNewPassword')}" />
+            <p class="text-xs text-gray-500 mt-1">${i18n.t('editProfile.passwordRequirement')}</p>
           </div>
           
           <div class="mb-4">
-            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
-            <input type="password" id="confirmPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Confirmez votre nouveau mot de passe" />
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">${i18n.t('editProfile.confirmPassword')}</label>
+            <input type="password" id="confirmPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="${i18n.t('editProfile.confirmNewPassword')}" />
           </div>
           
           <div class="flex justify-end space-x-3 mt-6">
             <button id="cancelPasswordChange" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none">
-              Annuler
+              ${i18n.t('general.cancel')}
             </button>
             <button id="savePasswordChange" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none">
-              Enregistrer
+              ${i18n.t('general.save')}
             </button>
           </div>
         </div>
@@ -160,7 +165,7 @@ export default function EditProfile() {
         hover:border-b-[0px]
         transition-all duration-150 [box-shadow:0_10px_0_0_#15803d,0_15px_0_0_#1b70f841]
         border-b-[1px] border-green-400'>
-        <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>Save Changes</span>
+        <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>${i18n.t('editProfile.saveChanges')}</span>
         </div>
 
         <div id="resetChangesBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-red-600 rounded-lg cursor-pointer select-none
@@ -168,7 +173,7 @@ export default function EditProfile() {
         hover:border-b-[0px]
         transition-all duration-150 [box-shadow:0_10px_0_0_#b91c1c,0_15px_0_0_#1b70f841]
         border-b-[1px] border-red-400'>
-        <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>Reset Changes</span>
+        <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>${i18n.t('editProfile.resetChanges')}</span>
         </div>
 
         <div id="changePasswordBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-yellow-500 rounded-lg cursor-pointer select-none
@@ -176,7 +181,7 @@ export default function EditProfile() {
         hover:border-b-[0px]
         transition-all duration-150 [box-shadow:0_10px_0_0_#d49218,0_15px_0_0_#1b70f841]
         border-b-[1px] border-yellow-200'>
-        <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>Change Password</span>
+        <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>${i18n.t('editProfile.changePassword')}</span>
         </div>
       </div>
       
@@ -186,7 +191,7 @@ export default function EditProfile() {
         hover:border-b-[0px]
         transition-all duration-150 [box-shadow:0_10px_0_0_#181818,0_15px_0_0_#1b70f841]
         border-b-[1px] border-gray-400'>
-        <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>Back</span>
+        <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('general.back')}</span>
         </div>
       </div>
     </div>
@@ -281,7 +286,7 @@ async function changePassword(currentPassword: string, newPassword: string): Pro
 
     if (!response.ok) {
       const data = await response.json();
-      throw new Error(data.error || 'Erreur lors du changement de mot de passe');
+      throw new Error(data.error || i18n.t('editProfile.errorChangingPassword'));
     }
 
     const result = await response.json();
@@ -416,12 +421,12 @@ async function setupEditProfilePage() {
         const newUsername = usernameInput.value.trim();
         
         if (!newUsername) {
-          showError('Le nom d\'utilisateur ne peut pas être vide');
+          showError(i18n.t('editProfile.errorEmptyUsername'));
           return;
         }
         
         if (newUsername.length > 7) {
-          showError('Le nom d\'utilisateur ne peut pas dépasser 7 caractères');
+          showError(i18n.t('editProfile.errorUsernameTooLong'));
           return;
         }
         
@@ -456,13 +461,13 @@ async function setupEditProfilePage() {
         const newEmail = emailInput.value.trim();
         
         if (!newEmail) {
-          showError('L\'email ne peut pas être vide');
+          showError(i18n.t('editProfile.errorEmptyEmail'));
           return;
         }
         
         const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
         if (!emailRegex.test(newEmail)) {
-          showError('Veuillez entrer une adresse email valide');
+          showError(i18n.t('editProfile.errorInvalidEmail'));
           return;
         }
         
@@ -509,37 +514,37 @@ async function setupEditProfilePage() {
       const confirmPassword = confirmPasswordInput.value;
       
       if (!oldPassword || !newPassword || !confirmPassword) {
-        showError('Tous les champs doivent être remplis');
+        showError(i18n.t('editProfile.errorAllFieldsRequired'));
         return;
       }
       
       if (newPassword.length < 6) {
-        showError('Le nouveau mot de passe doit contenir au moins 6 caractères');
+        showError(i18n.t('editProfile.errorPasswordTooShort'));
         return;
       }
       
       if (newPassword !== confirmPassword) {
-        showError('Les mots de passe ne correspondent pas');
+        showError(i18n.t('editProfile.errorPasswordsMismatch'));
         return;
       }
       
       try {
         savePasswordChangeBtn.disabled = true;
-        savePasswordChangeBtn.textContent = 'Traitement...';
+        savePasswordChangeBtn.textContent = i18n.t('editProfile.processing');
         
         const success = await changePassword(oldPassword, newPassword);
         
         if (success) {
-          showNotification('Mot de passe modifié avec succès', true);
+          showNotification(i18n.t('editProfile.passwordChangedSuccess'), true);
           togglePasswordChange(false);
         } else {
-          showError('Échec de la modification du mot de passe');
+          showError(i18n.t('editProfile.passwordChangeFailed'));
         }
       } catch (error: any) {
-        showError(error.message || 'Erreur lors du changement de mot de passe');
+        showError(error.message || i18n.t('editProfile.errorChangingPassword'));
       } finally {
         savePasswordChangeBtn.disabled = false;
-        savePasswordChangeBtn.textContent = 'Enregistrer';
+        savePasswordChangeBtn.textContent = i18n.t('general.save');
       }
     });
   }
@@ -559,7 +564,7 @@ async function setupEditProfilePage() {
       hideError();
       
       if (Object.keys(changedData).length === 0) {
-        showError('Aucune modification à enregistrer');
+        showError(i18n.t('editProfile.errorNoChanges'));
         return;
       }
       
@@ -574,7 +579,7 @@ async function setupEditProfilePage() {
           const avatarSuccess = await uploadAvatar(changedData.avatarFile);
           if (!avatarSuccess) {
             success = false;
-            errorMessage += 'Échec du téléchargement de l\'avatar. ';
+            errorMessage += i18n.t('editProfile.errorUploadAvatar') + ' ';
           }
         }
         
@@ -586,12 +591,12 @@ async function setupEditProfilePage() {
           const profileSuccess = await updateUserProfile(updateData);
           if (!profileSuccess) {
             success = false;
-            errorMessage += 'Échec de la mise à jour des informations du profil. ';
+            errorMessage += i18n.t('editProfile.errorUpdateProfile') + ' ';
           }
         }
         
         if (success) {
-          showNotification('Profil mis à jour avec succès !', true);
+          showNotification(i18n.t('editProfile.profileUpdatedSuccess'), true);
           
           originalUserData = await fetchUserProfile();
           changedData = {};
@@ -599,11 +604,11 @@ async function setupEditProfilePage() {
             updateProfileBoxUI(originalUserData);
           }
         } else {
-          showError(`Échec de la mise à jour : ${errorMessage}\nVeuillez vérifier votre connexion et réessayer.`);
+          showError(`${i18n.t('editProfile.updateFailed')}: ${errorMessage}${i18n.t('editProfile.checkConnection')}`);
         }
       } catch (error) {
         console.error('Erreur lors de l\'enregistrement des modifications:', error);
-        showError(`Une erreur est survenue : ${error}`);
+        showError(`${i18n.t('editProfile.errorOccurred')}: ${error}`);
       } finally {
         saveChangesBtn.classList.remove('opacity-50');
         saveChangesBtn.removeAttribute('disabled');
@@ -619,7 +624,7 @@ async function setupEditProfilePage() {
       hideEmailEdit();
       changedData = {};
       
-      showNotification('Modifications annulées', true);
+      showNotification(i18n.t('editProfile.changesReset'), true);
     });
   }
 
@@ -628,7 +633,7 @@ async function setupEditProfilePage() {
   if (backBtn) {
     backBtn.addEventListener('click', () => {
       if (Object.keys(changedData).length > 0) {
-        if (confirm('You have unsaved changes. Are you sure you want to go back?')) {
+        if (confirm(i18n.t('editProfile.confirmUnsavedChanges'))) {
           history.pushState(null, '', '/profile');
           window.dispatchEvent(new PopStateEvent('popstate'));
         }

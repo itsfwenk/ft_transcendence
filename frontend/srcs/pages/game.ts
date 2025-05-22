@@ -1,5 +1,8 @@
 import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
+import i18n from '../i18n';
+
+// Faire trad !!!!!!!!!!!!!!!!!!!
 
 // let gameState : Game;
 // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -185,17 +188,17 @@ export default function game() {
 		<div class="flex justify-center items-center mb-2">
 			<!-- Photo de profil joueur 1 -->
 			<div class="w-30 h-30 mr-20 bg-pink-500 rounded-md flex items-center justify-center text-white">
-				<img id="player1-avatar" src="/avatars/default.png" alt="Joueur 1" 
+				<img id="player1-avatar" src="/avatars/default.png" alt="${i18n.t('game.player1')}" 
 						class="w-full h-full object-cover rounded-md"
 						onerror="this.src='/avatars/default.png'">
 			</div>
 			
 			<!-- Titre du jeu -->
-			<div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">Pong Game</div>
+			<div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">${i18n.t('general.pongGame')}</div>
 
 			<!-- Photo de profil joueur 2 -->
 			<div class="w-30 h-30 ml-20 bg-yellow-500 rounded-md flex items-center justify-center text-white">
-				<img id="player2-avatar" src="/avatars/default.png" alt="Joueur 2" 
+				<img id="player2-avatar" src="/avatars/default.png" alt="${i18n.t('game.player2')}" 
 						class="w-full h-full object-cover rounded-md"
 						onerror="this.src='/avatars/default.png'">
 			</div>

@@ -68,7 +68,7 @@ export function saveUser(userName: string, email: string, password: string) {
 
 	const stmt = db.prepare(`
 		INSERT INTO users (userId, userName, email, passwordHsh, role, status, avatarUrl, inGameId)
-		VALUES (?, ?, ?, ?, 'user', 'offline', '/avatars/default.png', ?)
+		VALUES (?, ?, ?, ?, 'user', 'online', '/avatars/default.png', ?)
 	`);
 	const result = stmt.run(userId, userName, email, password, "none");
 

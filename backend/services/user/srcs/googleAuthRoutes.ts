@@ -55,13 +55,6 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
 		  fastify.get('/auth/status', { 
 			preHandler: [(fastify as any).authenticate],
 			schema: {
-			  headers: {
-				type: 'object',
-				properties: {
-				  Authorization: { type: 'string', description: 'Bearer <token>' }
-				},
-				required: ['Authorization']
-			  },
 			  response: {
 				200: {
 				  type: 'object',

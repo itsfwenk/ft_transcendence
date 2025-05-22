@@ -63,6 +63,8 @@
         "matchPrep": "Préparation du match",
         "matchOfficiallyStarted": "Le match est maintenant officiellement lancé par le serveur",
         "matchStartsIn": "Le match commence dans {{seconds}}...",
+        "startsIn": "Le tournoi commence dans {{seconds}}",
+        "cleanupMatchmaking": "Nettoyage du matchmaking du tournoi",
         "playerEliminated": "Dommage, vous êtes éliminé !",
         "tryAgainNextTime": "Vous pourrez retenter votre chance la prochaine fois.",
         "backToMenu": "Revenir au Menu",

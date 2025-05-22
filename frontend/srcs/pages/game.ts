@@ -44,7 +44,23 @@ export interface Game {
 //let cleanupMatchmakingFn: () => void;
 
 
-
+function mapMatchTypeToI18nKey(matchType: string): string {
+  if (!matchType) return 'gameMode.1v1Online';
+  
+  const lowerCaseType = matchType.toLowerCase();
+  
+  if (lowerCaseType.includes('tournament') && lowerCaseType.includes('semifinal')) {
+    return 'tournament.semifinalMatch';
+  } else if (lowerCaseType.includes('tournament') && lowerCaseType.includes('final')) {
+    return 'tournament.finalMatch';
+  } else if (lowerCaseType.includes('1v1') && lowerCaseType.includes('online')) {
+    return 'gameMode.1v1Online';
+  } else if (lowerCaseType.includes('1v1') && lowerCaseType.includes('local')) {
+    return 'gameMode.1v1Local';
+  }
+  
+  return 'gameMode.commonMatchType';
+}
 
 export default function game() {
     let gameStarted = false;
@@ -125,7 +141,7 @@ export default function game() {
 		try {
 			if (!matchId) {
 			console.warn("Impossible de récupérer le type de match: matchId manquant");
-			return "1v1 online";
+			return i18n.t('gameMode.1v1Online');
 			}
 
 			const baseUrl = window.location.origin;
@@ -136,15 +152,17 @@ export default function game() {
 			
 			if (!response.ok) {
 			console.warn(`Erreur lors de la récupération du type de match: ${response.status} ${response.statusText}`);
-			return "1v1 online";
+			return i18n.t('gameMode.1v1Online');
 			}
 			
 			const data = await response.json();
 			console.log("Type de match récupéré:", data.matchType);
-			return data.matchType || "1v1 online";
+			
+			const matchTypeKey = mapMatchTypeToI18nKey(data.matchType);
+			return i18n.t(matchTypeKey);
 		} catch (error) {
 			console.error('Erreur lors de la récupération du type de match:', error);
-			return "1v1 online";
+			return i18n.t('gameMode.1v1Online');
 		}
 	}
 

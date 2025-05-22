@@ -63,6 +63,8 @@
         "matchPrep": "Preparación del partido",
         "matchOfficiallyStarted": "El partido ha comenzado oficialmente",
         "matchStartsIn": "El partido comienza en {{seconds}}...",
+        "startsIn": "El torneo comienza en {{seconds}}",
+        "cleanupMatchmaking": "Limpieza de emparejamiento del torneo",
         "playerEliminated": "¡Lo siento, has sido eliminado!",
         "tryAgainNextTime": "Podrás intentarlo de nuevo la próxima vez.",
         "backToMenu": "Volver al menú",

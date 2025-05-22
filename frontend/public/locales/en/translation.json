@@ -63,6 +63,8 @@
         "matchPrep": "MATCH_PREP",
         "matchOfficiallyStarted": "Match is now officially started by the server",
         "matchStartsIn": "Match starts in {{seconds}}…",
+        "startsIn": "Tournament starts in {{seconds}}",
+        "cleanupMatchmaking": "CleanupMatchmaking Tournament",
         "playerEliminated": "Sorry, you've been eliminated!",
         "tryAgainNextTime": "You can try your luck next time.",
         "backToMenu": "Back to Menu",

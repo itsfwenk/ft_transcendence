@@ -1,19 +1,4 @@
 services:
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #     target: ${FRONTEND_TARGET}
-  #   ports:
-  #     - "${FRONTEND_PORT}"
-  #     - "5173:5173" # dev
-  #   networks:
-  #     - app-network
-  #   volumes: 
-  #     - ${FRONTEND_VOLUMES}
-  #   working_dir: ${FRONTEND_WORKDIR}
-  #   restart: always
-  #   env_file: .env
   frontend:
     build: 
       context: ./
@@ -68,20 +53,6 @@ services:
     - app-network
     env_file: .env
 
-  # gateway:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: gateway/Dockerfile
-  #   ports:
-  #     - "${GATEWAY_SERVICE_PORT}:4000"
-  #     - "9230:9230"
-  #   depends_on:
-  #     - user
-  #     - game
-  #     - matchmaking
-  #   networks:
-  #     - app-network
-  #   env_file: .env
   caddy:
     image: caddy:latest
     ports:
@@ -102,8 +73,9 @@ services:
       - user
       - game
       - matchmaking
-      # - frontend
+
     restart: always
+  
 
 volumes:
   caddy_data:

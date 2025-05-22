@@ -139,7 +139,7 @@ export default async function Queue() {
     console.error("Pas de connexion WebSocket disponible");
     return;
   }
-  ws.removeEventListener('message', handleMessage);
+  ws.removeEventListener('message', handleMessage1v1);
 
   function updateOpponentDisplay(player: {userId: string; userName: string}) {
     if (player.userId === currentPlayerId) return; 
@@ -192,13 +192,13 @@ export default async function Queue() {
   function cleanupMatchmaking() {
     if (ws && ws.readyState === WebSocket.OPEN) {
       console.log("Cleanup matchmaking queue1v1");
-      ws.removeEventListener('message', handleMessage);
+      ws.removeEventListener('message', handleMessage1v1);
     }
   }
   
   //cleanupMatchmakingFn = cleanupMatchmaking;
 
-  function handleMessage(event: MessageEvent) {
+  function handleMessage1v1(event: MessageEvent) {
     try {
       const msg = JSON.parse(event.data);
       console.log("Message reçu:", msg);
@@ -244,8 +244,8 @@ export default async function Queue() {
 
   window.addEventListener('beforeunload', handlePageUnload);
 
-	//ws.addEventListener('message', handleMessage);
-	ws.onmessage = handleMessage;
+	//ws.addEventListener('message', handleMessage1v1);
+	ws.onmessage = handleMessage1v1;
 
 
   ws.send(JSON.stringify({

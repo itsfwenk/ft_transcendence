@@ -378,7 +378,7 @@ export default function game() {
 		ctx.closePath();
 	}
 
-	function handleMessage(event: MessageEvent) {
+	function handleMessageGame(event: MessageEvent) {
 		try {
 		const msg = JSON.parse(event.data);
 		console.log("Message reçu:", msg);
@@ -402,7 +402,7 @@ export default function game() {
 	function cleanupMatchmaking() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
 			console.log("Cleanup matchmaking game");
-			ws.removeEventListener('message', handleMessage);
+			ws.removeEventListener('message', handleMessageGame);
 		}
 	}
 	
@@ -416,12 +416,12 @@ export default function game() {
 		console.error("Pas de connexion WebSocket disponible");
 		return;
 	}
-	ws.removeEventListener('message', handleMessage);
+	ws.removeEventListener('message', handleMessageGame);
 
 	window.addEventListener('beforeunload', handlePageUnload);
 
-	ws.onmessage = handleMessage;
-	//ws.addEventListener('message', handleMessage);
+	ws.onmessage = handleMessageGame;
+	//ws.addEventListener('message', handleMessageGame);
 
 
 	function makeBackButton() {

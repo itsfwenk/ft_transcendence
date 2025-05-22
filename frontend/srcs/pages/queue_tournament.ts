@@ -123,12 +123,12 @@ export default async function Queuetournament() {
 		console.error("Pas de connexion WebSocket disponible");
 		return;
 	}
-	ws.removeEventListener('message', handleMessage);
+	ws.removeEventListener('message', handleMessageTournament);
 	
 	function cleanupMatchmaking() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
 			console.log("CleanupMatchmaking Tournament");
-			ws.removeEventListener('message', handleMessage);
+			ws.removeEventListener('message', handleMessageTournament);
 			cancelCountdown();
 		}
 	}
@@ -194,7 +194,7 @@ export default async function Queuetournament() {
 		userName: userProfile.userName ?? 'You',
 		avatarUrl: currentPlayerAvatar
 	});
-	async function handleMessage(event: MessageEvent) {
+	async function handleMessageTournament(event: MessageEvent) {
 		try {
 			const msg = JSON.parse(event.data);
 			console.log("Message reçu:", msg);
@@ -236,8 +236,8 @@ export default async function Queuetournament() {
 	
 		window.addEventListener('beforeunload', handlePageUnload);
 	
-		ws.onmessage = handleMessage;
-		//ws.addEventListener('message', handleMessage);
+		ws.onmessage = handleMessageTournament;
+		//ws.addEventListener('message', handleMessageTournament);
 
 	
 		ws.send(JSON.stringify({

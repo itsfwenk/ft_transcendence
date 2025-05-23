@@ -1,5 +1,6 @@
 import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
+import { Game, gamePalette } from '../../gameInterfaces'
 
 // let gameState : Game;
 // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -7,36 +8,36 @@ import { getAvatarUrl } from "./profile";
 // const port = window.location.port;
 // const path = '/ws';
 
-export interface Ball {
-	x: number;
-	y: number;
-	radius: number;
-	dx: number;
-	dy: number
-}
+// export interface Ball {
+// 	x: number;
+// 	y: number;
+// 	radius: number;
+// 	dx: number;
+// 	dy: number
+// }
 
-export interface Paddle {
-	x: number;
-	y: number;
-	dy: number
-}
+// export interface Paddle {
+// 	x: number;
+// 	y: number;
+// 	dy: number
+// }
 
 
-export interface Game {
-	gameId: string;
-	player1_id: string;
-	player2_id: string;
-	score1: number;
-	score2: number;
-	leftPaddle: Paddle;
-	rightPaddle: Paddle;
-	ball: Ball;
-	status: 'waiting' | 'ongoing' | 'finished';
-	winner_id?: string | null;
-	matchId?: string | null;
-	canvasWidth: number;
-	canvasHeight: number;
-}
+// export interface Game {
+// 	gameId: string;
+// 	player1_id: string;
+// 	player2_id: string;
+// 	score1: number;
+// 	score2: number;
+// 	leftPaddle: Paddle;
+// 	rightPaddle: Paddle;
+// 	ball: Ball;
+// 	status: 'waiting' | 'ongoing' | 'finished';
+// 	winner_id?: string | null;
+// 	matchId?: string | null;
+// 	canvasWidth: number;
+// 	canvasHeight: number;
+// }
 
 //let cleanupMatchmakingFn: () => void;
 
@@ -50,6 +51,35 @@ export default function game() {
 	// let score1Display: HTMLElement | null;
 	// let score2Display: HTMLElement | null;
 	let countdownInterval: number | null = null;
+
+	const savedThemeString = localStorage.getItem('selectedGamePalette');
+  	let gamePalette: gamePalette;
+
+	if (savedThemeString) {
+		try {
+			gamePalette = JSON.parse(savedThemeString);
+		} catch (e) {
+			console.error("Could not parse saved game palette, falling back to default:", e);
+			gamePalette = {
+				background: "#DDDDDD",
+				paddle1: "#4F46E5",
+				paddle2: "#DC2626",
+				ball: "black",
+				line: "rgba(0, 0, 0, 0.2)",
+				score: "rgba(200, 200, 200, 0.7)"
+			};
+		}
+	} else {
+		gamePalette = {
+			background: "#DDDDDD",
+			paddle1: "#4F46E5",
+			paddle2: "#DC2626",
+			ball: "black",
+			line: "rgba(0, 0, 0, 0.2)",
+			score: "rgba(200, 200, 200, 0.7)"
+		};
+	}
+
 
     function keydownHandler(e: KeyboardEvent) {
         if (socket && socket.readyState === WebSocket.OPEN && gameStarted) {
@@ -339,29 +369,30 @@ export default function game() {
 		const ballRadius = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
 		
 		ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-		
+		ctx.fillStyle = gamePalette.background;
+    	ctx.fillRect(0, 0, canvas.width, canvas.height);
 		// Dessiner la ligne centrale
 		ctx.beginPath();
 		ctx.setLineDash([5, 5]); // Ligne en pointillé
 		ctx.moveTo(canvasWidth / 2, 0);
 		ctx.lineTo(canvasWidth / 2, canvasHeight);
-		ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+		ctx.strokeStyle = gamePalette.line;
 		ctx.lineWidth = 1;
 		ctx.stroke();
 		ctx.setLineDash([]);
 		
 		
 		// Dessiner la raquette gauche
-		ctx.fillStyle = '#4F46E5';
+		ctx.fillStyle = gamePalette.paddle1;
 		ctx.fillRect(0, state.leftPaddle.y, paddleWidth, paddleHeight);
 		
 		// Dessiner la raquette droite
-		ctx.fillStyle = '#DC2626';
+		ctx.fillStyle = gamePalette.paddle2;
 		ctx.fillRect(canvasWidth - paddleWidth, state.rightPaddle.y, paddleWidth, paddleHeight);
 		
 		// Dessiner les scores
 		ctx.font = 'bold 120px Arial';
-		ctx.fillStyle = 'rgba(200, 200, 200, 0.7)';
+		ctx.fillStyle = gamePalette.score;
 		ctx.textAlign = 'center';
 		
 		// Score gauche
@@ -373,7 +404,7 @@ export default function game() {
 		// Dessiner la balle en noir au centre
 		ctx.beginPath();
 		ctx.arc(state.ball.x, state.ball.y, ballRadius, 0, Math.PI * 2);
-		ctx.fillStyle = 'black';
+		ctx.fillStyle = gamePalette.ball;
 		ctx.fill();
 		ctx.closePath();
 	}

@@ -1,4 +1,5 @@
 let isPaused = false;
+import { Paddle, Ball, gamePalette } from '../../../gameInterfaces'
 
 export function initGame(){
   const app = document.getElementById('app');
@@ -29,19 +30,19 @@ export function initGame(){
   // Paddle settings
   const paddleWidth = 10, paddleHeight = 80, paddleSpeed = 5;
 
-  interface Paddle {
-    x: number;
-    y: number;
-    dy: number;
-  }
+  // interface Paddle {
+  //   x: number;
+  //   y: number;
+  //   dy: number;
+  // }
 
-  interface Ball {
-    x: number;
-    y: number;
-    radius: number;
-    dx: number;
-    dy: number;
-  }
+  // interface Ball {
+  //   x: number;
+  //   y: number;
+  //   radius: number;
+  //   dx: number;
+  //   dy: number;
+  // }
 
   let player1Score = 0;
   let player2Score = 0;
@@ -68,6 +69,34 @@ export function initGame(){
     dx: Math.random() > 0.5 ? 3 : -3,
     dy: Math.random() > 0.5 ? 3 : -3,
   };
+
+  const savedThemeString = localStorage.getItem('selectedGamePalette');
+  let gamePalette: gamePalette;
+
+  if (savedThemeString) {
+      try {
+          gamePalette = JSON.parse(savedThemeString);
+      } catch (e) {
+          console.error("Could not parse saved game palette, falling back to default:", e);
+          gamePalette = {
+              background: "#DDDDDD",
+              paddle1: "#4F46E5",
+              paddle2: "#DC2626",
+              ball: "black",
+              line: "rgba(0, 0, 0, 0.2)",
+              score: "rgba(200, 200, 200, 0.7)"
+          };
+      }
+  } else {
+      gamePalette = {
+          background: "#DDDDDD",
+          paddle1: "#4F46E5",
+          paddle2: "#DC2626",
+          ball: "black",
+          line: "rgba(0, 0, 0, 0.2)",
+          score: "rgba(200, 200, 200, 0.7)"
+      };
+  }
 
   // Variables pour stocker l'état du jeu pendant la pause
   let lastBallX = 0;
@@ -256,28 +285,30 @@ function update() {
 	const ballRadius = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
 
     if (ctx) {
-		ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas	
+		ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+    ctx.fillStyle = gamePalette.background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 		// Dessiner la ligne centrale
 		ctx.beginPath();
 		ctx.setLineDash([5, 5]); // Ligne en pointillé
 		ctx.moveTo(canvasWidth / 2, 0);
 		ctx.lineTo(canvasWidth / 2, canvasHeight);
-		ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+		ctx.strokeStyle = gamePalette.line;
 		ctx.lineWidth = 1;
 		ctx.stroke();
 		ctx.setLineDash([]);
 		
 		// Dessiner la raquette gauche
-		ctx.fillStyle = '#4F46E5';
+		ctx.fillStyle = gamePalette.paddle1;
 		ctx.fillRect(0, leftPaddle.y, paddleWidth, paddleHeight);
 		
 		// Dessiner la raquette droite
-		ctx.fillStyle = '#DC2626';
+		ctx.fillStyle = gamePalette.paddle2;
 		ctx.fillRect(canvasWidth - paddleWidth, rightPaddle.y, paddleWidth, paddleHeight);
 		
 		// Dessiner les scores
 		ctx.font = 'bold 120px Arial';
-		ctx.fillStyle = 'rgba(200, 200, 200, 0.7)';
+		ctx.fillStyle = gamePalette.score;
 		ctx.textAlign = 'center';
 		
 		// Score gauche
@@ -289,7 +320,7 @@ function update() {
 		// Dessiner la balle en noir au centre
 		ctx.beginPath();
 		ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
-		ctx.fillStyle = 'black';
+		ctx.fillStyle = gamePalette.ball;
 		ctx.fill();
 		ctx.closePath();
     }

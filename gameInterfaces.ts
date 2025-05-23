@@ -27,3 +27,12 @@ export interface Game {
 	canvasWidth: number;
 	canvasHeight: number;
 }
+
+export interface gamePalette {
+	background: string,
+	paddle1: string,
+	paddle2: string,
+	ball: string,
+	line: string,
+	score: string
+}

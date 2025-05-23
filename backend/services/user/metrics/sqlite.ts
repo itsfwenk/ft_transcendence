@@ -30,10 +30,13 @@ setInterval(() => {
   } catch {
     sqliteDbFileBytes.set({ service: 'user' }, 0);
   }
-}, 30000); // Toutes les 30s
+}, 30000);
 
 export function instrumentedRun<T>(service: string, statementName: string, fn: () => T) {
+	const METRICS_ON = process.env.ENABLE_METRICS !== "false";
+  if (!METRICS_ON) return fn();
   const end = sqliteQueryDuration.startTimer({ service, statement: statementName });
+
   try {
     const result = fn();
     sqliteQueriesTotal.inc({ service, status: 'ok', statement: statementName });

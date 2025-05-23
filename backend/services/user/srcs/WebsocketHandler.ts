@@ -10,7 +10,7 @@ interface JwtPayload {
 	userId: string;
 }
 
-const activeConnections: Map<string, WebSocket> = new Map();
+export const activeConnections: Map<string, WebSocket> = new Map();
 
 async function authenticateWsConnection(fastify: FastifyInstance, token: string): Promise<string | null> {
 	try {

@@ -9,6 +9,8 @@ import fastifyJwt from '@fastify/jwt';
 import { websocketHandshake } from './gameController.js';
 import websocket from '@fastify/websocket';
 import cors from '@fastify/cors';
+import { ongoingGames } from './gameController.js';
+import {gamesInProgress} from '../metrics/gameMetrics.js'
 
 // import Database from 'better-sqlite3';
 
@@ -21,7 +23,10 @@ export default activeUsers;
 
 // Debug hook
 app.addHook('onRequest', (req, reply, done) => {
-    console.log('Global game request log:', req.method, req.url);
+	if (req.url === '/metrics') {
+        gamesInProgress.set(ongoingGames.size);
+    }
+	console.log('Global game request log:', req.method, req.url);
     done();
 });
 

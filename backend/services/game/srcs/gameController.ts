@@ -18,7 +18,7 @@ const activeUsers = new Map<string, WebSocket>(); // userId -> WebSocket
 export default activeUsers;
 const gameReadyPlayers = new Map<string, Set<string>>(); // gameId -> Set of userIds who are ready
 
-const ongoingGames = new Map<string, Game>(); // gameId -> Game
+export const ongoingGames = new Map<string, Game>(); // gameId -> Game
 
 /*
 // Interface pour le body de startGame
@@ -110,7 +110,7 @@ export async function startGame(req: FastifyRequest<{ Body: { player1_id: string
     if (matchId) {
         newGame.matchId = matchId;
     }
-	await saveGameInDb(newGame);
+	saveGameInDb(newGame);
 	console.log('NEW GAME IS NUMBER :', newGame.gameId)
 	ongoingGames.set(newGame.gameId, newGame);
 	if (ongoingGames.has(newGame.gameId))

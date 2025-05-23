@@ -226,7 +226,7 @@ export default function EditProfile() {
   
 let originalUserData: UserData | null = null;
 let changedData: { userName?: string; email?: string; avatarFile?: File } = {};
-let isGoogleUser = false; // Variable pour stocker si l'utilisateur est connecté via Google
+let isGoogleUser = false;
 
 async function uploadAvatar(file: File): Promise<boolean> {
   try {
@@ -368,7 +368,6 @@ function hideUsernameEdit() {
 }
   
 function showEmailEdit() {
-  // Si l'utilisateur est connecté via Google, on ne permet pas l'édition de l'email
   if (isGoogleUser) {
     showNotification(i18n.t('editProfile.googleEmailRestriction'), false);
     return;
@@ -402,7 +401,6 @@ function updateUIForGoogleUser(isGoogle: boolean) {
   const changePasswordBtn = document.getElementById('changePasswordBtn');
   
   if (editEmailBtn) {
-    // Masquer le bouton d'édition d'email pour les utilisateurs Google
     if (isGoogle) {
       editEmailBtn.classList.add('hidden');
     } else {
@@ -411,19 +409,16 @@ function updateUIForGoogleUser(isGoogle: boolean) {
   }
   
   if (changePasswordBtn) {
-    // Désactiver le bouton de changement de mot de passe pour les utilisateurs Google
     if (isGoogle) {
       changePasswordBtn.classList.add('opacity-50', 'cursor-not-allowed');
       changePasswordBtn.setAttribute('title', i18n.t('editProfile.notAvailableForGoogle'));
       
-      // Supprimer les effets de survol et les animations pour le bouton désactivé
       changePasswordBtn.classList.remove(
         'hover:translate-y-2', 
         'hover:[box-shadow:0_0px_0_0_#d49218,0_0px_0_0_#1b70f841]',
         'hover:border-b-[0px]'
       );
       
-      // Ajouter un message d'information au survol
       changePasswordBtn.addEventListener('mouseenter', () => {
         showNotification(i18n.t('editProfile.googlePasswordRestriction'), false);
       });

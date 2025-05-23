@@ -17,21 +17,21 @@ import i18n from '../i18n';
 // 	dy: number
 // }
 
-export interface Game {
-	gameId: string;
-	player1_id: string;
-	player2_id: string;
-	score1: number;
-	score2: number;
-	leftPaddle: Paddle;
-	rightPaddle: Paddle;
-	ball: Ball;
-	status: 'waiting' | 'ongoing' | 'finished';
-	winner_id?: string | null;
-	matchId?: string | null;
-	canvasWidth: number;
-	canvasHeight: number;
-}
+// export interface Game {
+// 	gameId: string;
+// 	player1_id: string;
+// 	player2_id: string;
+// 	score1: number;
+// 	score2: number;
+// 	leftPaddle: Paddle;
+// 	rightPaddle: Paddle;
+// 	ball: Ball;
+// 	status: 'waiting' | 'ongoing' | 'finished';
+// 	winner_id?: string | null;
+// 	matchId?: string | null;
+// 	canvasWidth: number;
+// 	canvasHeight: number;
+// }
 
 function mapMatchTypeToI18nKey(matchType: string): string {
   if (!matchType) return 'gameMode.1v1Online';

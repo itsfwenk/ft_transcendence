@@ -1,0 +1,31 @@
+groups:
+  - name: pong-api-alerts
+    rules:
+      - alert: HighHttpErrorRate
+        expr: sum(rate(http_request_duration_seconds_count{status_code=~"4..|5.."}[5m])) by (service)
+              / sum(rate(http_request_duration_seconds_count[5m])) by (service) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Taux d'erreurs HTTP > 5 % sur 5 minutes"
+          description: "Le service {{ $labels.service }} a un taux d’erreurs supérieur à 5 %"
+
+      - alert: SQLiteP95LatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(sqlite_query_duration_seconds_bucket[5m])) by (le, service))
+              > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latence p95 SQLite > 100ms"
+          description: "La latence p95 sur SQLite dans {{ $labels.service }} est > 100 ms"
+
+      - alert: SQLiteFileLarge
+        expr: sqlite_db_file_bytes > 500000
+        for: 2m
+        labels:
+          severity: info
+        annotations:
+          summary: "Base SQLite > 100 MB"
+          description: "Le fichier SQLite de {{ $labels.service }} dépasse 100 MB"

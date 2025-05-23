@@ -16,3 +16,5 @@ scrape_configs:
     static_configs:
       - targets:
           - caddy:2019
+rule_files:
+  - alerting_rules.yml

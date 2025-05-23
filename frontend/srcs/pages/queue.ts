@@ -255,6 +255,12 @@ export default async function Queue() {
 
   const backBtn = document.getElementById('backBtn');
   backBtn?.addEventListener('click', () => {
+	if (ws && ws.readyState === WebSocket.OPEN) {
+		ws.send(JSON.stringify({
+				action: 'QUEUE_LEAVE_1V1',
+				payload: {playerId: currentPlayerId}
+		}));
+	}
     cleanupMatchmaking();
     history.pushState(null, '', '/mode');
     window.dispatchEvent(new PopStateEvent('popstate'));

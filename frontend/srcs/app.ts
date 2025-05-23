@@ -1,4 +1,4 @@
-import { initGame, pauseGame } from './pages/game-logics/local-logic';
+import { initGame } from './pages/game-logics/local-logic';
 // import { pauseGame } from '../game.ts';
 import game from './pages/game';
 
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameModeTitle = document.getElementById('gameMode') as HTMLElement | null;
     const localBtn = document.getElementById('localBtn') as HTMLButtonElement | null;
     const remoteBtn = document.getElementById('remoteBtn') as HTMLButtonElement | null;
-    const pauseBtn = document.getElementById('pauseBtn') as HTMLButtonElement | null;
+    // const pauseBtn = document.getElementById('pauseBtn') as HTMLButtonElement | null;
     const homeBtn = document.getElementById('homeBtn') as HTMLButtonElement | null;
     const gameCanvas = document.getElementById('gameCanvas') as HTMLCanvasElement | null;
   
@@ -38,9 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
       game();
     });
   
-    pauseBtn?.addEventListener('click', () => {
-      pauseGame();
-    });
+    // pauseBtn?.addEventListener('click', () => {
+    //   pauseGame();
+    // });
   
     homeBtn?.addEventListener('click', () => {
       showPage(homePage);

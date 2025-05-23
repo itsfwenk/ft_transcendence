@@ -57,6 +57,29 @@ function hideError() {
   }
 }
 
+async function checkGoogleAuthentication(): Promise<boolean> {
+  try {
+    const baseUrl = window.location.origin;
+    const response = await fetch(`${baseUrl}/user/auth/status`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      console.error('Error fetching auth status:', response.statusText);
+      return false;
+    }
+
+    const data = await response.json();
+    console.log('Google authentication status:', data);
+    
+    return data.user?.hasGoogleLinked || false;
+  } catch (error) {
+    console.error('Error checking Google authentication:', error);
+    return false;
+  }
+}
+
 export default function EditProfile() {
   const app = document.getElementById('app');
   if (app) {
@@ -203,6 +226,7 @@ export default function EditProfile() {
   
 let originalUserData: UserData | null = null;
 let changedData: { userName?: string; email?: string; avatarFile?: File } = {};
+let isGoogleUser = false; // Variable pour stocker si l'utilisateur est connecté via Google
 
 async function uploadAvatar(file: File): Promise<boolean> {
   try {
@@ -344,6 +368,12 @@ function hideUsernameEdit() {
 }
   
 function showEmailEdit() {
+  // Si l'utilisateur est connecté via Google, on ne permet pas l'édition de l'email
+  if (isGoogleUser) {
+    showNotification(i18n.t('editProfile.googleEmailRestriction'), false);
+    return;
+  }
+
   const emailContainer = document.getElementById('emailContainer');
   const emailEditContainer = document.getElementById('emailEditContainer');
   const emailInput = document.getElementById('emailInput') as HTMLInputElement;
@@ -366,8 +396,47 @@ function hideEmailEdit() {
     emailEditContainer.classList.add('hidden');
   }
 }
+
+function updateUIForGoogleUser(isGoogle: boolean) {
+  const editEmailBtn = document.getElementById('editEmailBtn');
+  const changePasswordBtn = document.getElementById('changePasswordBtn');
+  
+  if (editEmailBtn) {
+    // Masquer le bouton d'édition d'email pour les utilisateurs Google
+    if (isGoogle) {
+      editEmailBtn.classList.add('hidden');
+    } else {
+      editEmailBtn.classList.remove('hidden');
+    }
+  }
+  
+  if (changePasswordBtn) {
+    // Désactiver le bouton de changement de mot de passe pour les utilisateurs Google
+    if (isGoogle) {
+      changePasswordBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      changePasswordBtn.setAttribute('title', i18n.t('editProfile.notAvailableForGoogle'));
+      
+      // Supprimer les effets de survol et les animations pour le bouton désactivé
+      changePasswordBtn.classList.remove(
+        'hover:translate-y-2', 
+        'hover:[box-shadow:0_0px_0_0_#d49218,0_0px_0_0_#1b70f841]',
+        'hover:border-b-[0px]'
+      );
+      
+      // Ajouter un message d'information au survol
+      changePasswordBtn.addEventListener('mouseenter', () => {
+        showNotification(i18n.t('editProfile.googlePasswordRestriction'), false);
+      });
+    }
+  }
+}
   
 async function setupEditProfilePage() {
+  isGoogleUser = await checkGoogleAuthentication();
+  console.log("Est un utilisateur Google:", isGoogleUser);
+  
+  updateUIForGoogleUser(isGoogleUser);
+
   originalUserData = await fetchUserProfile();
   if (originalUserData) {
     updateProfileBoxUI(originalUserData);
@@ -488,10 +557,10 @@ async function setupEditProfilePage() {
   }
 
   const changePasswordBtn = document.getElementById('changePasswordBtn');
-  const savePasswordChangeBtn = document.getElementById('savePasswordChange') as HTMLInputElement;
+  const savePasswordChangeBtn = document.getElementById('savePasswordChange') as HTMLButtonElement;
   const cancelPasswordChangeBtn = document.getElementById('cancelPasswordChange');
   
-  if (changePasswordBtn) {
+  if (changePasswordBtn && !isGoogleUser) {
     changePasswordBtn.addEventListener('click', () => {
       togglePasswordChange(true);
     });
@@ -583,10 +652,10 @@ async function setupEditProfilePage() {
           }
         }
         
-        if (changedData.userName || changedData.email) {
+        if ((changedData.userName || (changedData.email && !isGoogleUser))) {
           const updateData: { userName?: string; email?: string } = {};
           if (changedData.userName) updateData.userName = changedData.userName;
-          if (changedData.email) updateData.email = changedData.email;
+          if (changedData.email && !isGoogleUser) updateData.email = changedData.email;
           
           const profileSuccess = await updateUserProfile(updateData);
           if (!profileSuccess) {

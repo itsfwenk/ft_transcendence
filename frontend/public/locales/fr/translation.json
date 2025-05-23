@@ -108,7 +108,7 @@
         "currentPlayerId": "ID du joueur actuel",
         "amIWinner": "Suis-je le gagnant ?",
         "scores": "Scores",
-		"cleanupMatchmaking": "Nettoyage de la file d'attente 1c1"
+        "cleanupMatchmaking": "Nettoyage de la file d'attente 1c1"
     },
     "editProfile": {
         "maxCharsUsername": "7 caractères maximum",
@@ -142,7 +142,10 @@
         "checkConnection": "Veuillez vérifier votre connexion et réessayer.",
         "errorOccurred": "Une erreur est survenue",
         "changesReset": "Modifications annulées",
-        "confirmUnsavedChanges": "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ?"
+        "confirmUnsavedChanges": "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ?",
+        "googleEmailRestriction": "Vous ne pouvez pas modifier votre email avec un compte Google",
+        "notAvailableForGoogle": "Non disponible pour les comptes Google",
+        "googlePasswordRestriction": "Cette fonctionnalité n'est pas disponible pour les comptes connectés via Google"
     },
     "game": {
         "ready": "Prêt...",

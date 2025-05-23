@@ -108,7 +108,7 @@
         "currentPlayerId": "Current player ID",
         "amIWinner": "Am I the winner?",
         "scores": "Scores",
-		"cleanupMatchmaking": "Cleanup matchmaking queue 1v1"
+        "cleanupMatchmaking": "Cleanup matchmaking queue 1v1"
     },
     "editProfile": {
         "maxCharsUsername": "Max 7 characters",
@@ -142,7 +142,10 @@
         "checkConnection": "Please check your connection and try again.",
         "errorOccurred": "An error occurred",
         "changesReset": "Changes reset",
-        "confirmUnsavedChanges": "You have unsaved changes. Are you sure you want to go back?"
+        "confirmUnsavedChanges": "You have unsaved changes. Are you sure you want to go back?",
+        "googleEmailRestriction": "You cannot modify your email with a Google account",
+        "notAvailableForGoogle": "Not available for Google accounts",
+        "googlePasswordRestriction": "This feature is not available for Google-connected accounts"
     },
     "game": {
         "ready": "Ready...",

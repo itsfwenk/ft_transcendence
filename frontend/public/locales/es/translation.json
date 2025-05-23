@@ -108,7 +108,7 @@
         "currentPlayerId": "ID del jugador actual",
         "amIWinner": "¿Soy el ganador?",
         "scores": "Puntuaciones",
-		"cleanupMatchmaking": "Limpieza de la cola de emparejamiento 1c1"
+        "cleanupMatchmaking": "Limpieza de la cola de emparejamiento 1c1"
     },
     "editProfile": {
         "maxCharsUsername": "Máximo 7 caracteres",
@@ -142,7 +142,10 @@
         "checkConnection": "Por favor, comprueba tu conexión e inténtalo de nuevo.",
         "errorOccurred": "Ha ocurrido un error",
         "changesReset": "Cambios restablecidos",
-        "confirmUnsavedChanges": "Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?"
+        "confirmUnsavedChanges": "Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?",
+        "googleEmailRestriction": "No puedes modificar tu email con una cuenta de Google",
+        "notAvailableForGoogle": "No disponible para cuentas de Google",
+        "googlePasswordRestriction": "Esta función no está disponible para cuentas conectadas con Google"
     },
     "game": {
         "ready": "Listo...",

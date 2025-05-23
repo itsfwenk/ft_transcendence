@@ -39,7 +39,7 @@ export async function websocketHandshake(connection: WebSocket, req: FastifyRequ
 
     // Initialize ready players set for this game if it doesn't exist
     if (!gameReadyPlayers.has(gameId)) {
-        gameReadyPlayers.set(gameId, new Set<string>());
+        gameReadyPlayers.set(String(gameId), new Set());
     }
 
     connection.on('message', async (message) => {

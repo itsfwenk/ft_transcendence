@@ -1,13 +1,13 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { endGameInDb, getGamebyId, saveGame, updateGameScore, updateBallPositionInDb, getAllGamesId, updatePaddleDelta, updatePaddlesInDb, updateGameStatusInDb, endGameForfeitInDb } from './gameDb.js'
-import { Ball } from '../gameInterfaces'
+import { getGamebyId, getGameCount, saveGameInDb, updateGameInDb } from './gameDb.js'
+import { Game, Ball, Paddle } from '../gameInterfaces'
 import axios from 'axios';
 import { WebSocket } from "ws";
 import jwt from 'jsonwebtoken';
 import { isReturnStatement } from 'typescript';
 
-// const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
-// const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
+const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
+const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
 const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
 const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
 const paddleSpeed = parseInt(process.env.PADDLE_SPEED as string, 10);
@@ -17,6 +17,8 @@ const speedIncrease = parseFloat(process.env.SPEED_INCREASE as string);
 const activeUsers = new Map<string, WebSocket>(); // userId -> WebSocket
 export default activeUsers;
 const gameReadyPlayers = new Map<string, Set<string>>(); // gameId -> Set of userIds who are ready
+
+const ongoingGames = new Map<string, Game>(); // gameId -> Game
 
 /*
 // Interface pour le body de startGame
@@ -43,6 +45,36 @@ interface EndGameRequest extends FastifyRequest {
 }
 */
 
+function createPaddle(side: string) {
+	let newPaddle : Paddle;
+	if (side === `left`) {
+		newPaddle = {
+			x: 0,
+			y: canvasHeight / 2 - paddleHeight / 2,
+			dy:0,
+		}
+	}
+	else {
+		newPaddle = {
+			x: canvasWidth - 10,
+			y: canvasHeight / 2 - paddleHeight / 2,
+			dy:0,
+		}
+	}
+	return newPaddle;
+}
+
+function createBall() {
+	let newBall : Ball = {
+			x: canvasWidth / 2,
+			y: canvasHeight / 2,
+			radius: ballRadius,
+			dx: Math.random() > 0.5 ? 3 : -3,
+			dy: Math.random() > 0.5 ? 3 : -3,
+		}
+	return newBall;
+}
+
 function wait(ms: number) {
   return new Promise<void>(res => setTimeout(res, ms));
 }
@@ -59,11 +91,33 @@ export async function startGame(req: FastifyRequest<{ Body: { player1_id: string
 	if (!player2) {
 		return reply.status(400).send({error: "player 2 do not exist"})
 	}
-    let newGame;
-    newGame = saveGame(player1_id, player2_id, matchId);
-	const gameId = { gameId: newGame.gameId };
-	await updateUserGameId(player1_id, gameId);
-	await updateUserGameId(player2_id, gameId);
+    let newGame : Game = {
+		gameId: (await getGameCount() + 1).toString(),
+		// gameId: (ongoingGames.size + 1).toString(),
+		player1_id: player1_id,
+		player2_id: player2_id,
+		score1: 0,
+		score2: 0,
+		leftPaddle: createPaddle(`left`),
+		rightPaddle: createPaddle(`right`),
+		ball: createBall(),
+		status: 'waiting',
+		winner_id: null,
+		matchId:  null,
+		canvasWidth: canvasWidth,
+		canvasHeight: canvasHeight,
+	}
+    if (matchId) {
+        newGame.matchId = matchId;
+    }
+	await saveGameInDb(newGame);
+	console.log('NEW GAME IS NUMBER :', newGame.gameId)
+	ongoingGames.set(newGame.gameId, newGame);
+	if (ongoingGames.has(newGame.gameId))
+		console.log('new game in ongoingGames')
+	// const gameId = { gameId: newGame.gameId };
+	await updateUserGameId(player1_id, newGame.gameId);
+	await updateUserGameId(player2_id, newGame.gameId);
 	reply.send({ success: true, game: newGame });
 }
 
@@ -76,40 +130,40 @@ export async function getGame(req: FastifyRequest<{ Params: { gameId: string } }
 }
 
 //mettre a jour le score
-export async function updateScore(req: FastifyRequest<{ Params: { gameId: string }; Body: { score1: number; score2: number } }>, reply: FastifyReply) {
-	const { gameId } = req.params as {gameId: string};
-	const { score1, score2 } = req.body as { score1: number, score2:number }
-	const game = await getGamebyId(gameId);
-	if (!game) return reply.status(404).send({error: "Game not found"});
-	// Vérifier que les scores sont bien des nombres
-	if (typeof score1 !== 'number' || typeof score2 !== 'number') {
-		return reply.status(400).send({ error: "Scores must be numbers" });
-	}
-	const updatedGame = updateGameScore(gameId, score1, score2);
-	if (!updatedGame) return reply.status(500).send({ error: "Failed to update score" });
-	reply.send({success: true, game: updatedGame});
-}
+// export async function updateScore(req: FastifyRequest<{ Params: { gameId: string }; Body: { score1: number; score2: number } }>, reply: FastifyReply) {
+// 	const { gameId } = req.params as {gameId: string};
+// 	const { score1, score2 } = req.body as { score1: number, score2:number }
+// 	const game = await getGamebyId(gameId);
+// 	if (!game) return reply.status(404).send({error: "Game not found"});
+// 	// Vérifier que les scores sont bien des nombres
+// 	if (typeof score1 !== 'number' || typeof score2 !== 'number') {
+// 		return reply.status(400).send({ error: "Scores must be numbers" });
+// 	}
+// 	const updatedGame = updateGameScore(gameId, score1, score2);
+// 	if (!updatedGame) return reply.status(500).send({ error: "Failed to update score" });
+// 	reply.send({success: true, game: updatedGame});
+// }
 
 //terminer une partie
-export async function endGame(req:FastifyRequest<{ Params: { gameId: string } }>, reply:FastifyReply) {
-	const { gameId } = req.params
-	const updatedGame = endGameInDb(gameId);
-	if (!updatedGame) return reply.status(404).send({error: "Game not found"});
-	reply.send({success: true, updatedGame});
-	//mise a jour du service matchmaking
-	console.log("EndGame", updatedGame);
-	try {
-		const baseUrl = process.env.MATCHMAKING_SERVICE_BASE_URL || 'http://matchmaking:4003';
-		const response = await axios.post(`${baseUrl}/matchmaking/match/update/${updatedGame.matchId}`, {
-			matchId: updatedGame.matchId,
-			score1: updatedGame.score1,
-			score2: updatedGame.score2,
-			winner_id: updatedGame.winner_id
-		});
-	} catch (error) {
-		console.error('Erreur lors de la mise à jour du matchmaking:', error);
-	}
-}
+// export async function endGame(req:FastifyRequest<{ Params: { gameId: string } }>, reply:FastifyReply) {
+// 	const { gameId } = req.params
+// 	const updatedGame = endGameInDb(gameId);
+// 	if (!updatedGame) return reply.status(404).send({error: "Game not found"});
+// 	reply.send({success: true, updatedGame});
+// 	//mise a jour du service matchmaking
+// 	console.log("EndGame", updatedGame);
+// 	try {
+// 		const baseUrl = process.env.MATCHMAKING_SERVICE_BASE_URL || 'http://matchmaking:4003';
+// 		const response = await axios.post(`${baseUrl}/matchmaking/match/update/${updatedGame.matchId}`, {
+// 			matchId: updatedGame.matchId,
+// 			score1: updatedGame.score1,
+// 			score2: updatedGame.score2,
+// 			winner_id: updatedGame.winner_id
+// 		});
+// 	} catch (error) {
+// 		console.error('Erreur lors de la mise à jour du matchmaking:', error);
+// 	}
+// }
 
 async function getUserById(userId: string) {
 	try {
@@ -129,11 +183,14 @@ async function getUserById(userId: string) {
 	}
 }
 
-async function updateUserGameId(userId: string, gameId: Partial<{ gameId: string }>) {
+async function updateUserGameId(userId: string, gameId: string) {
 	try {
 	  console.log(`Updating user ${userId}`);
+	  const gameIdObj = {
+		gameId: gameId,
+	  }
 	  const baseUrl = process.env.USER_SERVICE_BASE_URL || 'http://user:4001';
-	  const response = await axios.patch(`${baseUrl}/user/${userId}`, gameId);
+	  const response = await axios.patch(`${baseUrl}/user/${userId}`, gameIdObj);
 	  return response.data;
 	} catch (error) {
 	  if (axios.isAxiosError(error)) {
@@ -147,18 +204,35 @@ async function updateUserGameId(userId: string, gameId: Partial<{ gameId: string
 	}
   }
 
+export async function updateGameScore(gameId: string, score1: number, score2: number) {
+	const game = ongoingGames.get(gameId);
+	if (!game) {
+		console.error(`Game ${gameId} not found`);
+		return;
+	}
+	if (score1 < 5 && score2 < 5) {
+		game.score1 = score1;
+		game.score2 = score2;
+		game.status = 'ongoing';
+	}
+	else {
+		console.log("game finished in updateGameScore")
+		game.score1 = score1;
+		game.score2 = score2;
+		game.status = 'finished';
+	}
+}
+
 export async function updateBallPosition(gameId: string) {
 	try {
 		// console.log(`updateBallPosition called`);
-		const game = await getGamebyId(gameId);
+		const game = ongoingGames.get(gameId);
 		if (!game) {
 			console.error(`Game ${gameId} not found`);
 			return;
 		}
 		if (game.status !== `ongoing`)
-			return;
-		// if (game.status === `finished`)
-		// 	return;
+			return
 		const ball: Ball = game.ball;
 		ball.x += ball.dx;
 		ball.y += ball.dy;
@@ -233,7 +307,7 @@ export async function updateBallPosition(gameId: string) {
 			}
 		  }
 		// console.log(ball.x, ball.y, ball.dx, ball.dy);
-		await updateBallPositionInDb(gameId, ball);
+		// await updateBallPositionInDb(gameId, ball);
 	}
 	catch (error) {
 		console.error("Error updating ball:", error);
@@ -257,15 +331,42 @@ export async function updateBallPosition(gameId: string) {
 // 	  return null;
 // }
 
+export async function updatePaddles(gameId: string) {
+	try {
+			const game = ongoingGames.get(gameId);
+			if (!game) {
+				console.error(`Game ${gameId} not found`);
+				return;
+			}
+			// const game.leftPaddle = game.game.leftPaddle;
+			// const game.rightPaddle = game.game.rightPaddle;
+			if (game.leftPaddle && game.rightPaddle) {
+				game.leftPaddle.y = game.leftPaddle.y + game.leftPaddle.dy;
+				game.rightPaddle.y = game.rightPaddle.y + game.rightPaddle.dy;
+
+				game.leftPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, game.leftPaddle.y));
+				game.rightPaddle.y = Math.max(0, Math.min(game.canvasHeight - paddleHeight, game.rightPaddle.y));
+
+				// game.rightPaddle.x = game.canvasWidth - 10;
+				// console.log('leftPaddle :', game.leftPaddle);
+				// console.log('rightPaddle :', game.rightPaddle);
+			}
+	} catch (err) {
+	  console.error('Error updating paddles:', err);
+	}
+}
+
 export async function updateGames() {
 	try {
-		const allIds : {gameId: string }[] = await getAllGamesId();
+		// const allIds : {gameId: string }[] = await getAllGamesId();
+		// const allIds = ongoingGames.keys();
 		// console.log(`updateGames called`);
-		await Promise.all(allIds.map(async (gameId) => {
-		  updateBallPosition(gameId.gameId);
-		  updatePaddlesInDb(gameId.gameId);
-		  broadcastGameToPlayers(gameId.gameId);
-		}));
+		for(let gameId of ongoingGames.keys()) {
+		  updateBallPosition(gameId);
+		//   updatePaddlesInDb(gameId.gameId);
+		  updatePaddles(gameId);
+		  broadcastGameToPlayers(gameId);
+		};
 	  } catch (error) {
 		console.error('Error fetching games:', error);
 		return;
@@ -277,7 +378,7 @@ export async function updateGames() {
 async function markPlayerAsForfeit(quitterId : string): Promise<void> {
 	const	user = await getUserById(quitterId);
 	if (!user) return;
-	const	game = await getGamebyId(user.inGameId);
+	const	game = ongoingGames.get(user.inGameId.toString());
 	if (!game) return;
 
 	const winnerId = game.player1_id === quitterId ? game.player2_id : game.player1_id;
@@ -285,7 +386,66 @@ async function markPlayerAsForfeit(quitterId : string): Promise<void> {
 
 	game.status = 'finished';
 	game.winner_id = winnerId;
-	endGameForfeitInDb(game);
+	// endGameForfeitInDb(game);
+	// saveGameInDb(game);
+	// ongoingGames.delete(game.gameId);
+	// endGameInOngoingGames(game.gameId);
+}
+
+export async function updatePaddleDeltaInOngoingGames(gameId: string, playerId: string, delta: number) {
+	try {
+		// console.log('looking for game', gameId, typeof gameId);
+		// console.log('in ongoingGames :', ongoingGames);
+		const	game = ongoingGames.get(gameId.toString());
+		if (game) {
+			// console.log('game retrieved :', game)
+			if (playerId === game.player1_id) {
+				game.leftPaddle.dy = delta;
+				// updateEntirePaddleInDb(gameId, paddle, `left`);
+			}
+			else {
+				game.rightPaddle.dy = delta;
+				// updateEntirePaddleInDb(gameId, paddle, `right`);
+			}
+			// console.log(game);
+		}
+		else {
+			console.log('game is', game, 'for gameId :', gameId);
+		}
+	} catch (err) {
+		console.error('Error updating paddle delta:', err);
+	}
+}
+
+export function endGameInOngoingGames(gameId: string) {
+	const game = ongoingGames.get(gameId.toString());
+	if (!game) {
+		console.log('NO GAME FOUND IN endGameInOngoingGames');
+		return;
+	}
+	console.log("endGameInOngoingGames game", game);
+	if (game.status !== 'finished' || game.winner_id === null) {
+		let winner_id: string | null = null;
+		if (game.score1 > game.score2) winner_id = game.player1_id;
+		else if (game.score2 > game.score1) winner_id = game.player2_id;
+		game.status = 'finished';
+		game.winner_id = winner_id;
+	}
+	if (game.status === 'finished' && game.winner_id != null) {
+		updateGameInDb(game);
+		console.log('ongoingGames size :', ongoingGames.size);
+		return game;
+	}
+
+	// let winner_id: string | null = null;
+	// if (game.score1 > game.score2) winner_id = game.player1_id;
+	// else if (game.score2 > game.score1) winner_id = game.player2_id;
+	// game.status = 'finished';
+	// game.winner_id = winner_id;
+	// saveGameInDb(game);
+	// console.log('ongoingGames size :', ongoingGames.size);
+	// ongoingGames.delete(gameId.toString());
+	// return game;
 }
 
 export async function websocketHandshake(fastify: FastifyInstance, connection: WebSocket, req: FastifyRequest) {
@@ -310,8 +470,8 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 	console.log(`User ${userId} connected via WebSocket`);
 
 	const gameId = user.inGameId;
-	if (!gameReadyPlayers.has(gameId)) {
-        gameReadyPlayers.set(gameId, new Set<string>());
+	if (!gameReadyPlayers.has(gameId.toString())) {
+        gameReadyPlayers.set(gameId.toString(), new Set<string>());
     }
 
     connection.on('message', async (message) => {
@@ -332,13 +492,27 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 			// 	updatePaddlesInDb(gameId);
 			  if (type === 'ready_to_start') {
                 console.log(`User ${userId} is ready to start game ${gameId}`);
-                const readyPlayers = gameReadyPlayers.get(gameId)!;
+                const readyPlayers = gameReadyPlayers.get(gameId.toString())!;
                 readyPlayers.add(userId);
-
-                const game = await getGamebyId(gameId);
+				// console.log('gamereadyplayers :',gameReadyPlayers)
+                const game = ongoingGames.get(gameId.toString());
+				// if (game) {
+				// 	console.log('game is in ongoingGames :', game.gameId);
+				// 	if (readyPlayers.size === 2) {
+				// 		console.log('readyPlayers size is 2');
+				// 	}
+				// 	else {
+				// 		console.log('readyPlayers size is ', readyPlayers.size);
+				// 	}
+				// 	console.log('Game status is :', game.status);
+				// }
+				// else {
+				// 	console.log('game is not in ongoingGames :', game);
+				// }
                 if (game && readyPlayers.size === 2 && game.status !== 'ongoing') {
                     console.log(`Both players ready for game ${gameId}. Starting game.`);
-                    await updateGameStatusInDb(gameId, 'ongoing');
+                    // await updateGameStatusInDb(gameId, 'ongoing');
+					game.status = 'ongoing';
                     for (const playerId of [game.player1_id, game.player2_id]) {
                         const playerSocket = activeUsers.get(playerId);
                         playerSocket?.send(JSON.stringify({ type: 'game_start' }));
@@ -353,15 +527,16 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
             //         updatePaddleDelta(user.inGameId, userId, 0);
             //     }
             // } else if (key === 'ArrowDown') {
-            //     if (type === "keydown") {
+            //     if (type === "keydown") endGameInOngoingGames{
             //         updatePaddleDelta(user.inGameId, userId, paddleSpeed);
             //     } else if (type === "keyup") {
             //         updatePaddleDelta(user.inGameId, userId, 0);
             //     }
             // }
 			else if (type === 'input' && key) {
+				// console.log('type === input received');
                 const delta = (key === 'ArrowUp') ? -paddleSpeed : (key === 'ArrowDown') ? paddleSpeed : 0;
-                updatePaddleDelta(gameId, userId, state === 'keydown' ? delta : 0);
+                updatePaddleDeltaInOngoingGames(gameId, userId, state === 'keydown' ? delta : 0);
 			}
 			else if (type === 'FORFEIT') {
 				markPlayerAsForfeit(userId);
@@ -376,11 +551,11 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 	// Handle socket close
 	connection.on('close', async () => {
 		activeUsers.delete(userId);
-		const readyPlayers = gameReadyPlayers.get(gameId);
+		const readyPlayers = gameReadyPlayers.get(gameId.toString());
 		readyPlayers?.delete(userId);
 		if (readyPlayers?.size === 0)
 		{
-			const updatedGame = endGameInDb(gameId);
+			const updatedGame = endGameInOngoingGames(gameId);
 			if (!updatedGame) 
 			{
 				console.error('game not found');
@@ -401,7 +576,8 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 				console.error('Erreur lors de la mise à jour du matchmaking:', error);
 			}
 			console.log("Game", gameId, "has finished.");
-			gameReadyPlayers.delete(gameId);
+			gameReadyPlayers.delete(gameId.toString());
+			ongoingGames.delete(gameId.toString());
 		}
 		console.log(`User ${userId} disconnected`);
 		connection.close(1003, 'Invalid message format');
@@ -415,11 +591,18 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 }
 
 async function broadcastGameToPlayers(gameId: string) {
-	const game = await getGamebyId(gameId);
+	const game = ongoingGames.get(gameId);
 	if (!game) return;
-
+	// else {
+	// 	console.log('Broadcasting game :', gameId);
+	// }
+	// console.log('IN BROADCAST :', game);
 	[game.player1_id, game.player2_id].forEach(userId => {
-		const gameSet = gameReadyPlayers.get(gameId);
+		// console.log("typeof gameId:", typeof gameId);
+		const gameSet = gameReadyPlayers.get(gameId.toString());
+		// console.log('IN BROADCAST gameReadyPlayers :', gameReadyPlayers);
+		// console.log("WANTED GAMESET IS", gameId);
+		// console.log("BUT GAMESET IS", gameSet)
 		if (gameSet?.has(userId)) {
 			const socket = activeUsers.get(userId);
 			if (socket) {

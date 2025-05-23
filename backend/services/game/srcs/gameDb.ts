@@ -60,7 +60,7 @@ db.exec(`
 	PRAGMA foreign_keys = OFF;  -- ✅ Désactiver les FK pour éviter les erreurs
 
 	CREATE TABLE IF NOT EXISTS games (
-	  gameId INTEGER PRIMARY KEY AUTOINCREMENT,
+	  gameId INTEGER DEFAULT 0,
 	  player1_id STRING NOT NULL,
 	  player2_id STRING NOT NULL,
 	  score1 INTEGER DEFAULT 0,
@@ -287,4 +287,85 @@ function updateEntirePaddleInDb(gameId: string, paddle: Paddle, side: string) {
     } catch (err) {
       console.error('Error updating paddle in the database:', err);
     }
+}
+
+export async function saveGameInDb(game: Game) {
+	try {
+		const stmt = db.prepare(`
+			INSERT INTO games (
+				gameId,
+				player1_id,
+				player2_id,
+				score1,
+				score2,
+				leftPaddle,
+				rightPaddle,
+				ball,
+				status,
+				winner_id,
+				matchId,
+				canvasWidth,
+				canvasHeight
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`);
+
+		stmt.run(
+			game.gameId,		
+			game.player1_id,
+			game.player2_id,
+			game.score1,
+			game.score2,
+			JSON.stringify(game.leftPaddle),
+			JSON.stringify(game.rightPaddle),
+			JSON.stringify(game.ball),
+			game.status,
+			game.winner_id,
+			game.matchId,
+			game.canvasWidth,
+			game.canvasHeight
+		);
+	} catch(error) {
+		console.error('Error while saving game db :', error);
+	}
+}
+
+export async function updateGameInDb(game: Game) {
+	try {
+		const stmt = db.prepare(`
+			UPDATE games
+			SET
+				player1_id = ?,
+				player2_id = ?,
+				score1 = ?,
+				score2 = ?,
+				leftPaddle = ?,
+				rightPaddle = ?,
+				ball = ?,
+				status = ?,
+				winner_id = ?,
+				matchId = ?,
+				canvasWidth = ?,
+				canvasHeight = ?
+			WHERE
+				gameId = ?;
+		`);
+
+		stmt.run(
+			game.player1_id,
+			game.player2_id,
+			game.score1,
+			game.score2,
+			JSON.stringify(game.leftPaddle),
+			JSON.stringify(game.rightPaddle),
+			JSON.stringify(game.ball),
+			game.status,
+			game.winner_id,
+			game.matchId,
+			game.canvasWidth,
+			game.canvasHeight,
+			game.gameId,
+		);
+	} catch(error) {
+		console.error('Error while updating game db :', error);
+	}
 }

@@ -62,8 +62,8 @@
         "leave": "Quitter",
         "matchPrep": "Préparation du match",
         "matchOfficiallyStarted": "Le match est maintenant officiellement lancé par le serveur",
-        "matchStartsIn": "Le match commence dans {{seconds}}...",
-        "startsIn": "Le tournoi commence dans {{seconds}}",
+        "matchStartsIn": "Le match commence dans ...",
+        "startsIn": "Le tournoi commence dans ",
         "cleanupMatchmaking": "Nettoyage du matchmaking du tournoi",
         "playerEliminated": "Dommage, vous êtes éliminé !",
         "tryAgainNextTime": "Vous pourrez retenter votre chance la prochaine fois.",
@@ -73,7 +73,7 @@
         "finalPreparation": "La finale est en préparation...",
         "congratsTournamentWin": "Bravo, vous avez gagné le tournoi !",
         "championCongrats": "Vous êtes le champion. Félicitations !",
-        "playerState": "Votre état joueur : {{state}}",
+        "playerState": "Votre état joueur : ",
         "waitingForInfo": "En attente d'informations supplémentaires.",
         "match": "Match de Tournoi",
         "semifinalMatch": "Demi-finale du Tournoi",
@@ -83,7 +83,7 @@
         "searchingOpponent": "Recherche d'adversaire...",
         "opponentFound": "Adversaire trouvé ! Préparez-vous...",
         "opponentLeft": "L'adversaire est parti. Recherche d'un nouvel adversaire...",
-        "gameStartingIn": "La partie commence dans {{seconds}}...",
+        "gameStartingIn": "La partie commence dans ...",
         "searchingPlayers": "Recherche de joueurs...",
         "tournamentQueue": "File d'attente du tournoi",
         "you": "Vous",
@@ -107,7 +107,8 @@
         "winnerId": "ID du gagnant",
         "currentPlayerId": "ID du joueur actuel",
         "amIWinner": "Suis-je le gagnant ?",
-        "scores": "Scores"
+        "scores": "Scores",
+		"cleanupMatchmaking": "Nettoyage de la file d'attente 1c1"
     },
     "editProfile": {
         "maxCharsUsername": "7 caractères maximum",
@@ -155,7 +156,14 @@
         "statusOngoing": "En cours",
         "statusFinished": "Terminé",
         "quit": "Quitter",
-        "pause": "Pause"
+        "pause": "Pause",
+        "countdownBegin": "Début dans ",
+        "resultWin": "Vous gagnez !",
+        "resultLose": "Vous perdez !",
+        "waitingOpponent": "attente de votre adversaire…",
+        "nextTime": "La prochaine fois...",
+        "finalPreparation": "finale en préparation",
+        "congratulations": "Félicitations !"
     },
     "result": {
         "victory": "Victoire !",

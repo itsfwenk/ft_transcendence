@@ -62,8 +62,8 @@
         "leave": "Leave",
         "matchPrep": "MATCH_PREP",
         "matchOfficiallyStarted": "Match is now officially started by the server",
-        "matchStartsIn": "Match starts in {{seconds}}…",
-        "startsIn": "Tournament starts in {{seconds}}",
+        "matchStartsIn": "Match starts in ...",
+        "startsIn": "Tournament starts in ",
         "cleanupMatchmaking": "CleanupMatchmaking Tournament",
         "playerEliminated": "Sorry, you've been eliminated!",
         "tryAgainNextTime": "You can try your luck next time.",
@@ -73,7 +73,7 @@
         "finalPreparation": "The final is being prepared...",
         "congratsTournamentWin": "Congratulations, you've won the tournament!",
         "championCongrats": "You are the champion. Congratulations!",
-        "playerState": "Your player state: {{state}}",
+        "playerState": "Your player state: ",
         "waitingForInfo": "Waiting for additional information.",
         "match": "Tournament Match",
         "semifinalMatch": "Tournament Semifinal",
@@ -83,7 +83,7 @@
         "searchingOpponent": "Searching for opponent...",
         "opponentFound": "Opponent found! Get ready...",
         "opponentLeft": "Opponent left. Searching for new opponent...",
-        "gameStartingIn": "Game starting in {{seconds}}...",
+        "gameStartingIn": "Game starting in ...",
         "searchingPlayers": "Searching for players...",
         "tournamentQueue": "Tournament Queue",
         "you": "You",
@@ -107,7 +107,8 @@
         "winnerId": "Winner ID",
         "currentPlayerId": "Current player ID",
         "amIWinner": "Am I the winner?",
-        "scores": "Scores"
+        "scores": "Scores",
+		"cleanupMatchmaking": "Cleanup matchmaking queue 1v1"
     },
     "editProfile": {
         "maxCharsUsername": "Max 7 characters",
@@ -155,7 +156,14 @@
         "statusOngoing": "In progress",
         "statusFinished": "Finished",
         "quit": "Quit",
-        "pause": "Pause"
+        "pause": "Pause",
+        "countdownBegin": "Begin in ",
+        "resultWin": "You Win!",
+        "resultLose": "You Lose!",
+        "waitingOpponent": "waiting your opponent…",
+        "nextTime": "Next time...",
+        "finalPreparation": "final in preparation",
+        "congratulations": "Congratulation!"
     },
     "result": {
         "victory": "Victory!",

@@ -2,14 +2,6 @@ import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
 import i18n from '../i18n';
 
-// Faire trad !!!!!!!!!!!!!!!!!!!
-
-// let gameState : Game;
-// const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-// const host = window.location.hostname;
-// const port = window.location.port;
-// const path = '/ws';
-
 export interface Ball {
 	x: number;
 	y: number;
@@ -23,7 +15,6 @@ export interface Paddle {
 	y: number;
 	dy: number
 }
-
 
 export interface Game {
 	gameId: string;
@@ -40,9 +31,6 @@ export interface Game {
 	canvasWidth: number;
 	canvasHeight: number;
 }
-
-//let cleanupMatchmakingFn: () => void;
-
 
 function mapMatchTypeToI18nKey(matchType: string): string {
   if (!matchType) return 'gameMode.1v1Online';
@@ -66,8 +54,6 @@ export default function game() {
     let gameStarted = false;
 	let canvas: HTMLCanvasElement | null;
 	let ctx: CanvasRenderingContext2D | null;
-	// let score1Display: HTMLElement | null;
-	// let score2Display: HTMLElement | null;
 	let countdownInterval: number | null = null;
 
     function keydownHandler(e: KeyboardEvent) {
@@ -100,22 +86,9 @@ export default function game() {
 
     function cleanup() {
 		if (countdownInterval) clearInterval(countdownInterval);
-        // console.log("Cleaning up...");
-        // const canvas = document.getElementById('game-canvas');
-        // if (canvas) {
-        //     console.log("Removing canvas");
-        //     canvas.remove();
-        // } else {
-        //     console.warn("No canvas to remove");
-        // }
-
         document.removeEventListener('keydown', keydownHandler);
         document.removeEventListener('keyup', keyupHandler);
 		document.removeEventListener('click', doForfeit);
-
-
-        // const app = document.getElementById('app');
-        // if (app) app.innerHTML = '';
     }
 
 	function doForfeit() {                                       
@@ -125,10 +98,6 @@ export default function game() {
 		}
   		makeBackButton(); 
 	}
-
-
-
-
 
 	function updateMatchType(type: string) {
         const matchType = document.getElementById('match-type');
@@ -200,8 +169,8 @@ export default function game() {
         console.error("Error retrieving app");
         return;
     }
-	//app.classList.add('relative');
-    app.innerHTML = /*html*//*html*/`
+
+    app.innerHTML = /*html*/`
 		<!-- En-tête avec titre et photos de profil -->
 		<div class="flex justify-center items-center mb-2">
 			<!-- Photo de profil joueur 1 -->
@@ -222,14 +191,12 @@ export default function game() {
 			</div>
 		</div>
 		
-
-		
 		<!-- Conteneur du canvas avec bordure -->
 		<div id="game-wrapper" class="inline-block">
 			<!-- Sous-titre -->
 			<div id="match-type"
 				class="text-left text-gray-600 text-2xl mb-2 ml-3 font-jaro">
-				chargement…
+				${i18n.t('general.loading')}
 			</div>
 
 			<!-- === Bloc canvas + overlay ==================================== -->
@@ -252,12 +219,12 @@ export default function game() {
 			<div id="game-status"
 				class="absolute top-2 right-4 px-2 py-0.5
 						bg-black/70 text-white text-xs rounded hidden">
-				En attente…
+				${i18n.t('game.statusWaiting')}
 			</div>
 		</div>
 
 		<div class="flex justify-center mt-4">
-			<button id="quit-btn" class="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700">Quitter</button>
+			<button id="quit-btn" class="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700">${i18n.t('game.quit')}</button>
 		</div>
 		`;
 	initGameUI();
@@ -277,19 +244,17 @@ export default function game() {
 	overlay.classList.remove('hidden');
 	}
 
-
 	function hideOverlay() {
 		overlay.classList.add('hidden');
 	}
 
-
 	if (overlay) {
-		overlay.textContent = `Begin in ${countdown}`;
+		overlay.textContent = i18n.t('game.countdownBegin', { seconds: countdown });
 		app.appendChild(overlay);
 		countdownInterval = window.setInterval(() => {
 			countdown--;
 			if (countdown > 0) {
-				showOverlay('Begin in', String(countdown), 'text-black');
+				showOverlay(i18n.t('game.countdownBegin'), String(countdown), 'text-black');
 			} else {
 				clearInterval(countdownInterval!);
 				hideOverlay();
@@ -316,10 +281,10 @@ export default function game() {
 				updateMatchType(matchType);
 				} catch (error) {
 				console.warn("Impossible de récupérer le type de match:", error);
-				updateMatchType("1v1 online");
+				updateMatchType(i18n.t('gameMode.1v1Online'));
 				}
 			} else {
-				updateMatchType("1v1 online");
+				updateMatchType(i18n.t('gameMode.1v1Online'));
 			}
 			updatePlayerAvatars(player1Id, player2Id);
 			config = true;
@@ -347,9 +312,6 @@ export default function game() {
 
 	document.addEventListener('keydown', keydownHandler);
 	document.addEventListener('keyup', keyupHandler);
-
-
-
             
 	function renderGame(state: Game) {
 		if (!ctx || !canvas || !gameStarted) return;
@@ -370,7 +332,6 @@ export default function game() {
 		ctx.lineWidth = 1;
 		ctx.stroke();
 		ctx.setLineDash([]);
-		
 		
 		// Dessiner la raquette gauche
 		ctx.fillStyle = '#4F46E5';
@@ -419,7 +380,6 @@ export default function game() {
 		}
  	}
 
-
 	function cleanupMatchmaking() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
 			console.log("Cleanup matchmaking game");
@@ -442,8 +402,6 @@ export default function game() {
 	window.addEventListener('beforeunload', handlePageUnload);
 
 	ws.onmessage = handleMessageGame;
-	//ws.addEventListener('message', handleMessageGame);
-
 
 	function makeBackButton() {
 		const btn = document.getElementById('quit-btn') as HTMLButtonElement;
@@ -453,7 +411,7 @@ export default function game() {
 		btn.parentNode!.replaceChild(newBtn, btn);
 
 		newBtn.id = 'back-btn';
-		newBtn.textContent = 'Retour';
+		newBtn.textContent = i18n.t('general.back');
 		newBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
 		newBtn.classList.add   ('bg-gray-700', 'hover:bg-gray-800');
 
@@ -474,23 +432,23 @@ export default function game() {
 
 		switch (state) {
 			case 'waiting_next_round':
-				title = 'You Win!';
-				subtitle = 'waiting your opponent…';
+				title = i18n.t('game.resultWin');
+				subtitle = i18n.t('game.waitingOpponent');
 				color = 'text-green-600';
 				break;
 			case 'eliminated':
-				title = 'You Lose!';
-				subtitle = 'Next time...';
+				title = i18n.t('game.resultLose');
+				subtitle = i18n.t('game.nextTime');
 				color = 'text-red-600';
 				break;
 			case 'waiting_final':
-				title = 'You Win!';
-				subtitle = 'final in preparation';
+				title = i18n.t('game.resultWin');
+				subtitle = i18n.t('game.finalPreparation');
 				color = 'text-green-600';
 				break;
 			case 'winner':
-				title = 'You Win!';
-				subtitle = 'Congratulation!';
+				title = i18n.t('game.resultWin');
+				subtitle = i18n.t('game.congratulations');
 				color = 'text-green-600';
 				break;
 		}
@@ -500,9 +458,4 @@ export default function game() {
 			<p class="text-xl text-black">${subtitle}</p>
 		`;
 	}
-
-
 }
-
-
-

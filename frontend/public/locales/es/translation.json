@@ -62,8 +62,8 @@
         "leave": "Salir",
         "matchPrep": "Preparación del partido",
         "matchOfficiallyStarted": "El partido ha comenzado oficialmente",
-        "matchStartsIn": "El partido comienza en {{seconds}}...",
-        "startsIn": "El torneo comienza en {{seconds}}",
+        "matchStartsIn": "El partido comienza en ...",
+        "startsIn": "El torneo comienza en ",
         "cleanupMatchmaking": "Limpieza de emparejamiento del torneo",
         "playerEliminated": "¡Lo siento, has sido eliminado!",
         "tryAgainNextTime": "Podrás intentarlo de nuevo la próxima vez.",
@@ -73,7 +73,7 @@
         "finalPreparation": "La final se está preparando...",
         "congratsTournamentWin": "¡Felicidades, has ganado el torneo!",
         "championCongrats": "Eres el campeón. ¡Enhorabuena!",
-        "playerState": "Tu estado de jugador: {{state}}",
+        "playerState": "Tu estado de jugador: ",
         "waitingForInfo": "Esperando información adicional.",
         "match": "Partida de Torneo",
         "semifinalMatch": "Semifinal del Torneo",
@@ -83,7 +83,7 @@
         "searchingOpponent": "Buscando oponente...",
         "opponentFound": "¡Oponente encontrado! Prepárate...",
         "opponentLeft": "El oponente se ha ido. Buscando nuevo oponente...",
-        "gameStartingIn": "El juego comienza en {{seconds}}...",
+        "gameStartingIn": "El juego comienza en ...",
         "searchingPlayers": "Buscando jugadores...",
         "tournamentQueue": "Cola de Torneo",
         "you": "Tú",
@@ -107,7 +107,8 @@
         "winnerId": "ID del ganador",
         "currentPlayerId": "ID del jugador actual",
         "amIWinner": "¿Soy el ganador?",
-        "scores": "Puntuaciones"
+        "scores": "Puntuaciones",
+		"cleanupMatchmaking": "Limpieza de la cola de emparejamiento 1c1"
     },
     "editProfile": {
         "maxCharsUsername": "Máximo 7 caracteres",
@@ -155,7 +156,14 @@
         "statusOngoing": "En progreso",
         "statusFinished": "Finalizado",
         "quit": "Abandonar",
-        "pause": "Pausa"
+        "pause": "Pausa",
+        "countdownBegin": "Empieza en ",
+        "resultWin": "¡Ganas!",
+        "resultLose": "¡Pierdes!",
+        "waitingOpponent": "esperando a tu oponente…",
+        "nextTime": "La próxima vez...",
+        "finalPreparation": "final en preparación",
+        "congratulations": "¡Felicitaciones!"
     },
     "result": {
         "victory": "¡Victoria!",

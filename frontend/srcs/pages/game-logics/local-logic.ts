@@ -1,3 +1,5 @@
+import i18n from '../../i18n';
+
 let isPaused = false;
 
 export function initGame(){
@@ -5,17 +7,17 @@ export function initGame(){
   if (app) {
     app.innerHTML = /*html*/`
       <div class="flex flex-col items-center">
-        <div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">Pong Game</div>
+        <div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">${i18n.t('general.pongGame')}</div>
         
         <!-- Conteneur avec bordures -->
-		<div class="self-start text-gray-600 text-2xl mb-2 ml-27 font-jaro select-none" id="match-type">1v1 local</div>
+		<div class="self-start text-gray-600 text-2xl mb-2 ml-27 font-jaro select-none" id="match-type">${i18n.t('localGame.matchType')}</div>
         <div class="border-4 border-black bg-white relative">
           <canvas id="gameCanvas" width="1000" height="500" class="w-full"></canvas>
         </div>
         
         <div class="mt-4 space-x-2">
-          <button id="pauseLocalBtn" class="p-3 mr-5 bg-red-500 text-white rounded hover:bg-red-600">Pause</button>
-          <a href="/menu" data-link id="btnHome" class="h-16 p-3 py-2.5 px-5 bg-blue-700 text-white rounded-lg border border-solid border-transparent hover:bg-blue-800">Home</a>
+          <button id="pauseLocalBtn" class="p-3 mr-5 bg-red-500 text-white rounded hover:bg-red-600">${i18n.t('localGame.pause')}</button>
+          <a href="/menu" data-link id="btnHome" class="h-16 p-3 py-2.5 px-5 bg-blue-700 text-white rounded-lg border border-solid border-transparent hover:bg-blue-800">${i18n.t('menu.home')}</a>
         </div>
       </div>
     `;
@@ -122,9 +124,9 @@ function pauseGame() {
 		pauseOverlay.id = 'pauseOverlay';
 		pauseOverlay.className = 'absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10 hidden';
 		pauseOverlay.innerHTML = `
-		<div class="text-white text-4xl font-bold mb-6">JEU EN PAUSE</div>
+		<div class="text-white text-4xl font-bold mb-6">${i18n.t('localGame.gamePaused')}</div>
 		<button id="resumeBtn" class="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg text-xl">
-			Reprendre
+			${i18n.t('localGame.resume')}
 		</button>
 		`;
 		
@@ -145,7 +147,7 @@ function pauseGame() {
 		}
 		pauseOverlay.classList.remove('hidden');
 		const pauseBtn = document.getElementById('pauseLocalBtn');
-		if (pauseBtn) pauseBtn.textContent = 'Reprendre';
+		if (pauseBtn) pauseBtn.textContent = i18n.t('localGame.resume');
 	} else {
 		pauseOverlay.classList.add('hidden');
 		if (btnHome && btnPause) {
@@ -153,7 +155,7 @@ function pauseGame() {
 			btnPause.classList.remove('hidden');
 		}
 		const pauseBtn = document.getElementById('pauseLocalBtn');
-		if (pauseBtn) pauseBtn.textContent = 'Pause';
+		if (pauseBtn) pauseBtn.textContent = i18n.t('localGame.pause');
 	}
 }
 

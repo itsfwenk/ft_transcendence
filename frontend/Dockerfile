@@ -8,6 +8,7 @@ RUN npm cache clean --force
 RUN npm install dotenv
 COPY ./frontend .
 COPY gameInterfaces.ts ./
+COPY ./frontend/public/locales /app/dist/locales
 RUN npm install --save-dev @types/node
 
 # RUN npm run build

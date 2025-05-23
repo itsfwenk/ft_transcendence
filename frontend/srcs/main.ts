@@ -1,11 +1,24 @@
 import './styles.css'
-import { initRouter } from './router';
 import { matchmakingWebSocket } from "./wsClient";
+import './i18n';
+import { waitForI18n } from './i18n';
 // import { handleDisconnect } from './pages/menu';
 // import { fetchUserProfile } from './pages/mode';
 
+async function initApp() {
+  try {
+    await waitForI18n();
+    
+    const { initRouter } = await import('./router');
+    initRouter();
+    
+  } catch (error) {
+    console.error("❌ Erreur lors de l'initialisation:", error);
+  }
+}
 
-initRouter();
+initApp();
+
 
 // window.addEventListener('beforeunload', () => {
 //     handleDisconnect()

@@ -241,14 +241,15 @@ export default function game() {
 					class="relative inline-block border-4 border-black bg-white">
 				<canvas id="game-canvas" width="${canvasWidth}" height="${canvasHeight}" class="block"></canvas>
 
-				<!-- Mini-overlay SCORE, centré sur le canvas -->
+				<!-- Overlay centré sur le canvas, transparent pour voir le jeu en arrière-plan -->
 				<div id="result-overlay"
-					class="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
-							w-[320px]                               <!-- largeur fixe, adapte -->
-							max-w-[70%] px-6 py-4
-							bg-gray-200/90 rounded-md
-							text-center pointer-events-none">
-					<!-- contenu injecté dynamiquement -->
+					class="hidden absolute inset-0 flex flex-col justify-center items-center
+							pointer-events-none z-10">
+					<div class="bg-white bg-opacity-70 rounded-lg shadow-lg px-8 py-6 text-center
+							border-2 border-gray-300">
+						<h2 id="overlay-title" class="text-5xl font-bold mb-3 font-jaro"></h2>
+						<p id="overlay-subtitle" class="text-xl font-medium font-jaro"></p>
+					</div>
 				</div>
 			</div>
 
@@ -260,8 +261,14 @@ export default function game() {
 			</div>
 		</div>
 
-		<div class="flex justify-center mt-4">
-			<button id="quit-btn" class="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700">${i18n.t('game.quit')}</button>
+		<div class="flex justify-center mt-8">
+			<div id="quit-btn" class="button h-14 w-32 bg-red-600 rounded-lg cursor-pointer select-none
+				hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#A31F1F,0_0px_0_0_#A31F1F41]
+				hover:border-b-[0px]
+				transition-all duration-150 [box-shadow:0_10px_0_0_#A31F1F,0_15px_0_0_#A31F1F41]
+				border-b-[1px] border-red-400">
+				<span class="flex flex-col justify-center items-center h-full text-white font-jaro text-xl">${i18n.t('game.quit')}</span>
+			</div>
 		</div>
 		`;
 	initGameUI();
@@ -271,36 +278,46 @@ export default function game() {
 
 	console.log("countdown", countdown);
 
-	const overlay = document.getElementById('result-overlay')!;
+	showOverlay(i18n.t('game.countdownBegin'), String(countdown), 'text-blue-700');
+
+	countdownInterval = window.setInterval(() => {
+		countdown--;
+		if (countdown > 0) {
+			showOverlay(i18n.t('game.countdownBegin'), String(countdown), 'text-blue-700');
+		} else {
+			clearInterval(countdownInterval!);
+			hideOverlay();
+			if (socket.readyState === WebSocket.OPEN) {
+				socket.send(JSON.stringify({ type: 'ready_to_start' }));
+			}
+		}
+	}, 1000);
 
 	function showOverlay(title: string, subtitle = '', color = 'text-black') {
-	overlay.innerHTML = `
-		<h2 class="text-5xl font-bold mb-2 ${color}">${title}</h2>
-		${subtitle ? `<p class="text-lg ${color}">${subtitle}</p>` : ''}
-	`;
-	overlay.classList.remove('hidden');
+		const overlay = document.getElementById('result-overlay');
+		const titleEl = document.getElementById('overlay-title');
+		const subtitleEl = document.getElementById('overlay-subtitle');
+		
+		if (!overlay || !titleEl || !subtitleEl) return;
+		
+		titleEl.textContent = title;
+		titleEl.className = `text-5xl font-bold mb-3 font-jaro ${color}`;
+		
+		subtitleEl.textContent = subtitle;
+		subtitleEl.className = subtitle ? 'text-xl font-medium font-jaro text-gray-800' : 'hidden';
+		
+		overlay.classList.remove('hidden');
+		overlay.classList.add('flex');
 	}
 
 	function hideOverlay() {
+		const overlay = document.getElementById('result-overlay');
+		if (!overlay) return;
+		
 		overlay.classList.add('hidden');
+		overlay.classList.remove('flex');
 	}
 
-	if (overlay) {
-		overlay.textContent = i18n.t('game.countdownBegin', { countdown });
-		app.appendChild(overlay);
-		countdownInterval = window.setInterval(() => {
-			countdown--;
-			if (countdown > 0) {
-				showOverlay(i18n.t('game.countdownBegin'), String(countdown), 'text-black');
-			} else {
-				clearInterval(countdownInterval!);
-				hideOverlay();
-				if (socket.readyState === WebSocket.OPEN) {
-					socket.send(JSON.stringify({ type: 'ready_to_start' }));
-				}
-			}
-		}, 1000);
-	}
     
 	let config = false;
 	socket.onmessage = async (event) => {
@@ -442,28 +459,30 @@ export default function game() {
 	ws.onmessage = handleMessageGame;
 
 	function makeBackButton() {
-		const btn = document.getElementById('quit-btn') as HTMLButtonElement;
-		if (!btn) return;
+		const quitBtn = document.getElementById('quit-btn');
+		if (!quitBtn) return;
 
-		const newBtn = btn.cloneNode(true) as HTMLButtonElement;
-		btn.parentNode!.replaceChild(newBtn, btn);
+		const btnContainer = quitBtn.parentNode;
+		if (!btnContainer || !(btnContainer instanceof HTMLElement)) return;
 
-		newBtn.id = 'back-btn';
-		newBtn.textContent = i18n.t('general.back');
-		newBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-		newBtn.classList.add   ('bg-gray-700', 'hover:bg-gray-800');
+		btnContainer.innerHTML = `
+			<div id="back-btn" class="button h-14 w-32 bg-blue-700 rounded-lg cursor-pointer select-none
+				hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#193cb8,0_0px_0_0_#1b70f841]
+				hover:border-b-[0px]
+				transition-all duration-150 [box-shadow:0_10px_0_0_#193cb8,0_15px_0_0_#1b70f841]
+				border-b-[1px] border-blue-400">
+				<span class="flex flex-col justify-center items-center h-full text-white font-jaro text-xl">${i18n.t('general.back')}</span>
+			</div>
+		`;
 
-		newBtn.addEventListener('click', () => {
+		document.getElementById('back-btn')?.addEventListener('click', () => {
 			history.pushState(null, '', '/mode');
 			window.dispatchEvent(new PopStateEvent('popstate'));
 		});
 	}
 
-	function showResultOverlay(state: 'eliminated'|'waiting_next_round'|'waiting_final'|'winner') {
-		const overlay = document.getElementById('result-overlay')!;
-		overlay.classList.remove('hidden');
-		makeBackButton()
 
+	function showResultOverlay(state: 'eliminated'|'waiting_next_round'|'waiting_final'|'winner') {
 		let title = '';
 		let subtitle = '';
 		let color = '';
@@ -491,9 +510,7 @@ export default function game() {
 				break;
 		}
 
-		overlay.innerHTML = `
-			<h2 class="text-6xl font-bold mb-2 ${color}">${title}</h2>
-			<p class="text-xl text-black">${subtitle}</p>
-		`;
+		showOverlay(title, subtitle, color);
+		makeBackButton();
 	}
 }

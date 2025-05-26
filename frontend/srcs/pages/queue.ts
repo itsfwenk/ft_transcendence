@@ -172,14 +172,14 @@ export default async function Queue() {
     let timeLeft = delay ?? 5;
     
     if (statusMessage) {
-      statusMessage.textContent = i18n.t('queue.gameStartingIn', { seconds: timeLeft });
+      statusMessage.textContent = i18n.t('queue.gameStartingIn') + timeLeft;
     }
     
     const intervalId = setInterval(() => {
       timeLeft--;
       
       if (statusMessage && timeLeft >= 0) {
-        statusMessage.textContent = i18n.t('queue.gameStartingIn', { seconds: timeLeft });
+        statusMessage.textContent = i18n.t('queue.gameStartingIn') + timeLeft;
       }
       
       if (timeLeft < 0) {

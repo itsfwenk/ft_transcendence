@@ -83,7 +83,7 @@
         "searchingOpponent": "Searching for opponent...",
         "opponentFound": "Opponent found! Get ready...",
         "opponentLeft": "Opponent left. Searching for new opponent...",
-        "gameStartingIn": "Game starting in ...",
+        "gameStartingIn": "Game starting in ",
         "searchingPlayers": "Searching for players...",
         "tournamentQueue": "Tournament Queue",
         "you": "You",

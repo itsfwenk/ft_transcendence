@@ -96,13 +96,13 @@ export default async function Queuetournament() {
 		//box.classList.remove('hidden');
 		let seconds = delay > 0 ? delay : 5;
 		if (statusMessage) {
-			statusMessage.textContent = i18n.t('tournament.startsIn', { seconds });
+			statusMessage.textContent = i18n.t('tournament.startsIn') + seconds;
 		}
 
 		countdownHandle = window.setInterval(() => {
 			seconds--;
 			if (seconds > 0 && statusMessage) {
-				statusMessage.textContent = i18n.t('tournament.startsIn', { seconds });
+				statusMessage.textContent = i18n.t('tournament.startsIn') + seconds;
 			} else {
 				clearInterval(countdownHandle!);
 				countdownHandle = null;

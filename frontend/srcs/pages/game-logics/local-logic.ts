@@ -29,9 +29,22 @@ export function initGame(){
             </div>
         </div>
         
-        <div class="mt-4 space-x-2">
-          <button id="pauseLocalBtn" class="p-3 mr-5 bg-red-500 text-white rounded hover:bg-red-600">${i18n.t('localGame.pause')}</button>
-          <a href="/menu" data-link id="btnHome" class="h-16 p-3 py-2.5 px-5 bg-blue-700 text-white rounded-lg border border-solid border-transparent hover:bg-blue-800">${i18n.t('menu.home')}</a>
+        <div class="mt-8 space-x-6 flex items-center justify-center">
+          <div id="pauseLocalBtn" class="button h-14 w-32 bg-red-600 rounded-lg cursor-pointer select-none
+            hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#A31F1F,0_0px_0_0_#A31F1F41]
+            hover:border-b-[0px]
+            transition-all duration-150 [box-shadow:0_10px_0_0_#A31F1F,0_15px_0_0_#A31F1F41]
+            border-b-[1px] border-red-400">
+            <span class="flex flex-col justify-center items-center h-full text-white font-jaro text-xl">${i18n.t('localGame.pause')}</span>
+          </div>
+
+          <div id="btnHome" class="button h-14 w-32 bg-blue-700 rounded-lg cursor-pointer select-none
+            hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#193cb8,0_0px_0_0_#1b70f841]
+            hover:border-b-[0px]
+            transition-all duration-150 [box-shadow:0_10px_0_0_#193cb8,0_15px_0_0_#1b70f841]
+            border-b-[1px] border-blue-400">
+            <span class="flex flex-col justify-center items-center h-full text-white font-jaro text-xl">${i18n.t('menu.home')}</span>
+          </div>
         </div>
       </div>
     `;
@@ -43,24 +56,6 @@ export function initGame(){
   }
 
   // Paddle settings
-  
-//   const paddleWidth = 10, paddleHeight = 80, paddleSpeed = 5;
-//   const initialBallSpeed: number = parseFloat(import.meta.env.VITE_INITIAL_BALL_SPEED as string);
-    
-
-  // interface Paddle {
-  //   x: number;
-  //   y: number;
-  //   dy: number;
-  // }
-
-  // interface Ball {
-  //   x: number;
-  //   y: number;
-  //   radius: number;
-  //   dx: number;
-  //   dy: number;
-  // }
 
   let player1Score = 0;
   let player2Score = 0;
@@ -80,16 +75,16 @@ export function initGame(){
   };
 
   // Ball settings
-	let angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
-	if (Math.random() > 0.5) {
-		angle += Math.PI;
-	}
+  let angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
+  if (Math.random() > 0.5) {
+    angle += Math.PI;
+  }
   let ball: Ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
     radius: ballRadius,
-	dx: Math.cos(angle) * 3,
-	dy: Math.sin(angle) * 3,
+    dx: Math.cos(angle) * 3,
+    dy: Math.sin(angle) * 3,
   };
 
   const savedThemeString = localStorage.getItem('selectedGamePalette');
@@ -148,11 +143,13 @@ export function initGame(){
       if (event.key === "w") leftPaddle.dy = -paddleSpeed;
       if (event.key === "s") leftPaddle.dy = paddleSpeed;
       if (event.key === "ArrowUp") {
-		event.preventDefault(); 
-		rightPaddle.dy = -paddleSpeed;}
+        event.preventDefault(); 
+        rightPaddle.dy = -paddleSpeed;
+      }
       if (event.key === "ArrowDown") {
-		event.preventDefault(); 
-		rightPaddle.dy = paddleSpeed;}
+        event.preventDefault(); 
+        rightPaddle.dy = paddleSpeed;
+      }
     }
   });
 
@@ -160,204 +157,201 @@ export function initGame(){
     if (!isPaused) {
       if (event.key === "w" || event.key === "s") leftPaddle.dy = 0;
       if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-		event.preventDefault();
-		rightPaddle.dy = 0;
-	  }
+        event.preventDefault();
+        rightPaddle.dy = 0;
+      }
     }
   });
 
+  // Gestion des boutons
   document.getElementById('pauseLocalBtn')?.addEventListener('click', pauseGame);
+  document.getElementById('btnHome')?.addEventListener('click', () => {
+    history.pushState(null, '', '/menu');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  });
 
-function pauseGame() {
-	isPaused = !isPaused;
-	
-	let pauseOverlay = document.getElementById('pauseOverlay');
-	const btnHome = document.getElementById('btnHome');
-	const btnPause = document.getElementById('pauseLocalBtn');
+  function pauseGame() {
+    isPaused = !isPaused;
+    
+    let pauseOverlay = document.getElementById('pauseOverlay');
+    const btnHome = document.getElementById('btnHome');
+    const btnPause = document.getElementById('pauseLocalBtn');
 
-	if (!pauseOverlay) {
-		pauseOverlay = document.createElement('div');
-		pauseOverlay.id = 'pauseOverlay';
-		pauseOverlay.className = 'absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10 hidden';
-		pauseOverlay.innerHTML = `
-		<div class="text-white text-4xl font-bold mb-6">${i18n.t('localGame.gamePaused')}</div>
-		<button id="resumeBtn" class="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg text-xl">
-			${i18n.t('localGame.resume')}
-		</button>
-		`;
-		
-		const canvasContainer = document.querySelector('.border-4.border-black');
-		if (canvasContainer) {
-		canvasContainer.appendChild(pauseOverlay);
-		}
-		
-		document.getElementById('resumeBtn')?.addEventListener('click', () => {
-		pauseGame();
-		});
-	}
-	
-	if (isPaused) {
-		if (btnHome && btnPause) {
-			btnHome.classList.add('hidden');
-			btnPause.classList.add('hidden');
-		}
-		pauseOverlay.classList.remove('hidden');
-		const pauseBtn = document.getElementById('pauseLocalBtn');
-		if (pauseBtn) pauseBtn.textContent = i18n.t('localGame.resume');
-	} else {
-		pauseOverlay.classList.add('hidden');
-		if (btnHome && btnPause) {
-			btnHome.classList.remove('hidden');
-			btnPause.classList.remove('hidden');
-		}
-		const pauseBtn = document.getElementById('pauseLocalBtn');
-		if (pauseBtn) pauseBtn.textContent = i18n.t('localGame.pause');
-	}
-}
-
-  // Update paddle positions
-function update() {
-	leftPaddle.y += leftPaddle.dy;
-	rightPaddle.y += rightPaddle.dy;
-
-	// Prevent paddles from moving off-screen
-	leftPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddle.y));
-	rightPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddle.y));
-
-	// Ball collision with top and bottom walls
-	if (ball.y - ball.radius <= 0) {
-		ball.dy *= -1; // Reverse direction
-		ball.y += 3;
-	}
-	else if (ball.y + ball.radius >= canvas.height) {
-		ball.dy *= -1; // Reverse direction
-		ball.y -= 3;
-	}
-
-	// Define constant ball speed
-	// const BALL_SPEED = 5;
-	const SPEED_INCREASE = speedIncrease;
-
-	// Normalize ball speed after paddle hit
-	// function normalizeBallSpeed() {
-	//     let speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-	//     ball.dx = (ball.dx / speed) * BALL_SPEED;
-	//     ball.dy = (ball.dy / speed) * BALL_SPEED;
-	// }
-
-	// Ball collision with paddles (with speed normalization)
-	if (
-		ball.x - ball.radius <= leftPaddle.x + paddleWidth &&
-		ball.y >= leftPaddle.y && ball.y <= leftPaddle.y + paddleHeight
-	) {
-		let relativeIntersectY = ball.y - (leftPaddle.y + paddleHeight / 2);
-		let normalizedIntersectY = relativeIntersectY / (paddleHeight / 2);
-		
-		ball.dx *= -1; // Reverse horizontal direction
-		ball.dy = normalizedIntersectY * Math.abs(ball.dx);; // Adjust vertical direction
-		ball.x += 2;
-
-		ball.dx *= SPEED_INCREASE;
-		ball.dy *= SPEED_INCREASE;
-		// normalizeBallSpeed(); // Keep speed constant
-	}
-
-	if (
-		ball.x + ball.radius >= rightPaddle.x &&
-		ball.y >= rightPaddle.y && ball.y <= rightPaddle.y + paddleHeight
-	) {
-		let relativeIntersectY = ball.y - (rightPaddle.y + paddleHeight / 2);
-		let normalizedIntersectY = relativeIntersectY / (paddleHeight / 2);
-		
-		ball.dx *= -1; // Reverse horizontal direction
-		ball.dy = normalizedIntersectY * Math.abs(ball.dx); // Adjust vertical direction
-		ball.x -= 2;
-		// normalizeBallSpeed(); // Keep speed constant
-
-		ball.dx *= SPEED_INCREASE;
-		ball.dy *= SPEED_INCREASE;
+    if (!pauseOverlay) {
+      pauseOverlay = document.createElement('div');
+      pauseOverlay.id = 'pauseOverlay';
+      pauseOverlay.className = 'absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10 hidden';
+      pauseOverlay.innerHTML = `
+        <div class="text-white text-4xl font-bold mb-6 font-jaro">${i18n.t('localGame.gamePaused')}</div>
+        <div id="resumeBtn" class="button h-14 w-40 bg-green-600 rounded-lg cursor-pointer select-none
+          hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#15803d,0_0px_0_0_#15803d41]
+          hover:border-b-[0px]
+          transition-all duration-150 [box-shadow:0_10px_0_0_#15803d,0_15px_0_0_#15803d41]
+          border-b-[1px] border-green-400">
+          <span class="flex flex-col justify-center items-center h-full text-white font-jaro text-xl">${i18n.t('localGame.resume')}</span>
+        </div>
+      `;
+      
+      const canvasContainer = document.querySelector('#canvas-box');
+      if (canvasContainer) {
+        canvasContainer.appendChild(pauseOverlay);
+      }
+      
+      document.getElementById('resumeBtn')?.addEventListener('click', () => {
+        pauseGame();
+      });
+    }
+    
+    if (isPaused) {
+      if (btnHome && btnPause) {
+        btnHome.classList.add('opacity-50', 'pointer-events-none');
+        btnPause.classList.add('opacity-50', 'pointer-events-none');
+      }
+      pauseOverlay.classList.remove('hidden');
+      const pauseBtn = document.getElementById('pauseLocalBtn');
+      if (pauseBtn) {
+        const pauseBtnText = pauseBtn.querySelector('span');
+        if (pauseBtnText) pauseBtnText.textContent = i18n.t('localGame.resume');
+      }
+    } else {
+      pauseOverlay.classList.add('hidden');
+      if (btnHome && btnPause) {
+        btnHome.classList.remove('opacity-50', 'pointer-events-none');
+        btnPause.classList.remove('opacity-50', 'pointer-events-none');
+      }
+      const pauseBtn = document.getElementById('pauseLocalBtn');
+      if (pauseBtn) {
+        const pauseBtnText = pauseBtn.querySelector('span');
+        if (pauseBtnText) pauseBtnText.textContent = i18n.t('localGame.pause');
+      }
+    }
   }
 
-	// Ball movement
-	ball.x += ball.dx;
-	ball.y += ball.dy;
+  // Update paddle positions
+  function update() {
+    leftPaddle.y += leftPaddle.dy;
+    rightPaddle.y += rightPaddle.dy;
 
-	// Reset ball if it goes past paddles
-	// if (ball.x < 0 || ball.x > canvas.width) {
-	//     ball.x = canvas.width / 2;
-	//     ball.y = canvas.height / 2;
-	//     ball.dx = -ball.dx;
-	// }
-	// Reset ball if it goes past paddles
-	if (ball.x < 0) { 
-		player2Score++; // Player 2 scores a point
-		resetBall();
-	} else if (ball.x > canvas.width) { 
-		player1Score++; // Player 1 scores a point
-		resetBall();
-	}
+    // Prevent paddles from moving off-screen
+    leftPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddle.y));
+    rightPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddle.y));
 
-	function resetBall() {
-		ball.x = canvas.width / 2;
-		ball.y = canvas.height / 2;
+    // Ball collision with top and bottom walls
+    if (ball.y - ball.radius <= 0) {
+      ball.dy *= -1; // Reverse direction
+      ball.y += 3;
+    }
+    else if (ball.y + ball.radius >= canvas.height) {
+      ball.dy *= -1; // Reverse direction
+      ball.y -= 3;
+    }
 
-		let angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
-		if (Math.random() > 0.5) {
-			angle += Math.PI;
-		}
-		ball.dx = Math.cos(angle) * 3;
-		ball.dy = Math.sin(angle) * 3;
-		ball.radius = ballRadius;
-	}
-}
+    // Define constant ball speed
+    const SPEED_INCREASE = speedIncrease;
+
+    // Ball collision with paddles (with speed normalization)
+    if (
+      ball.x - ball.radius <= leftPaddle.x + paddleWidth &&
+      ball.y >= leftPaddle.y && ball.y <= leftPaddle.y + paddleHeight
+    ) {
+      let relativeIntersectY = ball.y - (leftPaddle.y + paddleHeight / 2);
+      let normalizedIntersectY = relativeIntersectY / (paddleHeight / 2);
+      
+      ball.dx *= -1; // Reverse horizontal direction
+      ball.dy = normalizedIntersectY * Math.abs(ball.dx);; // Adjust vertical direction
+      ball.x += 2;
+
+      ball.dx *= SPEED_INCREASE;
+      ball.dy *= SPEED_INCREASE;
+    }
+
+    if (
+      ball.x + ball.radius >= rightPaddle.x &&
+      ball.y >= rightPaddle.y && ball.y <= rightPaddle.y + paddleHeight
+    ) {
+      let relativeIntersectY = ball.y - (rightPaddle.y + paddleHeight / 2);
+      let normalizedIntersectY = relativeIntersectY / (paddleHeight / 2);
+      
+      ball.dx *= -1; // Reverse horizontal direction
+      ball.dy = normalizedIntersectY * Math.abs(ball.dx); // Adjust vertical direction
+      ball.x -= 2;
+
+      ball.dx *= SPEED_INCREASE;
+      ball.dy *= SPEED_INCREASE;
+    }
+
+    // Ball movement
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+
+    // Reset ball if it goes past paddles
+    if (ball.x < 0) { 
+      player2Score++; // Player 2 scores a point
+      resetBall();
+    } else if (ball.x > canvas.width) { 
+      player1Score++; // Player 1 scores a point
+      resetBall();
+    }
+
+    function resetBall() {
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
+
+      let angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
+      if (Math.random() > 0.5) {
+        angle += Math.PI;
+      }
+      ball.dx = Math.cos(angle) * 3;
+      ball.dy = Math.sin(angle) * 3;
+      ball.radius = ballRadius;
+    }
+  }
 
   // Draw paddles and ball
   function draw() {
-	const canvasWidth = canvas.width;
-	const canvasHeight = canvas.height;
-	// const paddleWidth = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
-	// const paddleHeight = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
-	// const ballRadius = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
 
     if (ctx) {
-		ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-    ctx.fillStyle = gamePalette.background;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-		// Dessiner la ligne centrale
-		ctx.beginPath();
-		ctx.setLineDash([5, 5]); // Ligne en pointillé
-		ctx.moveTo(canvasWidth / 2, 0);
-		ctx.lineTo(canvasWidth / 2, canvasHeight);
-		ctx.strokeStyle = gamePalette.line;
-		ctx.lineWidth = 1;
-		ctx.stroke();
-		ctx.setLineDash([]);
-		
-		// Dessiner la raquette gauche
-		ctx.fillStyle = gamePalette.paddle1;
-		ctx.fillRect(0, leftPaddle.y, paddleWidth, paddleHeight);
-		
-		// Dessiner la raquette droite
-		ctx.fillStyle = gamePalette.paddle2;
-		ctx.fillRect(canvasWidth - paddleWidth, rightPaddle.y, paddleWidth, paddleHeight);
-		
-		// Dessiner les scores
-		ctx.font = 'bold 120px Arial';
-		ctx.fillStyle = gamePalette.score;
-		ctx.textAlign = 'center';
-		
-		// Score gauche
-		ctx.fillText(`${player1Score}`, canvasWidth / 4, canvasHeight / 2 + 40);
-		
-		// Score droit
-		ctx.fillText(`${player2Score}`, (canvasWidth / 4) * 3, canvasHeight / 2 + 40);
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+      ctx.fillStyle = gamePalette.background;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Dessiner la ligne centrale
+      ctx.beginPath();
+      ctx.setLineDash([5, 5]); // Ligne en pointillé
+      ctx.moveTo(canvasWidth / 2, 0);
+      ctx.lineTo(canvasWidth / 2, canvasHeight);
+      ctx.strokeStyle = gamePalette.line;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Dessiner la raquette gauche
+      ctx.fillStyle = gamePalette.paddle1;
+      ctx.fillRect(0, leftPaddle.y, paddleWidth, paddleHeight);
+      
+      // Dessiner la raquette droite
+      ctx.fillStyle = gamePalette.paddle2;
+      ctx.fillRect(canvasWidth - paddleWidth, rightPaddle.y, paddleWidth, paddleHeight);
+      
+      // Dessiner les scores
+      ctx.font = 'bold 120px Arial';
+      ctx.fillStyle = gamePalette.score;
+      ctx.textAlign = 'center';
+      
+      // Score gauche
+      ctx.fillText(`${player1Score}`, canvasWidth / 4, canvasHeight / 2 + 40);
+      
+      // Score droit
+      ctx.fillText(`${player2Score}`, (canvasWidth / 4) * 3, canvasHeight / 2 + 40);
 
-		// Dessiner la balle en noir au centre
-		ctx.beginPath();
-		ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
-		ctx.fillStyle = gamePalette.ball;
-		ctx.fill();
-		ctx.closePath();
+      // Dessiner la balle en noir au centre
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
+      ctx.fillStyle = gamePalette.ball;
+      ctx.fill();
+      ctx.closePath();
     }
   }
 

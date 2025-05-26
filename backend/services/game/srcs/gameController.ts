@@ -13,6 +13,7 @@ const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
 const paddleSpeed = parseInt(process.env.PADDLE_SPEED as string, 10);
 const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
 const speedIncrease = parseFloat(process.env.SPEED_INCREASE as string);
+// const initialBallSpeed = parseFloat(process.env.INITIAL_BALL_SPEED as string);
 
 const activeUsers = new Map<string, WebSocket>(); // userId -> WebSocket
 export default activeUsers;
@@ -65,12 +66,16 @@ function createPaddle(side: string) {
 }
 
 function createBall() {
+	let angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
+	if (Math.random() > 0.5) {
+		angle += Math.PI;
+	}
 	let newBall : Ball = {
 			x: canvasWidth / 2,
 			y: canvasHeight / 2,
 			radius: ballRadius,
-			dx: Math.random() > 0.5 ? 3 : -3,
-			dy: Math.random() > 0.5 ? 3 : -3,
+			dx: Math.cos(angle) * 3,
+			dy: Math.sin(angle) * 3,
 		}
 	return newBall;
 }
@@ -298,14 +303,17 @@ export async function updateBallPosition(gameId: string) {
 			resetBall();
 		  }
 		function resetBall() {
-			// console.log(`call resestBall`);
-			if (game) {
-				ball.x = game.canvasWidth / 2;
-				ball.y = game.canvasHeight / 2;
-				ball.dx = Math.random() > 0.5 ? 3 : -3;
-				ball.dy = Math.random() > 0.5 ? 3 : -3;
+			ball.x = canvasWidth / 2;
+			ball.y = canvasHeight / 2;
+
+			let angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
+			if (Math.random() > 0.5) {
+				angle += Math.PI;
 			}
-		  }
+			ball.dx = Math.cos(angle) * 3;
+			ball.dy = Math.sin(angle) * 3;
+			ball.radius = ballRadius;
+		}
 		// console.log(ball.x, ball.y, ball.dx, ball.dy);
 		// await updateBallPositionInDb(gameId, ball);
 	}

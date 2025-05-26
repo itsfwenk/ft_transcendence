@@ -127,15 +127,22 @@ export function initGame(){
     if (!isPaused) {
       if (event.key === "w") leftPaddle.dy = -paddleSpeed;
       if (event.key === "s") leftPaddle.dy = paddleSpeed;
-      if (event.key === "ArrowUp") rightPaddle.dy = -paddleSpeed;
-      if (event.key === "ArrowDown") rightPaddle.dy = paddleSpeed;
+      if (event.key === "ArrowUp") {
+		event.preventDefault(); 
+		rightPaddle.dy = -paddleSpeed;}
+      if (event.key === "ArrowDown") {
+		event.preventDefault(); 
+		rightPaddle.dy = paddleSpeed;}
     }
   });
 
   document.addEventListener("keyup", (event) => {
     if (!isPaused) {
       if (event.key === "w" || event.key === "s") leftPaddle.dy = 0;
-      if (event.key === "ArrowUp" || event.key === "ArrowDown") rightPaddle.dy = 0;
+      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+		event.preventDefault();
+		rightPaddle.dy = 0;
+	  }
     }
   });
 

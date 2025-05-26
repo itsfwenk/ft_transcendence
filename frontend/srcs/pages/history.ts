@@ -45,6 +45,18 @@ export default function History() {
   }
 }
 
+function translateMatchType(matchType: string): string {
+  const matchTypeTranslationMap: { [key: string]: string } = {
+    '1v1': 'history.oneVsOne',
+    'tournament-semifinal': 'history.semifinalMatch',
+    'tournament-final': 'history.finalMatch',
+  };
+
+  const translationKey = matchTypeTranslationMap[matchType.toLowerCase()] || 'history.unknown';
+  
+  return i18n.t(translationKey);
+}
+
 async function loadMatchHistory() {
   const userData = await fetchUserProfile();
   if (!userData || !userData.matchHistory) {
@@ -68,7 +80,7 @@ function renderMatchHistory(userData: UserData) {
     const date = new Date(match.date);
     const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
     
-    const matchType = match.gameType;
+    const translatedMatchType = translateMatchType(match.gameType);
     
     const scoreDisplay = `${match.score.player} - ${match.score.opponent}`;
     
@@ -76,7 +88,7 @@ function renderMatchHistory(userData: UserData) {
     
     return `
       <tr class="border-b border-gray-500">
-        <td class="bg-gray-400 font-jaro py-3 px-6 text-center select-none">${matchType}</td>
+        <td class="bg-gray-400 font-jaro py-3 px-6 text-center select-none">${translatedMatchType}</td>
         <td class="bg-gray-400 font-jaro py-3 px-6 text-center select-none text-red-500">${match.opponent.userName}</td>
         <td class="bg-gray-400 font-jaro py-3 px-6 text-center select-none ${scoreColorClass}">${scoreDisplay}</td>
         <td class="bg-gray-400 font-jaro py-3 px-6 text-center select-none">${formattedDate}</td>

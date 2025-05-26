@@ -190,7 +190,6 @@ export function renderFriendsList(friends: Friend[]) {
 		return;
 	}
 
-	// Créer toute la structure d'un coup avec des placeholders
 	const friendsHTML = friends.map((friend, index) => {
 		const isOnline = friend.status === 'online';
 		const statusColor = isOnline ? 'bg-green-500' : 'bg-gray-500';
@@ -264,7 +263,51 @@ export function toggleFriendSearch(show: boolean) {
 	}
 }
 
-function createLanguageSelector(): string {
+function createCustomizeButton(): string {
+	const gradientAnimationStyle = `
+		<style>
+			@keyframes gradientShift {
+				0% {
+					background-position: 0% 50%;
+				}
+				50% {
+					background-position: 100% 50%;
+				}
+				100% {
+					background-position: 0% 50%;
+				}
+			}
+			
+			.gradient-animate {
+				background: linear-gradient(270deg, #9333ea, #ef4444, #eab308, #ec4899, #3b82f6, #22c55e);
+				background-size: 600% 600%;
+				animation: gradientShift 8s ease infinite;
+			}
+			
+			.text-appear {
+				transition: opacity 0.5s ease, transform 0.5s ease;
+			}
+			
+			.customize-button:hover .text-appear {
+				opacity: 1;
+				transform: translateX(0);
+			}
+		</style>
+	`;
+	
+	return `
+		${gradientAnimationStyle}
+		<div class="relative group">
+			<button id="customize-button" class="customize-button gradient-animate text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-75 flex items-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+				</svg>
+			</button>
+		</div>
+	`;
+}
+
+function createHeaderControls(): string {
 	const currentLang = i18n.language || 'en';
 	
 	const options = supportedLanguages.map(lang => {
@@ -273,9 +316,11 @@ function createLanguageSelector(): string {
 	}).join('');
 	
 	return `
-		<div class="flex justify-end mb-4">
+		<div class="flex justify-between items-center mb-4 w-full px-4">
+			${createCustomizeButton()}
+			
 			<div class="relative group">
-				<select id="language-selector" class="appearance-none bg-blue-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 pr-8 cursor-pointer transition-colors duration-200 hover:bg-blue-700">
+				<select id="language-selector" class="appearance-none bg-blue-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 pr-8 cursor-pointer transition-colors duration-200 hover:bg-blue-800">
 					${options}
 				</select>
 				<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
@@ -292,7 +337,7 @@ export default function Profile() {
 	const app = document.getElementById('app');
 	if (app) {
 		app.innerHTML = /*html*/`
-		${createLanguageSelector()}
+		${createHeaderControls()}
 		
 		<div class="text-black font-jaro text-9xl mt-10 mb-16 select-none">${i18n.t('general.pongGame')}</div>
 		
@@ -411,6 +456,14 @@ async function setupProfilePage() {
 }
 
 function setupEventListeners() {
+	const customizeButton = document.getElementById('customize-button');
+	if (customizeButton) {
+		customizeButton.addEventListener('click', () => {
+			history.pushState(null, '', '/customGame');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+		});
+	}
+	
 	const languageSelector = document.getElementById('language-selector');
 	if (languageSelector) {
 		languageSelector.addEventListener('change', (event) => {

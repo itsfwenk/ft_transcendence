@@ -145,7 +145,8 @@
         "confirmUnsavedChanges": "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ?",
         "googleEmailRestriction": "Vous ne pouvez pas modifier votre email avec un compte Google",
         "notAvailableForGoogle": "Non disponible pour les comptes Google",
-        "googlePasswordRestriction": "Cette fonctionnalité n'est pas disponible pour les comptes connectés via Google"
+        "googlePasswordRestriction": "Cette fonctionnalité n'est pas disponible pour les comptes connectés via Google",
+		"selectTheme": "Sélectionnez un thème"
     },
     "game": {
         "ready": "Prêt...",
@@ -203,6 +204,9 @@
         "opponent": "Adversaire",
         "date": "Date",
         "loading": "Chargement de l'historique...",
-        "noMatches": "Aucun match dans l'historique"
+        "noMatches": "Aucun match dans l'historique",
+		"oneVsOne": "1c1",
+        "semifinalMatch": "Demi-finale Tournoi",
+        "finalMatch": "Finale Tournoi"
     }
 }

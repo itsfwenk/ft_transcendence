@@ -145,7 +145,8 @@
         "confirmUnsavedChanges": "You have unsaved changes. Are you sure you want to go back?",
         "googleEmailRestriction": "You cannot modify your email with a Google account",
         "notAvailableForGoogle": "Not available for Google accounts",
-        "googlePasswordRestriction": "This feature is not available for Google-connected accounts"
+        "googlePasswordRestriction": "This feature is not available for Google-connected accounts",
+		"selectTheme": "Select a theme"
     },
     "game": {
         "ready": "Ready...",
@@ -203,6 +204,9 @@
         "opponent": "Opponent",
         "date": "Date",
         "loading": "Loading match history...",
-        "noMatches": "No matches in history"
+        "noMatches": "No matches in history",
+		"oneVsOne": "1c1",
+		"semifinalMatch": "Tournament Semifinal",
+        "finalMatch": "Tournament Final"
     }
 }

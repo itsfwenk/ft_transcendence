@@ -1,12 +1,11 @@
+import i18n from '../i18n';
+
 export default function customGame() {
     const app = document.getElementById('app');
     if (app) {
-        app.innerHTML = `
-            <div class="text-black font-jaro text-9xl mt-16 mb-36 select-none">Game Customization</div>
+        app.innerHTML = /*html*/`
+            <div class="text-black font-jaro text-9xl mt-16 mb-16 select-none">${i18n.t('general.pongGame')}</div>
             <div class="flex flex-col justify-center items-center gap-6">
-
-                <h2 class="text-3xl font-bold text-black font-jaro mb-4">Select a theme:</h2>
-
                 <div class="flex gap-4 mb-8">
                     <button
                         id="defaultTheme"
@@ -25,11 +24,11 @@ export default function customGame() {
                     <button
                         id="BnWTheme"
                         class="w-40 h-12 rounded-md bg-gray-800 text-white font-jaro font-semibold cursor-pointer select-none
-                            hover:translate-y-2
-                            hover:[box-shadow:0_10px_0_0_transparent,0_15px_0_0_transparent]
-                            hover:border-b-[1px] hover:border-transparent
-                            transition-all duration-150
-                            [box-shadow:0_10px_0_0_#000000,0_15px_0_0_#00000041]
+							hover:translate-y-2 
+							hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
+							hover:border-b-[0px]
+							transition-all duration-150 
+							[box-shadow:0_10px_0_0_#193cb8,0_15px_0_0_#1b70f841]
                             border-b-[1px] border-gray-400"
                         data-theme-palette='{"background": "#1A1A1A", "paddle1": "white", "paddle2": "white", "ball": "white", "line": "rgba(255, 255, 255, 0.2)", "score": "rgba(255, 255, 255, 0.6)"}'
                         data-shadow-main="#000000"
@@ -81,7 +80,7 @@ export default function customGame() {
                     hover:border-b-[0px]
                     transition-all duration-150 [box-shadow:0_10px_0_0_#181818,0_15px_0_0_#1b70f841]
                     border-b-[1px] border-gray-400'>
-                    <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>Back</span>
+                    <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('general.back')}</span>
                 </div>
             </div>
         `;
@@ -224,7 +223,7 @@ export default function customGame() {
 
             const backBtn = document.getElementById('backBtn');
                 backBtn?.addEventListener('click', () => {
-                    history.pushState(null, '', '/menu');
+                    history.pushState(null, '', '/profile');
                     window.dispatchEvent(new PopStateEvent('popstate'));
             });
 

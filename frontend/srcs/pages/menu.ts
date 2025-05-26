@@ -19,7 +19,7 @@ export default function menu() {
 					[box-shadow:0_10px_0_0_#A31F1F,0_15px_0_0_#A31F1F41]
 					border-b-[1px] border-red-400'
 			>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-6xl '>Play Game</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-6xl '>${i18n.t('menu.playGame')}</span>
 			</div>
 
 			<div 
@@ -32,20 +32,7 @@ export default function menu() {
 					[box-shadow:0_10px_0_0_#193cb8,0_15px_0_0_#1b70f841]
 					border-b-[1px] border-blue-400'
 			>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-6xl '>Profile</span>
-			</div>
-			
-			<div
-			id="customBtn"
-			class="button text-6xl h-36 w-1/2 bg-[#FFB81B] rounded-lg cursor-pointer select-none
-					hover:translate-y-2
-					hover:[box-shadow:0_0px_0_0_#d98a00,0_0px_0_0_#d98a0041]
-					hover:border-b-[0px]
-					transition-all duration-150
-					[box-shadow:0_10px_0_0_#d98a00,0_15px_0_0_#d98a0041]
-					border-b-[1px] border-[#D98A00]"
-			>
-			<span class="flex flex-col justify-center items-center h-full text-white font-jaro text-6xl">Customization</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-6xl '>${i18n.t('menu.profile')}</span>
 			</div>
 
 			<div 
@@ -58,7 +45,7 @@ export default function menu() {
 					[box-shadow:0_10px_0_0_#181818,0_15px_0_0_#1b70f841]
 					border-b-[1px] border-gray-400'
 			>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro'>disconnect</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('menu.disconnect')}</span>
 			</div>
 
 	  </div>

@@ -3,6 +3,15 @@ import i18n from '../../i18n';
 let isPaused = false;
 import { Paddle, Ball, gamePalette } from '../../../gameInterfaces'
 
+
+const canvasWidth: number = parseInt(import.meta.env.VITE_CANVAS_WIDTH as string, 10);
+const canvasHeight: number = parseInt(import.meta.env.VITE_CANVAS_HEIGHT as string, 10);
+const paddleWidth: number = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
+const paddleHeight: number = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
+const paddleSpeed: number = parseInt(import.meta.env.VITE_PADDLE_SPEED as string, 10);
+const ballRadius: number = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
+const speedIncrease: number = parseFloat(import.meta.env.VITE_SPEED_INCREASE as string);
+
 export function initGame(){
   const app = document.getElementById('app');
   if (app) {
@@ -10,10 +19,14 @@ export function initGame(){
       <div class="flex flex-col items-center">
         <div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">${i18n.t('general.pongGame')}</div>
         
-        <!-- Conteneur avec bordures -->
-		<div class="self-start text-gray-600 text-2xl mb-2 ml-27 font-jaro select-none" id="match-type">${i18n.t('localGame.matchType')}</div>
-        <div class="border-4 border-black bg-white relative">
-          <canvas id="gameCanvas" width="1000" height="500" class="w-full"></canvas>
+        <div id="game-wrapper" class="inline-block">
+            <div id="match-type" class="text-left text-gray-600 text-2xl mb-2 ml-3 font-jaro select-none">
+                ${i18n.t('localGame.matchType')}
+            </div>
+
+            <div id="canvas-box" class="border-4 border-black bg-white relative inline-block">
+                <canvas id="gameCanvas" width="${canvasWidth}" height="${canvasHeight}" class="block"></canvas>
+            </div>
         </div>
         
         <div class="mt-4 space-x-2">
@@ -30,7 +43,10 @@ export function initGame(){
   }
 
   // Paddle settings
-  const paddleWidth = 10, paddleHeight = 80, paddleSpeed = 5;
+  
+//   const paddleWidth = 10, paddleHeight = 80, paddleSpeed = 5;
+//   const initialBallSpeed: number = parseFloat(import.meta.env.VITE_INITIAL_BALL_SPEED as string);
+    
 
   // interface Paddle {
   //   x: number;
@@ -64,12 +80,16 @@ export function initGame(){
   };
 
   // Ball settings
+	let angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
+	if (Math.random() > 0.5) {
+		angle += Math.PI;
+	}
   let ball: Ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
-    radius: 7,
-    dx: Math.random() > 0.5 ? 3 : -3,
-    dy: Math.random() > 0.5 ? 3 : -3,
+    radius: ballRadius,
+	dx: Math.cos(angle) * 3,
+	dy: Math.sin(angle) * 3,
   };
 
   const savedThemeString = localStorage.getItem('selectedGamePalette');
@@ -127,15 +147,22 @@ export function initGame(){
     if (!isPaused) {
       if (event.key === "w") leftPaddle.dy = -paddleSpeed;
       if (event.key === "s") leftPaddle.dy = paddleSpeed;
-      if (event.key === "ArrowUp") rightPaddle.dy = -paddleSpeed;
-      if (event.key === "ArrowDown") rightPaddle.dy = paddleSpeed;
+      if (event.key === "ArrowUp") {
+		event.preventDefault(); 
+		rightPaddle.dy = -paddleSpeed;}
+      if (event.key === "ArrowDown") {
+		event.preventDefault(); 
+		rightPaddle.dy = paddleSpeed;}
     }
   });
 
   document.addEventListener("keyup", (event) => {
     if (!isPaused) {
       if (event.key === "w" || event.key === "s") leftPaddle.dy = 0;
-      if (event.key === "ArrowUp" || event.key === "ArrowDown") rightPaddle.dy = 0;
+      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+		event.preventDefault();
+		rightPaddle.dy = 0;
+	  }
     }
   });
 
@@ -209,7 +236,7 @@ function update() {
 
 	// Define constant ball speed
 	// const BALL_SPEED = 5;
-	const SPEED_INCREASE = 1.1;
+	const SPEED_INCREASE = speedIncrease;
 
 	// Normalize ball speed after paddle hit
 	// function normalizeBallSpeed() {
@@ -273,8 +300,14 @@ function update() {
 	function resetBall() {
 		ball.x = canvas.width / 2;
 		ball.y = canvas.height / 2;
-		ball.dx = Math.random() > 0.5 ? 3 : -3;
-		ball.dy = Math.random() > 0.5 ? 3 : -3;
+
+		let angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
+		if (Math.random() > 0.5) {
+			angle += Math.PI;
+		}
+		ball.dx = Math.cos(angle) * 3;
+		ball.dy = Math.sin(angle) * 3;
+		ball.radius = ballRadius;
 	}
 }
 
@@ -282,9 +315,9 @@ function update() {
   function draw() {
 	const canvasWidth = canvas.width;
 	const canvasHeight = canvas.height;
-	const paddleWidth = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
-	const paddleHeight = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
-	const ballRadius = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
+	// const paddleWidth = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
+	// const paddleHeight = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
+	// const ballRadius = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
 
     if (ctx) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas

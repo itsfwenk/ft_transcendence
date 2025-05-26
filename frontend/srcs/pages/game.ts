@@ -32,6 +32,13 @@ import i18n from '../i18n';
 // 	canvasWidth: number;
 // 	canvasHeight: number;
 // }
+const canvasWidth: number = parseInt(import.meta.env.VITE_CANVAS_WIDTH as string, 10);
+const canvasHeight: number = parseInt(import.meta.env.VITE_CANVAS_HEIGHT as string, 10);
+const paddleWidth: number = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
+const paddleHeight: number = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
+// const paddleSpeed: number = parseInt(import.meta.env.VITE_PADDLE_SPEED as string, 10);
+const ballRadius: number = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
+// const speedIncrease: number = parseFloat(import.meta.env.VITE_SPEED_INCREASE as string);
 
 function mapMatchTypeToI18nKey(matchType: string): string {
   if (!matchType) return 'gameMode.1v1Online';
@@ -232,7 +239,7 @@ export default function game() {
 			<!-- === Bloc canvas + overlay ==================================== -->
 			<div id="canvas-box"
 					class="relative inline-block border-4 border-black bg-white">
-				<canvas id="game-canvas" width="800" height="400" class="block"></canvas>
+				<canvas id="game-canvas" width="${canvasWidth}" height="${canvasHeight}" class="block"></canvas>
 
 				<!-- Mini-overlay SCORE, centré sur le canvas -->
 				<div id="result-overlay"
@@ -345,11 +352,11 @@ export default function game() {
             
 	function renderGame(state: Game) {
 		if (!ctx || !canvas || !gameStarted) return;
-		const canvasWidth = canvas.width;
-		const canvasHeight = canvas.height;
-		const paddleWidth = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
-		const paddleHeight = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
-		const ballRadius = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
+		// const canvasWidth = canvas.width;
+		// const canvasHeight = canvas.height;
+		// const paddleWidth = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
+		// const paddleHeight = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
+		// const ballRadius = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
 		
 		ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 		ctx.fillStyle = gamePalette.background;

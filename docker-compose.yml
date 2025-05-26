@@ -65,8 +65,8 @@ services:
       # - "${MATCHMAKING_SERVICE_PORT}:${MATCHMAKING_SERVICE_PORT}"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data #Persist certificates
-      - caddy_config:/config #Persist caddy config
+      - caddy_data:/data
+      - caddy_config:/config
       - ./frontend/dist:/usr/share/caddy/frontend:ro
     networks:
       - app-network
@@ -102,7 +102,7 @@ services:
    command:
       - '--path.rootfs=/host'
    volumes:
-      - /:/host:ro,rslave
+      - /:/host:ro         #remettre ',rslave' lorsqu'on est pas sur mac
 
   grafana:
     image: grafana/grafana-oss:latest

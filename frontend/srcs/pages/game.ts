@@ -279,7 +279,7 @@ export default function game() {
 	}
 
 	if (overlay) {
-		overlay.textContent = i18n.t('game.countdownBegin', { seconds: countdown });
+		overlay.textContent = i18n.t('game.countdownBegin', { countdown });
 		app.appendChild(overlay);
 		countdownInterval = window.setInterval(() => {
 			countdown--;

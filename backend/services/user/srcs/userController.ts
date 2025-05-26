@@ -58,55 +58,58 @@ interface LoginRequest extends FastifyRequest {
   }
 
 // Connexion
-export async function loginUser(req:LoginRequest, reply:FastifyReply) {
-	const { email, password } = req.body;
-  
-	try {
-		const user = getUserByEmail(email);
-	
-		if (user) {
+export async function loginUser(req: LoginRequest, reply: FastifyReply) {
+  const { email, password } = req.body;
+  try {
+    const user = getUserByEmail(email);
 
-			const passwordMatch = await bcrypt.compare(password, user.passwordHsh);
-			if (passwordMatch === false) {
-				return reply.status(401).send({ error: 'Invalid password' });
-			}
-			console.log("Login user :", user);
-			// if  (user.status === 'online') {
-			// 	console.log("ALREADY ONLINE");
-			// 	return reply.status(401).send({ error: 'Already logged in somewhere else' });
-			// }
+    if (user) {
+      const passwordMatch = await bcrypt.compare(password, user.passwordHsh);
+      if (passwordMatch === false) {
+        return reply.status(401).send({ error: 'Invalid password' });
+      }
+      console.log("Login user:", user);
 
-			updateUserStatus(user.userId, 'online');
+      const connectedUsers = getConnectedUsers();
+      console.log("Currently connected users:", connectedUsers);
+      
+      if (user.status === 'online' || isUserConnected(user.userId)) {
+        console.log("User already online. Status:", user.status, "WebSocket connected:", isUserConnected(user.userId));
+        return reply.status(401).send({ error: 'Already logged in somewhere else' });
+      }
 
-			const token = req.server.jwt.sign(
-				{ userId: user.userId },
-				{ expiresIn: '24h' }
-			);
+      updateUserStatus(user.userId, 'online');
 
-			reply.setCookie('authToken', token, {
-				signed: true,
-				httpOnly: true,
-				secure: true,  // en production, utilisez HTTPS
-				sameSite: 'lax',
-				path: '/',  // disponible pour toutes les routes
-				maxAge: 60 * 60 * 24,
-			});
+      const token = req.server.jwt.sign(
+        { userId: user.userId },
+        { expiresIn: '24h' }
+      );
 
-			reply.send({ token,
-				user: { 
-					userId: user.userId,
-					userName: user.userName,
-					role: user.role,
-					status: user.status,
-				}
-				});
-		} else {
-			return reply.status(401).send({ error: 'Invalid email or password' });
-		}
-	} catch (error) {
-		console.error(error);
-		reply.status(500).send({ error: 'Internal server error' });
-	}
+      reply.setCookie('authToken', token, {
+        signed: true,
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24,
+      });
+
+      reply.send({ 
+        token,
+        user: { 
+          userId: user.userId,
+          userName: user.userName,
+          role: user.role,
+          status: user.status,
+        }
+      });
+    } else {
+      return reply.status(401).send({ error: 'Invalid email or password' });
+    }
+  } catch (error) {
+    console.error(error);
+    reply.status(500).send({ error: 'Internal server error' });
+  }
 }
 
 

@@ -81,6 +81,7 @@ export default async function login() {
 			const profile = await fetchUserProfile();
 			if (profile && profile.userId) {
 				localStorage.setItem("userId", profile.userId);
+				console.log("googleUserId", profile.userId);
 				matchmakingWebSocket(profile.userId);
 			} else {
 				console.error(i18n.t('login.profileError'));

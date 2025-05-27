@@ -130,8 +130,8 @@ export default function game() {
 
 	function doForfeit() {                                       
 		if (socket.readyState === WebSocket.OPEN) {
-		socket.send(JSON.stringify({ type: 'FORFEIT' }));        
-		socket.close(1000, 'player quit');                       
+			socket.send(JSON.stringify({ type: 'FORFEIT' }));        
+			socket.close(1000, 'player quit');                       
 		}
   		makeBackButton(); 
 	}
@@ -444,8 +444,12 @@ export default function game() {
 	}
 	
 	const handlePageUnload = () => {
+		doForfeit();
 		cleanupMatchmaking();
 	};
+
+	
+	window.addEventListener('beforeunload', handlePageUnload);
 
 	const ws = getMatchmakingSocket();
 

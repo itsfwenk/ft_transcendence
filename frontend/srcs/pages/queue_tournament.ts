@@ -231,6 +231,12 @@ export default async function Queuetournament() {
 	}
 	
 		const handlePageUnload = () => {
+			if (ws && ws.readyState === WebSocket.OPEN) {
+				ws.send(JSON.stringify({
+						action: 'QUEUE_LEAVE_TOURNAMENT',
+						payload: {playerId: currentPlayerId}
+				}));
+			}
 			cleanupMatchmaking();
 		}
 	

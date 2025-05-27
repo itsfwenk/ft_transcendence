@@ -242,7 +242,13 @@ export default async function Queue() {
   }
 
   const handlePageUnload = () => {
-    cleanupMatchmaking();
+	if (ws && ws.readyState === WebSocket.OPEN) {
+		ws.send(JSON.stringify({
+				action: 'QUEUE_LEAVE_1V1',
+				payload: {playerId: currentPlayerId}
+		}));
+	}
+	cleanupMatchmaking();
   };
 
   window.addEventListener('beforeunload', handlePageUnload);

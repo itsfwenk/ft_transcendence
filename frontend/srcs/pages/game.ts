@@ -140,6 +140,7 @@ export default function game() {
         const matchType = document.getElementById('match-type');
         if (matchType) {
             matchType.textContent = type;
+			matchType.classList.add('select-none');
         }
     }
 
@@ -238,7 +239,7 @@ export default function game() {
 
 			<!-- === Bloc canvas + overlay ==================================== -->
 			<div id="canvas-box"
-					class="relative inline-block border-4 border-black bg-white">
+					class="relative inline-block border-4 border-black bg-gray-300">
 				<canvas id="game-canvas" width="${canvasWidth}" height="${canvasHeight}" class="block"></canvas>
 
 				<!-- Overlay centré sur le canvas, transparent pour voir le jeu en arrière-plan -->

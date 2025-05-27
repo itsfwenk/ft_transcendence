@@ -70,11 +70,11 @@ export function saveUser(userName: string, email: string, password: string) {
 
 	const stmt = db.prepare(`
 		INSERT INTO users (userId, userName, email, passwordHsh, role, status, avatarUrl, inGameId)
-		VALUES (?, ?, ?, ?, 'user', 'online', '/avatars/default.png', ?)
+		VALUES (?, ?, ?, ?, 'user', 'offline', '/avatars/default.png', ?)
 	`);
 	return instrumentedRun('user', 'INSERT users', () => {
 		const result = stmt.run(userId, userName, email, password, "none");
-		return { userId, userName, email, passwordHsh: password, role: 'user', status: 'online', avatarUrl: '/avatars/default.png', inGameId:'none' };
+		return { userId, userName, email, passwordHsh: password, role: 'user', status: 'offline', avatarUrl: '/avatars/default.png', inGameId:'none' };
 	});
 }
 

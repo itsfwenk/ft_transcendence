@@ -401,25 +401,25 @@ export default function Profile() {
 		
 		<div class="flex justify-center items-center gap-9">
 			<div id="editBtn" class='button mb-2 h-20 w-1/6 bg-gray-400 rounded-lg cursor-pointer select-none
-			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#787f8e,0_0px_0_0_#1b70f841]
+			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#787f8e,0_0px_0_0_#787f8e41]
 			hover:border-b-[0px]
-			transition-all duration-150 [box-shadow:0_10px_0_0_#787f8e,0_15px_0_0_#1b70f841]
+			transition-all duration-150 [box-shadow:0_10px_0_0_#787f8e,0_15px_0_0_#787f8e41]
 			border-b-[1px] border-gray-300'>
 			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t('profile.editProfile')}</span>
 			</div>
 	
 			<div id="historyBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-yellow-500 rounded-lg cursor-pointer select-none
-			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#d49218,0_0px_0_0_#1b70f841]
+			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#d49218,0_0px_0_0_#d4921841]
 			hover:border-b-[0px]
-			transition-all duration-150 [box-shadow:0_10px_0_0_#d49218,0_15px_0_0_#1b70f841]
+			transition-all duration-150 [box-shadow:0_10px_0_0_#d49218,0_15px_0_0_#d4921841]
 			border-b-[1px] border-yellow-200'>
 			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t('profile.matchHistory')}</span>
 			</div>
 	
 			<div id="addFriendBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-green-600 rounded-lg cursor-pointer select-none
-			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#15803d,0_0px_0_0_#1b70f841]
+			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#15803d,0_0px_0_0_#15803d41]
 			hover:border-b-[0px]
-			transition-all duration-150 [box-shadow:0_10px_0_0_#15803d,0_15px_0_0_#1b70f841]
+			transition-all duration-150 [box-shadow:0_10px_0_0_#15803d,0_15px_0_0_#15803d41]
 			border-b-[1px] border-green-400'>
 			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t('profile.addFriend')}</span>
 			</div>

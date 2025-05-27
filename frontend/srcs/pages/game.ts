@@ -63,14 +63,14 @@ export default async function game() {
   	const gameId = params.get('gameSessionId');
 	if (!gameId || !(await checkGameExistsAndNotFinished(gameId))) {
 		console.log("finished");
-    	return showError('Game not found (invalid link).');
+    	return showError(i18n.t('game.errorLink'));
   	}
 
 	function showError(text: string) {
 		const app = document.getElementById('app')!;
 		app.innerHTML = `
 			<div class="flex flex-col items-center justify-center h-screen">
-			<p class="text-xl mb-6">${text}</p>
+			<p class="text-4xl mb-6 font-jaro text-red-500">${text}</p>
                 <div 
                     id="backBtn"
                     class='button w-24 h-13 mt-10 bg-gray-700 rounded-full cursor-pointer select-none

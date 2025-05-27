@@ -8,8 +8,8 @@ export default async function loginSuccess() {
     app.innerHTML = /*html*/`
       <div class="flex flex-col items-center justify-center">
         <div class="text-black font-jaro text-6xl mt-16">${i18n.t('login.googleSuccess')}</div>
-        <p class="text-black mt-8">${i18n.t('login.googleSuccessMessage')}</p>
-        <div id="connectionStatus" class="text-black mt-4">${i18n.t('login.initializingConnection')}</div>
+        <p class="text-black mt-8 font-jaro">${i18n.t('login.googleSuccessMessage')}</p>
+        <div id="connectionStatus" class="text-black font-jaro mt-4">${i18n.t('login.initializingConnection')}</div>
       </div>
     `;
 
@@ -57,12 +57,12 @@ export default async function loginSuccess() {
         }
         
         connectionStatus.textContent = `${i18n.t('login.connectionError')}: ${errorMessage}`;
-        connectionStatus.classList.add('text-red-500');
+        connectionStatus.classList.add('text-red-500 font-jaro');
       }
       
       const retryButton = document.createElement('button');
       retryButton.textContent = i18n.t('login.retry');
-      retryButton.className = 'mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700';
+      retryButton.className = 'mt-4 px-4 py-2 bg-blue-600 text-white font-jaro rounded hover:bg-blue-700';
       retryButton.onclick = () => {
         history.pushState(null, '', '/');
         window.dispatchEvent(new PopStateEvent('popstate'));

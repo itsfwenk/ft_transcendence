@@ -39,10 +39,10 @@ export default function menu() {
 				id="disconnectBtn" 
 				class='button w-1/8 h-12 mt-5 bg-gray-700 rounded-full cursor-pointer select-none
 					hover:translate-y-2  
-					hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
+					hover:[box-shadow:0_0px_0_0_#000000,0_0px_0_0_#00000041]
 					hover:border-b-[0px]
 					transition-all duration-150 
-					[box-shadow:0_10px_0_0_#181818,0_15px_0_0_#1b70f841]
+					[box-shadow:0_10px_0_0_#000000,0_15px_0_0_#00000041]
 					border-b-[1px] border-gray-400'
 			>
 			<span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('menu.disconnect')}</span>

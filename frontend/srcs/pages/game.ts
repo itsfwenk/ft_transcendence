@@ -71,10 +71,21 @@ export default async function game() {
 		app.innerHTML = `
 			<div class="flex flex-col items-center justify-center h-screen">
 			<p class="text-xl mb-6">${text}</p>
-			<button id="backBtn"
-					class="px-4 py-2 bg-gray-700 text-white rounded">
-				Back
-			</button>
+                <div 
+                    id="backBtn"
+                    class='button w-24 h-13 mt-10 bg-gray-700 rounded-full cursor-pointer select-none
+                        hover:translate-y-2 
+                        hover:[box-shadow:0_0px_0_0_#000000,0_0px_0_0_#00000041]
+                        hover:border-b-[0px]
+                        transition-all duration-150
+                        [box-shadow:0_10px_0_0_#000000,0_15px_0_0_#00000041]
+                        border-b-[1px] border-gray-400'
+                    data-shadow-main="#000000"
+                    data-shadow-accent="#00000041"
+                    data-border-color="#4D4D4D"
+                >
+                    <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('general.back')}</span>
+                </div>
 			</div>`;
 		document.getElementById('backBtn')!
 			.addEventListener('click', () => {

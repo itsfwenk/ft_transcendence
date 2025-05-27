@@ -488,34 +488,43 @@ export default function game() {
 
 
 	function showResultOverlay(state: 'eliminated'|'waiting_next_round'|'waiting_final'|'winner') {
-		let title = '';
-		let subtitle = '';
-		let color = '';
+	let title = '';
+	let subtitle = '';
+	let color = '';
 
-		switch (state) {
-			case 'waiting_next_round':
-				title = i18n.t('game.resultWin');
-				subtitle = i18n.t('game.waitingOpponent');
-				color = 'text-green-600';
-				break;
-			case 'eliminated':
-				title = i18n.t('game.resultLose');
-				subtitle = i18n.t('game.nextTime');
-				color = 'text-red-600';
-				break;
-			case 'waiting_final':
-				title = i18n.t('game.resultWin');
-				subtitle = i18n.t('game.finalPreparation');
-				color = 'text-green-600';
-				break;
-			case 'winner':
-				title = i18n.t('game.resultWin');
-				subtitle = i18n.t('game.congratulations');
-				color = 'text-green-600';
-				break;
-		}
-
-		showOverlay(title, subtitle, color);
+	switch (state) {
+		case 'waiting_next_round':
+		title = i18n.t('game.resultWin');
+		subtitle = i18n.t('game.waitingOpponent');
+		color = 'text-green-600';
+		const quitBtn = document.getElementById('quit-btn');
+		if (quitBtn) quitBtn.classList.add('hidden');
+		break;
+		case 'eliminated':
+		title = i18n.t('game.resultLose');
+		subtitle = i18n.t('game.nextTime');
+		color = 'text-red-600';
 		makeBackButton();
+		break;
+		case 'waiting_final':
+		title = i18n.t('game.resultWin');
+		subtitle = i18n.t('game.finalPreparation');
+		color = 'text-green-600';
+		const quitBtnFinal = document.getElementById('quit-btn');
+		if (quitBtnFinal) quitBtnFinal.classList.add('hidden');
+		break;
+		case 'winner':
+		title = i18n.t('game.resultWin');
+		subtitle = i18n.t('game.congratulations');
+		color = 'text-green-600';
+		makeBackButton();
+		break;
+	}
+
+	showOverlay(title, subtitle, color);
+	
+	if (state === 'eliminated' || state === 'winner') {
+		makeBackButton();
+	}
 	}
 }

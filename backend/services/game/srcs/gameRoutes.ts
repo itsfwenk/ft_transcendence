@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
-import { startGame, getGame, websocketHandshake } from './gameController.js'
+import { startGame, getGame, websocketHandshake, getStatus } from './gameController.js'
 
 //definir un schema pour 'start game'
 const startGameSchema: FastifySchema = {
@@ -39,6 +39,7 @@ const updateScoreSchema: FastifySchema = {
 export default async function gameRoutes(fastify: FastifyInstance, options: FastifyPluginOptions) {
 	fastify.post('/start', { schema: startGameSchema}, startGame);
 	fastify.get('/:gameId', getGame );
+	fastify.get('/:gameId/status', getStatus);
 	// fastify.put('/:gameId/score', { schema: updateScoreSchema }, updateScore);
 	// fastify.post('/:gameId/end', endGame);
 	// fastify.get('/ws', { websocket: true }, (connection, req) => {

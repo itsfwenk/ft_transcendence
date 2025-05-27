@@ -58,7 +58,39 @@ function mapMatchTypeToI18nKey(matchType: string): string {
   return 'gameMode.commonMatchType';
 }
 
-export default function game() {
+export default async function game() {
+	const params = new URLSearchParams(location.search);
+  	const gameId = params.get('gameSessionId');
+	if (!gameId || !(await checkGameExistsAndNotFinished(gameId))) {
+		console.log("finished");
+    	return showError('Game not found (invalid link).');
+  	}
+
+	function showError(text: string) {
+		const app = document.getElementById('app')!;
+		app.innerHTML = `
+			<div class="flex flex-col items-center justify-center h-screen">
+			<p class="text-xl mb-6">${text}</p>
+			<button id="backBtn"
+					class="px-4 py-2 bg-gray-700 text-white rounded">
+				Back
+			</button>
+			</div>`;
+		document.getElementById('backBtn')!
+			.addEventListener('click', () => {
+			history.pushState(null, '', '/mode');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+			});
+	}
+
+	async function checkGameExistsAndNotFinished(id: string): Promise<boolean> {
+		const baseUrl = window.location.origin;
+		const res = await fetch(`${baseUrl}/game/${id}/status`)
+		if (!res.ok) return false;
+		const { status } = await res.json();
+		return status !== 'finished';
+	}
+
     let gameStarted = false;
 	let canvas: HTMLCanvasElement | null;
 	let ctx: CanvasRenderingContext2D | null;
@@ -153,8 +185,8 @@ export default function game() {
 
 			const baseUrl = window.location.origin;
 			const response = await fetch(`${baseUrl}/matchmaking/matches/${matchId}/type`, {
-			method: 'GET',
-			credentials: 'include'
+				method: 'GET',
+				credentials: 'include'
 			});
 			
 			if (!response.ok) {

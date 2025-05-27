@@ -130,9 +130,16 @@ export async function startGame(req: FastifyRequest<{ Body: { player1_id: string
 export async function getGame(req: FastifyRequest<{ Params: { gameId: string } }>, reply: FastifyReply) {
 	const game = await getGamebyId(req.params.gameId);
 	if (!game) return reply.status(404).send({ error: 'Game not found' });
-
 	reply.send(game);
 }
+
+export async function getStatus(req: FastifyRequest<{ Params: { gameId: string } }>, reply: FastifyReply) {
+
+  const game = await getGamebyId(req.params.gameId);
+  if (!game) return reply.code(404).send({ error: 'Game not found' });
+  return { status: game.status };
+};
+
 
 //mettre a jour le score
 // export async function updateScore(req: FastifyRequest<{ Params: { gameId: string }; Body: { score1: number; score2: number } }>, reply: FastifyReply) {

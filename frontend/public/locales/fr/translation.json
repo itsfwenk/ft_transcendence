@@ -167,7 +167,8 @@
         "waitingOpponent": "attente de votre adversaire…",
         "nextTime": "La prochaine fois...",
         "finalPreparation": "finale en préparation",
-        "congratulations": "Félicitations !"
+        "congratulations": "Félicitations !",
+		"errorLink": "Jeu non trouvé (lien invalide)."
     },
     "result": {
         "victory": "Victoire !",

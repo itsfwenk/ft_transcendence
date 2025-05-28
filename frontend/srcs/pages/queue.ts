@@ -124,12 +124,45 @@ export default async function Queue() {
     </div>
   `;
 
-  const ws = getMatchmakingSocket();
-  if (!ws || ws.readyState !== WebSocket.OPEN) {
-    console.error(i18n.t('gameMode.socketNotConnected'));
-    return;
-  }
-  ws.removeEventListener('message', handleMessage1v1);
+	function showError(messageKey: string) {
+		const app = document.getElementById('app');
+		if (!app) return;
+
+		app.innerHTML = /*html*/ `
+			<div class="min-h-screen flex flex-col items-center justify-center bg-white text-black">
+			<p class="text-xl mb-6">${i18n.t(messageKey)}</p>
+			<button id="backBtn"
+					class="px-5 py-2 bg-gray-700 text-white rounded">
+				${i18n.t('general.back')}
+			</button>
+			</div>
+		`;
+
+		document.getElementById('backBtn')?.addEventListener('click', () => {
+			history.pushState(null, '', '/mode');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+		});
+	}
+
+
+  	const ws = getMatchmakingSocket();
+	if (!ws) {
+		showError(i18n.t('gameMode.socketNotConnected'));
+		return;
+	}
+
+	function initQueueSocket() {
+		if (!ws) return;
+		ws.onmessage = handleMessage1v1;
+
+		ws.send(JSON.stringify({ action: 'QUEUE_JOIN_1V1', payload: {} }));
+	}
+	if (ws.readyState === WebSocket.OPEN) {
+		initQueueSocket();
+	} else {
+		ws.addEventListener('open', initQueueSocket, { once: true });
+	}
+	ws.removeEventListener('message', handleMessage1v1);
 
   function updateOpponentDisplay(player: {userId: string; userName: string}) {
     if (player.userId === currentPlayerId) return; 
@@ -239,15 +272,6 @@ export default async function Queue() {
   };
 
   window.addEventListener('beforeunload', handlePageUnload);
-
-	//ws.addEventListener('message', handleMessage1v1);
-	ws.onmessage = handleMessage1v1;
-
-
-  ws.send(JSON.stringify({
-    action: "QUEUE_JOIN_1V1",
-    payload: {}
-  }));
 
   const backBtn = document.getElementById('backBtn');
   backBtn?.addEventListener('click', () => {

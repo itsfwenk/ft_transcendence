@@ -120,10 +120,43 @@ export default async function Queuetournament() {
 		document.getElementById('tournament-timer')?.classList.add('hidden');
 	}
 
+function showError(messageKey: string) {
+		const app = document.getElementById('app');
+		if (!app) return;
+
+		app.innerHTML = /*html*/ `
+			<div class="min-h-screen flex flex-col items-center justify-center bg-white text-black">
+			<p class="text-xl mb-6">${i18n.t(messageKey)}</p>
+			<button id="backBtn"
+					class="px-5 py-2 bg-gray-700 text-white rounded">
+				${i18n.t('general.back')}
+			</button>
+			</div>
+		`;
+
+		document.getElementById('backBtn')?.addEventListener('click', () => {
+			history.pushState(null, '', '/mode');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+		});
+	}
+
+
 	const ws = getMatchmakingSocket();
-	if (!ws || ws.readyState !== WebSocket.OPEN) {
-		console.error(i18n.t('gameMode.socketNotConnected'));
+	if (!ws) {
+		showError(i18n.t('gameMode.socketNotConnected'));
 		return;
+	}
+
+	function initQueueSocket() {
+		if (!ws) return;
+		ws.onmessage = handleMessageTournament;
+
+		ws.send(JSON.stringify({ action: 'QUEUE_JOIN_TOURNAMENT', payload: {} }));
+	}
+	if (ws.readyState === WebSocket.OPEN) {
+		initQueueSocket();
+	} else {
+		ws.addEventListener('open', initQueueSocket, { once: true });
 	}
 	ws.removeEventListener('message', handleMessageTournament);
 	
@@ -244,15 +277,7 @@ export default async function Queuetournament() {
 	
 		window.addEventListener('beforeunload', handlePageUnload);
 	
-		ws.onmessage = handleMessageTournament;
-		//ws.addEventListener('message', handleMessageTournament);
 
-	
-		ws.send(JSON.stringify({
-			action: "QUEUE_JOIN_TOURNAMENT",
-			payload: {}
-		}));
-	
 		const backBtn = document.getElementById('backBtn');
 		backBtn?.addEventListener('click', () => {
 			if (ws && ws.readyState === WebSocket.OPEN) {

@@ -3,6 +3,7 @@ import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
 import i18n from '../i18n';
 
+
 export default async function Queuetournament() {
 	const app = document.getElementById('app');
 	if (!app) return;
@@ -53,31 +54,32 @@ export default async function Queuetournament() {
 	const slots = Array.from(
 	document.querySelectorAll<HTMLDivElement>('#queue-list .slot')
 	);
-
+	const DEFAULT_AVATAR = '/avatars/default.png';
 	function addPlayerToSlot(p: QueuePlayer) {
-	if (document.querySelector(`[data-user-id="${p.userId}"]`)) return;
+		if (document.querySelector(`[data-user-id="${p.userId}"]`)) return;
 
-	const slot = slots.find(s => s.dataset.filled === 'false');
-	if (!slot) return; // queue full
+		const slot = slots.find(s => s.dataset.filled === 'false');
+		if (!slot) return; // queue full
 
-	slot.dataset.filled = 'true';
-	slot.dataset.userId = p.userId;
+		slot.dataset.filled = 'true';
+		slot.dataset.userId = p.userId;
+		console.log("p.avatarUrl", p.avatarUrl);
+		slot.innerHTML = `
+			<img src="${p.avatarUrl || DEFAULT_AVATAR}"
+         alt="${p.userName}"
+         class="w-full h-full object-cover"
+         onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'" />`;
+		}
 
-	slot.innerHTML = `
-		<img src="${p.avatarUrl || '/avatars/default.png'}"
-			alt="${p.userName}"
-			class="w-full h-full object-cover" />`;
-	}
+		function removePlayerFromSlot(userId: string) {
+		const slot = document.querySelector<HTMLDivElement>(
+			`.slot[data-user-id="${userId}"]`
+		);
+		if (!slot) return;
 
-	function removePlayerFromSlot(userId: string) {
-	const slot = document.querySelector<HTMLDivElement>(
-		`.slot[data-user-id="${userId}"]`
-	);
-	if (!slot) return;
-
-	slot.dataset.filled = 'false';
-	slot.removeAttribute('data-user-id');
-	slot.innerHTML = '';
+		slot.dataset.filled = 'false';
+		slot.removeAttribute('data-user-id');
+		slot.innerHTML = '';
 	}
 
 

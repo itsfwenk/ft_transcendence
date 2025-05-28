@@ -86,8 +86,6 @@ export default async function Queue() {
   function renderPlayerBox(playerId: string, playerName: string, avatarUrl: string) {
 
     const boxId = `player-${playerId.slice(0, 8)}`;
-
-    if (avatarUrl) {  
       return `
       <div id="${boxId}" class="w-16 h-16 bg-blue-600 text-white flex items-center justify-center text-2xl rounded-md cube-3d">
         <img 
@@ -99,17 +97,6 @@ export default async function Queue() {
         />
       </div>
       `;
-    } else {
-      return `
-      <div class="w-16 h-16 bg-blue-600 rounded-md cube-3d flex items-center justify-center text-white text-2xl">
-        <img 
-        src="/avatars/default.png" 
-        alt="${playerName}" 
-        class="w-full h-full object-cover"
-        />
-      </div>
-      `;
-    }
   }
   
   app.innerHTML = /*html*/`

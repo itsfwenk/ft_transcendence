@@ -7,11 +7,11 @@ export default function createAccount() {
 		<div class="text-black font-jaro text-9xl mt-16 mb-28 select-none">${i18n.t('general.pongGame')}</div>
 		<form id="registerForm" class="flex flex-col gap-6 justify-center items-center">
         
-			<input id="username" type="username" id="username" name="username" placeholder="${i18n.t('login.username')}" required class="shadow-md h-25 pl-6 w-120 bg-white border border-black font-jaro text-black text-2xl rounded-md focus:outline-none">
+			<input id="username" type="username" id="username" name="username" placeholder="${i18n.t('login.username')}" required class="shadow-md h-18 pl-6 w-100 bg-white border border-black font-jaro text-black text-2xl rounded-md focus:outline-none">
 
-			<input id="email" type="email" id="email" name="email" placeholder="${i18n.t('login.email')}" required class="shadow-md h-25 pl-6 w-120 bg-white border border-black font-jaro text-black text-2xl rounded-md focus:outline-none">
+			<input id="email" type="email" id="email" name="email" placeholder="${i18n.t('login.email')}" required class="shadow-md h-18 pl-6 w-100 bg-white border border-black font-jaro text-black text-2xl rounded-md focus:outline-none">
 
-			<input id="password" type="password" id="password" name="password" placeholder="${i18n.t('login.password')}" required class="shadow-md h-25 pl-6 w-120 bg-white border border-black font-jaro text-black text-2xl rounded-md focus:outline-none">
+			<input id="password" type="password" id="password" name="password" placeholder="${i18n.t('login.password')}" required class="shadow-md h-18 pl-6 w-100 bg-white border border-black font-jaro text-black text-2xl rounded-md focus:outline-none">
 			
             <div id="createAccountSubmitBtn" class="button font-jaro mt-4 w-60 h-14 bg-blue-700 rounded-lg cursor-pointer select-none
                         hover:translate-y-[15px]  hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]

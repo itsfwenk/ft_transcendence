@@ -10,10 +10,10 @@ export default async function login() {
         <div class="text-black font-jaro text-9xl mt-16 select-none">${i18n.t('general.pongGame')}</div>
         
         <form id="loginForm" class="flex flex-col items-center gap-6">
-            <input type="email" id="email" name="email" placeholder="${i18n.t('login.email')}" required 
-                   class="mt-35 h-25 pl-6 w-120 bg-white border border-black text-black text-2xl rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md font-jaro">
-            <input type="password" id="password" name="password" placeholder="${i18n.t('login.password')}" required 
-                   class="h-25 pl-6 w-120 bg-white border border-black text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md font-jaro text-2xl">
+				<input type="email" id="email" name="email" placeholder="${i18n.t('login.email')}" required 
+					class="mt-35 h-18 pl-6 w-100 bg-white border border-black text-black text-2xl rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md font-jaro">
+				<input type="password" id="password" name="password" placeholder="${i18n.t('login.password')}" required 
+					class="h-18 pl-6 w-100 bg-white border border-black text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md font-jaro text-2xl">
             
             <div id="loginSubmitBtn"
                     class="button font-jaro mt-4 w-60 h-14 bg-blue-700 rounded-lg cursor-pointer select-none
@@ -30,35 +30,39 @@ export default async function login() {
 
         </form>
         
-        <div id="errorMessage" class="text-red-500 mt-2 hidden font-jaro">${i18n.t('login.errorLogin')}</div>
-        <hr class="mx-auto my-10 border-black w-1/4">
+        <div id="errorMessage" class="text-red-500 mt-6 invisible opacity-0 font-jaro">${i18n.t('login.errorLogin')}</div>
 
-        <div id="createAccountBtn" 
-                class="button font-jaro w-80 h-16 bg-blue-700 rounded-lg cursor-pointer select-none mx-auto
-                    hover:translate-y-[12px]  hover:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841]
+
+        <div class="flex justify-center items-center gap-4 mt-6">
+            <div id="createAccountBtn" 
+                    class="button font-jaro w-80 h-16 bg-red-600 rounded-lg cursor-pointer select-none
+                        hover:translate-y-[12px]  hover:[box-shadow:0_0px_0_0_#A31F1F,0_0px_0_0_#A31F1F41]
+                        hover:border-b-[0px]
+                        transition-all duration-150 [box-shadow:0_10px_0_0_#A31F1F,0_15px_0_0_#A31F1F41]
+                        border-b-[1px] border-red-400 hover:outline-none focus:outline-none"
+                    data-shadow-main="#991B1B"
+                    data-shadow-accent="#EF444441"
+                    data-border-color="#F87171"
+            >
+                <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-3xl'>${i18n.t('login.createAccount')}</span>
+            </div>
+            
+             <div class="text-black mt-6 my-4 font-jaro text-xl">${i18n.t('login.or')}</div>
+
+            <div id="googleLoginBtn" 
+                class="button font-jaro w-80 h-16 bg-white rounded-lg cursor-pointer select-none
+                    hover:translate-y-[12px] hover:[box-shadow:0_0px_0_0_var(--shadow-main-color),0_0px_0_0_var(--shadow-accent-color)]
                     hover:border-b-[0px]
-                    transition-all duration-150 [box-shadow:0_10px_0_0_#193cb8,0_15px_0_0_#1b70f841]
-                    border-b-[1px] border-blue-400 hover:outline-none focus:outline-none"
-                data-shadow-main="#193cb8"
-                data-shadow-accent="#1b70f841"
-                data-border-color="#60A5FA"
-        >
-            <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-3xl'>${i18n.t('login.createAccount')}</span>
-        </div>
-
-        <div class="text-black mt-6 my-4 font-jaro text-xl">${i18n.t('login.or')}</div>
-        
-        <div id="googleLoginBtn" 
-                class="button font-jaro w-80 h-16 bg-red-500 rounded-lg cursor-pointer select-none mx-auto
-                hover:translate-y-[12px] hover:[box-shadow:0_0px_0_0_#991B1B,0_0px_0_0_#EF444441]
-                hover:border-b-[0px]
-                transition-all duration-150 [box-shadow:0_10px_0_0_#991B1B,0_15px_0_0_#EF444441]
-                border-b-[1px] border-red-400 hover:outline-none focus:outline-none"
-                data-shadow-main="#991B1B"
-                data-shadow-accent="#EF444441"
-                data-border-color="#F87171"
-        >
-            <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-3xl'>Google</span>
+                    transition-all duration-150 [box-shadow:0_10px_0_0_var(--shadow-main-color),0_15px_0_0_var(--shadow-accent-color)]
+                    border-b-[1px] border-[#dadce0] hover:outline-none focus:outline-none 
+                    flex items-center px-6"
+                data-shadow-main="#a0a0a0"
+                data-shadow-accent="#e0e0e041"
+                data-border-color="#dadce0"
+            >
+                <img src="./images/Google_Favicon.svg" alt="G" class="h-8 w-8">
+                <span class='text-[#3c4043] font-jaro text-3xl flex-grow text-center pr-8'>Google</span> 
+            </div>
         </div>
       `;
 
@@ -85,7 +89,7 @@ export default async function login() {
           }
 
           .is-active {
-              transform: translateY(12px) !important;
+              transform: translateY(0px) !important;
               box-shadow: 0 0px 0 0 var(--shadow-main-color), 0 0px 0 0 var(--shadow-accent-color) !important;
               border-bottom-width: 0 !important;
               border-bottom-style: none !important;
@@ -104,7 +108,7 @@ export default async function login() {
       loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        errorMessage.classList.add('hidden');
+        errorMessage.classList.add('invisible', 'opacity-0');
         
         const email = (document.getElementById('email') as HTMLInputElement).value;
         const password = (document.getElementById('password') as HTMLInputElement).value;
@@ -140,7 +144,7 @@ export default async function login() {
         } catch (error) {
             console.error(`${i18n.t('login.loginError')}:`, error);
             errorMessage.textContent = error as string;
-            errorMessage.classList.remove('hidden');
+            errorMessage.classList.remove('invisible', 'opacity-0');
         }
       });
 

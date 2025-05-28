@@ -178,7 +178,7 @@
     },
     "login": {
         "email": "Email",
-        "username": "User name",
+        "username": "Username",
         "password": "Password",
         "login": "Login",
         "createAccount": "Create account",

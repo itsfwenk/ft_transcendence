@@ -100,7 +100,7 @@ export default async function Queuetournament() {
 		if (statusMessage) {
 			statusMessage.textContent = i18n.t('tournament.startsIn') + seconds;
 		}
-
+		if (backBtn) backBtn.classList.add('hidden');
 		countdownHandle = window.setInterval(() => {
 			seconds--;
 			if (seconds > 0 && statusMessage) {

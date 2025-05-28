@@ -81,19 +81,19 @@ export default async function Queue() {
 	console.log("currentPlayerId:", currentPlayerId);
 
 	const currentPlayerAvatar = getAvatarUrl(currentPlayerId);
+
 	console.log("Avatar de l'utilisateur actuel:", currentPlayerAvatar);
   
   function renderPlayerBox(playerId: string, playerName: string, avatarUrl: string) {
-
+	console.log("render_avatarUrl", avatarUrl);
     const boxId = `player-${playerId.slice(0, 8)}`;
       return `
       <div id="${boxId}" class="w-16 h-16 bg-blue-600 text-white flex items-center justify-center text-2xl rounded-md cube-3d">
         <img 
-        src="${avatarUrl}" 
-        alt="${playerName}" 
-        class="w-full h-full object-cover"
-        onload="console.log('${i18n.t('queue.imageLoadedSuccessfully')}:', '${avatarUrl}')"
-        onerror="console.log('${i18n.t('queue.errorLoadingImage')}:', '${avatarUrl}'); this.onerror=null; this.src='/avatars/default.png';"
+        	src="${avatarUrl || '/avatars/default.png'}"
+  			alt="${playerName}"
+  			class="w-full h-full object-cover"
+  			onerror="this.onerror=null;this.src='/avatars/default.png';"
         />
       </div>
       `;
@@ -170,6 +170,7 @@ export default async function Queue() {
     const container = document.getElementById('player2-container');
     if (container) {
       const avatarUrl = getAvatarUrl(player.userId);
+	  console.log("container_avatarUrl", avatarUrl);
       container.innerHTML = renderPlayerBox(player.userId, player.userName || i18n.t('queue.opponent'), avatarUrl);
     }
     

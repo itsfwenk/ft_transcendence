@@ -137,6 +137,9 @@ export default async function game() {
 
 
     function keydownHandler(e: KeyboardEvent) {
+		if (["ArrowUp", "ArrowDown"].includes(e.key)) {
+			e.preventDefault();
+		}
         if (socket && socket.readyState === WebSocket.OPEN && gameStarted) {
             let key = '';
             if (e.key === 'ArrowUp' || e.key === 'w') {

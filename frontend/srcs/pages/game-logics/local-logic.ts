@@ -137,7 +137,7 @@ export function initGame(){
     ball.dy = lastBallDy;
   }
 
-  // Keyboard event listeners
+  //Keyboard event listeners
   document.addEventListener("keydown", (event) => {
     if (!isPaused) {
       if (event.key === "w") leftPaddle.dy = -paddleSpeed;
@@ -153,7 +153,7 @@ export function initGame(){
     }
   });
 
-  document.addEventListener("keyup", (event) => {
+  window.addEventListener("keyup", (event) => {
     if (!isPaused) {
       if (event.key === "w" || event.key === "s") leftPaddle.dy = 0;
       if (event.key === "ArrowUp" || event.key === "ArrowDown") {

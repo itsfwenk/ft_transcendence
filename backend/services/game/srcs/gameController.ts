@@ -13,6 +13,7 @@ const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
 const paddleSpeed = parseInt(process.env.PADDLE_SPEED as string, 10);
 const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
 const speedIncrease = parseFloat(process.env.SPEED_INCREASE as string);
+const ballInitialSpeed: number = parseInt(process.env.BALL_SPEED as string, 10) || 5
 // const initialBallSpeed = parseFloat(process.env.INITIAL_BALL_SPEED as string);
 
 const activeUsers = new Map<string, WebSocket>(); // userId -> WebSocket
@@ -74,8 +75,8 @@ function createBall() {
 			x: canvasWidth / 2,
 			y: canvasHeight / 2,
 			radius: ballRadius,
-			dx: Math.cos(angle) * 3,
-			dy: Math.sin(angle) * 3,
+			dx: Math.cos(angle) * ballInitialSpeed,
+			dy: Math.sin(angle) * ballInitialSpeed,
 		}
 	return newBall;
 }
@@ -317,8 +318,8 @@ export async function updateBallPosition(gameId: string) {
 			if (Math.random() > 0.5) {
 				angle += Math.PI;
 			}
-			ball.dx = Math.cos(angle) * 3;
-			ball.dy = Math.sin(angle) * 3;
+			ball.dx = Math.cos(angle) * ballInitialSpeed;
+			ball.dy = Math.sin(angle) * ballInitialSpeed;
 			ball.radius = ballRadius;
 		}
 		// console.log(ball.x, ball.y, ball.dx, ball.dy);

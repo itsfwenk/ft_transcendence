@@ -153,29 +153,29 @@ export default function EditProfile() {
       
       <div id="passwordChangeContainer" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
         <div class="bg-white rounded-lg p-6 shadow-xl w-96 text-black">
-          <h3 class="text-xl font-bold mb-4 font-jaro">${i18n.t('editProfile.changePassword')}</h3>
+          <h3 class="text-3xl font-bold mb-4 font-jaro">${i18n.t('editProfile.changePassword')}</h3>
           
           <div class="mb-4">
-            <label for="oldPassword" class="block text-sm font-medium text-gray-700 mb-1">${i18n.t('editProfile.currentPassword')}</label>
-            <input type="password" id="oldPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="${i18n.t('editProfile.enterCurrentPassword')}" />
+            <label for="oldPassword" class="block text-2xl font-medium font-jaro text-gray-700 mb-1">${i18n.t('editProfile.currentPassword')}</label>
+            <input type="password" id="oldPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-jaro font-light" placeholder="${i18n.t('editProfile.enterCurrentPassword')}" />
           </div>
           
           <div class="mb-4">
-            <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">${i18n.t('editProfile.newPassword')}</label>
-            <input type="password" id="newPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="${i18n.t('editProfile.enterNewPassword')}" />
-            <p class="text-xs text-gray-500 mt-1">${i18n.t('editProfile.passwordRequirement')}</p>
+            <label for="newPassword" class="block text-2xl font-medium font-jaro text-gray-700 mb-1">${i18n.t('editProfile.newPassword')}</label>
+            <input type="password" id="newPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-jaro font-light" placeholder="${i18n.t('editProfile.enterNewPassword')}" />
+            <p class="text-sm text-gray-500 mt-1 font-jaro font-light">${i18n.t('editProfile.passwordRequirement')}</p>
           </div>
           
           <div class="mb-4">
-            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">${i18n.t('editProfile.confirmPassword')}</label>
-            <input type="password" id="confirmPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="${i18n.t('editProfile.confirmNewPassword')}" />
+            <label for="confirmPassword" class="block text-2xl font-medium font-jaro text-gray-700 mb-1">${i18n.t('editProfile.confirmPassword')}</label>
+            <input type="password" id="confirmPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-jaro font-light" placeholder="${i18n.t('editProfile.confirmNewPassword')}" />
           </div>
           
           <div class="flex justify-end space-x-3 mt-6">
-            <button id="cancelPasswordChange" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none">
+            <button id="cancelPasswordChange" class="px-4 py-2 bg-gray-300 font-jaro text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none">
               ${i18n.t('general.cancel')}
             </button>
-            <button id="savePasswordChange" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none">
+            <button id="savePasswordChange" class="px-4 py-2 bg-green-500 font-jaro text-white rounded-md hover:bg-green-600 focus:outline-none">
               ${i18n.t('general.save')}
             </button>
           </div>
@@ -184,25 +184,25 @@ export default function EditProfile() {
       
       <div class="flex justify-center items-center gap-9">
         <div id="saveChangesBtn" class='button mb-2 h-20 w-1/6 bg-green-600 rounded-lg cursor-pointer select-none
-        hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#15803d,0_0px_0_0_#1b70f841]
+        hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#15803d,0_0px_0_0_#15803d41]
         hover:border-b-[0px]
-        transition-all duration-150 [box-shadow:0_10px_0_0_#15803d,0_15px_0_0_#1b70f841]
+        transition-all duration-150 [box-shadow:0_10px_0_0_#15803d,0_15px_0_0_#15803d41]
         border-b-[1px] border-green-400'>
         <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>${i18n.t('editProfile.saveChanges')}</span>
         </div>
 
         <div id="resetChangesBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-red-600 rounded-lg cursor-pointer select-none
-        hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#b91c1c,0_0px_0_0_#1b70f841]
+        hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#b91c1c,0_0px_0_0_#b91c1c41]
         hover:border-b-[0px]
-        transition-all duration-150 [box-shadow:0_10px_0_0_#b91c1c,0_15px_0_0_#1b70f841]
+        transition-all duration-150 [box-shadow:0_10px_0_0_#b91c1c,0_15px_0_0_#b91c1c41]
         border-b-[1px] border-red-400'>
         <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>${i18n.t('editProfile.resetChanges')}</span>
         </div>
 
         <div id="changePasswordBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-yellow-500 rounded-lg cursor-pointer select-none
-        hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#d49218,0_0px_0_0_#1b70f841]
+        hover:translate-y-2 hover:[box-shadow:0_0px_0_0_#d49218,0_0px_0_0_#d4921841]
         hover:border-b-[0px]
-        transition-all duration-150 [box-shadow:0_10px_0_0_#d49218,0_15px_0_0_#1b70f841]
+        transition-all duration-150 [box-shadow:0_10px_0_0_#d49218,0_15px_0_0_#d4921841]
         border-b-[1px] border-yellow-200'>
         <span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl'>${i18n.t('editProfile.changePassword')}</span>
         </div>

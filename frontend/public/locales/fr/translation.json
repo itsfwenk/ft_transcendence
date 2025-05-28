@@ -185,6 +185,7 @@
         "or": "ou",
         "errorLogin": "Erreur de connexion. Vérifiez vos identifiants.",
         "backLog": "Retour à la connexion",
+        "creating": "Création du compte...",
         "logTrue": "Compte créé avec succès ! Redirection vers la connexion…",
         "logFalse": "Une erreur s'est produite lors de l'inscription. Veuillez réessayer.",
         "googleError": "Erreur de connexion",

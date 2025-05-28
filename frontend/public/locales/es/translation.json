@@ -186,6 +186,7 @@
         "or": "o",
         "errorLogin": "Error de inicio de sesión. Comprueba tus credenciales.",
         "backLog": "Volver a iniciar sesión",
+        "creating": "Crear cuenta...",
         "logTrue": "¡Cuenta creada correctamente! Redireccionando al inicio de sesión...",
         "logFalse": "Se produjo un error durante el registro. Inténtalo de nuevo.",
         "googleError": "Error de conexión",

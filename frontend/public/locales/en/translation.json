@@ -185,6 +185,7 @@
         "or": "or",
         "errorLogin": "Login error. Check your credentials.",
         "backLog": "Back to login",
+        "creating": "Creating account...",
         "logTrue": "Account created successfully! Redirecting to login...",
         "logFalse": "An error occurred during registration. Please try again.",
         "googleError": "Login Error",

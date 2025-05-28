@@ -179,6 +179,7 @@
     },
     "login": {
         "email": "Email",
+        "username": "Nombre de usuario",
         "password": "Contraseña",
         "login": "Iniciar sesión",
         "createAccount": "Crear cuenta",

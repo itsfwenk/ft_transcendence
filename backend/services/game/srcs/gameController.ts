@@ -5,6 +5,8 @@ import axios from 'axios';
 import { WebSocket } from "ws";
 import jwt from 'jsonwebtoken';
 import { isReturnStatement } from 'typescript';
+import * as fs from 'fs';
+import * as https from 'https';
 
 const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
 const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);

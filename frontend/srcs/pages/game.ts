@@ -395,6 +395,7 @@ export default async function game() {
 				gameStarted = true;
 				break;
 			case 'game_update':
+				console.log(data)
 				renderGame(data.game_state as Game);
 				if (data.game_state.status === 'finished') {
 					socket.close(); cleanup();

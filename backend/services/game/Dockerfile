@@ -1,7 +1,7 @@
 FROM node:20-bullseye-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 make g++ libsqlite3-dev curl net-tools sqlite3 \
+    python3 make g++ libsqlite3-dev curl net-tools sqlite3 ca-certificates\
     && ln -s /usr/bin/python3 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
 
@@ -22,9 +22,10 @@ COPY backend/services/game/srcs ./srcs
 COPY backend/services/game/metrics ./metrics
 COPY ./gameInterfaces.ts ./
 
-COPY ssl_crts/game/ ./game_ssl_crts/
-RUN chmod -R 600 /app/game_ssl_crts/*.key \
-    && chmod -R 644 /app/game_ssl_crts/*.crt
+COPY ssl_crts/*/*.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+# RUN chmod -R 600 /app/game_ssl_crts/*.key \
+#     && chmod -R 644 /app/game_ssl_crts/*.crt
 
 RUN npm run build
 

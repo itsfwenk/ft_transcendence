@@ -1,6 +1,6 @@
 FROM node:20-bullseye-slim
 RUN apt-get update && apt-get install -y \
-    python3 make g++ libsqlite3-dev curl net-tools \
+    python3 make g++ libsqlite3-dev curl net-tools ca-certificates \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
 
@@ -23,6 +23,9 @@ RUN npm install
 RUN npm rebuild better-sqlite3 --build-from-source
 
 COPY services/matchmaking ./
+
+COPY ../ssl_crts/*/*.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
 
 RUN npm run build
 

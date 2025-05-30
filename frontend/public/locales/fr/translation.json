@@ -55,7 +55,9 @@
         "profileFetchError": "Erreur de récupération du profil",
         "noUserConnected": "Aucun utilisateur connecté",
         "currentPlayerId": "ID du joueur actuel",
-        "currentPlayerAvatar": "Avatar du joueur actuel"
+        "currentPlayerAvatar": "Avatar du joueur actuel",
+		"stat": "Statistiques",
+		"nb": "nombre"
     },
     "tournament": {
         "title": "Tournoi",

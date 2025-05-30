@@ -1,4 +1,5 @@
 import i18n, { changeLanguage, supportedLanguages, t } from '../i18n';
+import Chart from 'chart.js/auto';
 
 export interface UserData {
 	user: {
@@ -36,6 +37,9 @@ export interface Friend {
 	status: string;
 	avatarUrl: string;
 }
+
+let winRateChartInstance: Chart | null = null;
+let winLossChartInstance: Chart | null = null;
 
 export function getAvatarUrl(userId: string): string {
 	const baseUrl = window.location.origin;
@@ -123,6 +127,238 @@ export async function addFriend(userName: string): Promise<{ success: boolean; m
 	}
 }
 
+function initWinLossChart(wins: number, losses: number): void {
+  const chartCanvas = document.getElementById('winLossChart') as HTMLCanvasElement;
+  if (!chartCanvas) return;
+  
+  const ctx = chartCanvas.getContext('2d');
+  if (!ctx) return;
+  
+  if (winLossChartInstance) {
+    winLossChartInstance.destroy();
+  }
+  
+  winLossChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [i18n.t('profile.win'), i18n.t('profile.losses')],
+      datasets: [{
+        label: i18n.t('profile.nb'),
+        data: [wins, losses],
+        backgroundColor: [
+          'rgba(75, 192, 75, 0.8)',
+          'rgba(255, 99, 71, 0.8)'
+        ],
+        borderColor: [
+          'rgba(75, 192, 75, 1)',
+          'rgba(255, 99, 71, 1)'
+        ],
+        borderWidth: 1,
+        borderRadius: 5,
+        hoverBackgroundColor: [
+          'rgba(75, 192, 75, 1)',
+          'rgba(255, 99, 71, 1)'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context: any) {
+              return `${context.dataset.label}: ${context.raw}`;
+            }
+          },
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          titleFont: {
+            size: 12,
+            family: 'font-jaro, sans-serif'
+          },
+          bodyFont: {
+            size: 12,
+            family: 'font-jaro, sans-serif'
+          },
+          padding: 8
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: 'white',
+            font: {
+              family: 'font-jaro, sans-serif',
+              size: 10
+            },
+            precision: 0
+          },
+          grid: {
+            display: false
+          }
+        },
+        x: {
+          ticks: {
+            color: 'white',
+            font: {
+              family: 'font-jaro, sans-serif',
+              size: 10
+            }
+          },
+          grid: {
+            display: false
+          }
+        }
+      },
+      animation: {
+        duration: 1000
+      }
+    }
+  });
+  
+  const winLossContainer = document.getElementById('winLossChartContainer');
+  const winsElement = document.getElementById('statWin');
+  const lossesElement = document.getElementById('statLosses');
+  
+  if (winsElement && lossesElement) {
+    winsElement.textContent = String(wins);
+    lossesElement.textContent = String(losses);
+  }
+  
+  if (winLossContainer) {
+    winLossContainer.addEventListener('mouseenter', () => {
+      if (winsElement && lossesElement) {
+        winsElement.classList.add('text-yellow-300');
+        lossesElement.classList.add('text-yellow-300');
+      }
+    });
+    
+    winLossContainer.addEventListener('mouseleave', () => {
+      if (winsElement && lossesElement) {
+        winsElement.classList.remove('text-yellow-300');
+        lossesElement.classList.remove('text-yellow-300');
+      }
+    });
+  }
+}
+
+function initWinRateChart(wins: number, losses: number): void {
+  const chartCanvas = document.getElementById('winRateChart') as HTMLCanvasElement;
+  if (!chartCanvas) return;
+  
+  const ctx = chartCanvas.getContext('2d');
+  if (!ctx) return;
+  
+  if (winRateChartInstance) {
+    winRateChartInstance.destroy();
+  }
+  
+  const totalGames = wins + losses;
+  const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
+  const lossRate = 100 - winRate;
+  
+  const percentageText = document.getElementById('winRatePercentage');
+  if (percentageText) {
+    percentageText.textContent = `${winRate}%`;
+  }
+  
+  winRateChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: [i18n.t('profile.win'), i18n.t('profile.losses')],
+      datasets: [{
+        data: [winRate, lossRate],
+        backgroundColor: [
+          'rgba(75, 192, 75, 0.8)',
+          'rgba(255, 99, 71, 0.8)'
+        ],
+        borderColor: [
+          'rgba(75, 192, 75, 1)',
+          'rgba(255, 99, 71, 1)'
+        ],
+        borderWidth: 1,
+        hoverBackgroundColor: [
+          'rgba(75, 192, 75, 1)',
+          'rgba(255, 99, 71, 1)'
+        ],
+        hoverBorderColor: '#FFFFFF',
+        hoverBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '70%',
+      animation: {
+        animateRotate: true,
+        animateScale: true,
+        duration: 1000
+      },
+      plugins: {
+        legend: {
+          display: false,
+          position: 'bottom',
+          labels: {
+            font: {
+              size: 12,
+              family: 'font-jaro, sans-serif'
+            },
+            color: 'white',
+            padding: 10,
+            boxWidth: 12
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context: any) {
+              return `${context.label}: ${context.raw}%`;
+            }
+          },
+          titleFont: {
+            size: 14,
+            family: 'font-jaro, sans-serif'
+          },
+          bodyFont: {
+            size: 12,
+            family: 'font-jaro, sans-serif'
+          },
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          padding: 10,
+          cornerRadius: 6,
+          caretSize: 6
+        }
+      }
+    }
+  });
+  
+  const chartContainer = document.getElementById('winRateChartContainer');
+  const percentageElement = document.getElementById('winRatePercentage');
+  
+  if (chartContainer && percentageElement) {
+    chartContainer.addEventListener('mouseenter', () => {
+      if (winRateChartInstance) {
+        winRateChartInstance.options.plugins!.legend!.display = true;
+        winRateChartInstance.update();
+        
+        percentageElement.style.opacity = '0';
+      }
+    });
+    
+    chartContainer.addEventListener('mouseleave', () => {
+      if (winRateChartInstance) {
+        winRateChartInstance.options.plugins!.legend!.display = false;
+        winRateChartInstance.update();
+        
+        percentageElement.style.opacity = '1';
+      }
+    });
+  }
+}
+
 export function updateProfileBoxUI(userData: UserData | null) {
 	if (!userData) return;
 
@@ -158,21 +394,11 @@ export function updateProfileBoxUI(userData: UserData | null) {
 			nbGamesElement.textContent = String(userData.stats.totalGames || 0);
 		}
 
-		const statWinElement = document.getElementById('statWin');
-		if (statWinElement) {
-			statWinElement.textContent = String(userData.stats.wins || 0);
-		}
-
-		const statLossesElement = document.getElementById('statLosses');
-		if (statLossesElement) {
-			statLossesElement.textContent = String(userData.stats.losses || 0);
-		}
-
-		const statWinRateElement = document.getElementById('statWinRate');
-		if (statWinRateElement) {
-			const winRate = userData.stats.winRate || 0;
-			statWinRateElement.textContent = `${Math.round(winRate)}%`;
-		}
+		const wins = userData.stats.wins || 0;
+		const losses = userData.stats.losses || 0;
+		
+		initWinLossChart(wins, losses);
+		initWinRateChart(wins, losses);
 	}
 }
 
@@ -359,7 +585,7 @@ export default function Profile() {
 		
 		<div>
 		<div id="twoBox" class="flex justify-center items-center mb-12 gap-5">
-			<div id="profilBox" class="h-80 w-1/3 bg-blue-700 rounded-lg p-4 text-white">
+			<div id="profilBox" class="h-103 w-1/3 bg-blue-700 rounded-lg p-4 text-white">
 				<div id="img_name" class="flex items-center mb-4">
 					<div id="img" class="w-28 h-28 rounded-lg bg-gray-300 mr-4 overflow-hidden">
 						<img id="profileImage" src="/avatars/default.png" alt="Profile" class="w-full h-full object-cover select-none"/>
@@ -372,22 +598,27 @@ export default function Profile() {
 					<div id="nbGames" class="ml-2 pt-0.5 font-jaro text-xl">0</div>
 				</div>
 				<div id="stats" class="flex justify-around items-center mt-3 text-center">
-					<div id="win" class="flex flex-col items-center gap-4">
-						<div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.win')}</div>
-						<div id="statWin" class="text-xl font-jaro select-none">0</div>
+					<div id="win-loss-stats" class="flex flex-col items-center">
+						<div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.stats')}</div>
+						<div id="winLossChartContainer" class="relative h-28 w-36 mb-6">
+							<canvas id="winLossChart" height="112" width="144"></canvas>
+							<div class="absolute -bottom-6 left-0 w-full flex justify-between px-6">
+								<span id="statWin" class="ml-6 text-sm font-bold transition-colors duration-200">0</span>
+								<span id="statLosses" class="text-sm font-bold transition-colors duration-200">0</span>
+							</div>
+						</div>
 					</div>
-					<div id="losses" class="flex flex-col items-center gap-4">
-						<div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.losses')}</div>
-						<div id="statLosses" class="text-xl font-jaro select-none">0</div>
-					</div>
-					<div id="winrate" class="flex flex-col items-center gap-4">
-						<div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.winRate')}</div>
-						<div id="statWinRate" class="text-xl font-jaro select-none">0%</div>
+					<div id="winrate" class="flex flex-col items-center">
+						<div class="font-bold font-jaro text-2xl select-none mb-3">${i18n.t('profile.winRate')}</div>
+						<div id="winRateChartContainer" class="relative h-28 w-28">
+							<canvas id="winRateChart" height="112" width="112"></canvas>
+							<div id="winRatePercentage" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-white select-none text-shadow transition-opacity duration-300">0%</div>
+						</div>
 					</div>
 				</div>
 			</div>
 	
-			<div id="friendBox" class="h-80 w-1/3 bg-red-700 rounded-lg p-4 text-white">
+			<div id="friendBox" class="h-103 w-1/3 bg-red-700 rounded-lg p-4 text-white">
 				<div class="text-xl font-bold mb-4 font-jaro select-none">${i18n.t('profile.friends')}</div>
 				<div id="friendsList" class="overflow-y-auto h-64 pr-2">
 					<div class="text-center text-gray-300 mt-10">${i18n.t('general.loading')}</div>
@@ -435,6 +666,12 @@ export default function Profile() {
 			</div>
 		</div>
 		</div>
+		
+		<style>
+		  .text-shadow {
+			text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+		  }
+		</style>
 		`;
 	
 		setupProfilePage();

@@ -55,7 +55,9 @@
         "profileFetchError": "Profile retrieval error",
         "noUserConnected": "No user connected",
         "currentPlayerId": "Current player ID",
-        "currentPlayerAvatar": "Current player avatar"
+        "currentPlayerAvatar": "Current player avatar",
+		"stats": "Statistics",
+		"nb": "number"
     },
     "tournament": {
         "title": "Tournament",

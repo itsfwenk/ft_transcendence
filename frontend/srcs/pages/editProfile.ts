@@ -87,7 +87,7 @@ export default function EditProfile() {
     <div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">${i18n.t('general.pongGame')}</div>
     <div>
       <div id="twoBox" class="flex justify-center items-center mb-10 gap-5">
-        <div id="profilBox" class="h-80 w-1/3 bg-blue-700 rounded-lg p-4 text-white">
+        <div id="profilBox" class="h-65 w-1/3 bg-blue-700 rounded-lg p-4 text-white">
           <div id="img_name" class="flex items-center mb-4">
             <div id="img" class="w-28 h-28 rounded-lg bg-gray-300 mr-4 overflow-hidden relative group cursor-pointer">
               <img id="profileImage" src="/avatars/default.png" alt="Profile" class="w-full h-full object-cover select-none"/>
@@ -133,20 +133,6 @@ export default function EditProfile() {
           <div id="totalGames" class="flex mb-2">
             <div class="font-jaro text-2xl select-none">${i18n.t('profile.totalGames')}: </div>
             <div id="nbGames" class="ml-2 pt-0.5 font-jaro text-xl">0</div>
-          </div>
-          <div id="stats" class="flex justify-around items-center mt-3 text-center">
-            <div id="win" class="flex flex-col items-center gap-4">
-              <div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.win')}</div>
-              <div id="statWin" class="text-xl font-jaro select-none">0</div>
-            </div>
-            <div id="losses" class="flex flex-col items-center gap-4">
-              <div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.losses')}</div>
-              <div id="statLosses" class="text-xl font-jaro select-none">0</div>
-            </div>
-            <div id="winrate" class="flex flex-col items-center gap-4">
-              <div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.winRate')}</div>
-              <div id="statWinRate" class="text-xl font-jaro select-none">0%</div>
-            </div>
           </div>
         </div>
       </div>

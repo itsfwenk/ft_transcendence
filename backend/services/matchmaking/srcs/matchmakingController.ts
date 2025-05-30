@@ -3,6 +3,37 @@ import type { WebSocket as WS } from 'ws';
 import {createMatch, createTournament, getTournamentById, Tournament, getMatchbyId, Match, updateMatchv2, scheduleFinal} from './matchmakingDb';
 import { websocketClients } from './matchmakingRoutes';
 import WebSocket from 'ws';
+//import {Game} from '../../../../gameInterfaces';
+
+interface Ball {
+	x: number;
+	y: number;
+	radius: number;
+	dx: number;
+	dy: number
+}
+
+interface Paddle {
+	x: number;
+	y: number;
+	dy: number
+}
+
+interface Game {
+	gameId: string;
+	player1_id: string;
+	player2_id: string;
+	score1: number;
+	score2: number;
+	leftPaddle: Paddle;
+	rightPaddle: Paddle;
+	ball: Ball;
+	status: 'waiting' | 'ongoing' | 'finished';
+	winner_id?: string | null;
+	matchId?: string | null;
+	canvasWidth: number;
+	canvasHeight: number;
+}
 
 export const queue1v1 = new Set<string>();
 export const queueTournament = new Set<string>();
@@ -362,24 +393,41 @@ interface MatchmakingMessage {
 	payload?: any;
 }
 
-//diffusion d'un etat a tous les joueurs
-// function broadcastTournamentState(tournament: Tournament) {
-// 	const message = JSON.stringify({
-// 		type: 'tournament_state_update',
-// 		payload: {
-// 			tournament_Id: tournament.id,
-// 			state: tournament.state,
-// 			tournament
-// 		}
-// 	});
 
-// 	for (const playerId of tournament.players) {
-// 		const socket = websocketClients.get(playerId);
-// 		if (socket && socket.readyState === WebSocket.OPEN) {
-// 			socket.send(message);
-// 		}
-// 	}
-// }
+
+async function declareForfeit(gameId: string, loserId: string) {
+	console.log("declare Forfeit", gameId, loserId);
+	const baseUrl = process.env.GAME_SERVICE_BASE_URL || 'http://game:4001';
+	const {data: game} = await axios.get<Game>(`${baseUrl}/game/${gameId}`);
+
+  	if (!game || game.status === 'finished') return;
+	console.log("declare Forfeit", game);
+ 	const winnerId = game.player1_id === loserId ? game.player2_id : game.player1_id;
+	console.log("declareForfeit winnerId", winnerId);
+
+  	await axios.patch<Game>(`${baseUrl}/game/${gameId}/forfeit`, {winnerId})
+
+  	const ws = websocketClients.get(winnerId);
+
+	const str = {
+		type: 'OPPONENT_FORFEIT',
+		payload: {
+			gameSessionId: gameId
+		}
+	}
+	if (ws && ws.readyState === WebSocket.OPEN)
+		ws.send(JSON.stringify(str));
+	const str2 = {
+		type: 'PLAYER_STATE_UPDATE',
+			payload: {
+				state: 'winner'
+			}
+	}
+	if (ws && ws.readyState === WebSocket.OPEN)
+		ws.send(JSON.stringify(str2));
+}
+
+
 
 // message provenant du front vers le back
 export async function handleMatchmakingMessage(
@@ -420,6 +468,12 @@ export async function handleMatchmakingMessage(
 		case 'QUEUE_LEAVE_TOURNAMENT':
 			leaveTournamentQueue(playerId);
 			break;
+		case 'MATCH_PREP_FORFEIT':
+			console.log("MATCH_PREP_FORFEIT", msg);
+			const gameId = msg.payload?.currentGameId;
+			await declareForfeit(gameId, playerId);
+			break;
+
 
 		default:
 			console.warn(`[MM] Action inconnue : ${msg.action}`);

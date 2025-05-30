@@ -448,6 +448,7 @@ export function endGameInOngoingGames(gameId: string) {
 		game.winner_id = winner_id;
 	}
 	if (game.status === 'finished' && game.winner_id != null) {
+		console.log("endgameongoinggames finihed winner ID", game);
 		updateGameInDb(game);
 		console.log('ongoingGames size :', ongoingGames.size);
 		return game;
@@ -481,7 +482,7 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 	}
 	const { userId } = decoded;
 	const	user = await getUserById(userId);
-
+    endedAt: new Date(),
 	activeUsers.set(userId, connection);
 	console.log(`User ${userId} connected via WebSocket`);
 
@@ -604,6 +605,18 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 		console.error('WebSocket error:', err.message);
 		connection.close(1003, 'Invalid message format');
 	  });
+}
+
+
+export function endOngoingGamesForfeit(req: FastifyRequest<{ Params: { gameId: string}, Body: {winnerId: string } }>, reply: FastifyReply) {
+	const game = ongoingGames.get(req.params.gameId.toString());
+	if (!game) {
+		console.log('NO GAME FOUND IN endGameInOngoingGames');
+		return;
+	}
+	game.status = 'finished'
+	game.winner_id = req.body.winnerId;
+	endGameInOngoingGames(game.gameId);
 }
 
 async function broadcastGameToPlayers(gameId: string) {

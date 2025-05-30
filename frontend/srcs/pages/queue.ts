@@ -6,6 +6,8 @@ import i18n from '../i18n';
 // Faire trad !!!!
 
 //let cleanupMatchmakingFn: () => void;
+let matchprep = false;
+let currentGameId: string | null = null;
 
 export async function fetchUserAvatar(userId: string): Promise<string> {
   try {
@@ -195,6 +197,16 @@ export default async function Queue() {
     if (statusMessage) {
       statusMessage.textContent = i18n.t('queue.gameStartingIn') + timeLeft;
     }
+
+	function handleExitBeforeStart() {
+		if (!ws) return;
+		if (ws.readyState === WebSocket.OPEN) {
+		ws.send(JSON.stringify({
+			action : 'MATCH_PREP_FORFEIT',
+			payload: { gameSessionId }
+		}));
+		}
+	}
     
     const intervalId = setInterval(() => {
       timeLeft--;
@@ -205,6 +217,8 @@ export default async function Queue() {
       
       if (timeLeft < 0) {
         clearInterval(intervalId);
+		window.removeEventListener('pagehide', handleExitBeforeStart);
+      	window.removeEventListener('beforeunload', handleExitBeforeStart);
 		cleanupMatchmaking(); 
         history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
         window.dispatchEvent(new PopStateEvent('popstate'));
@@ -248,14 +262,22 @@ export default async function Queue() {
           break;
           
         case 'MATCH_PREP':
-          const gameSessionId = msg.payload.gameSessionId;
+		  matchprep = true;
+          currentGameId  = msg.payload.gameSessionId;
           const opponent = msg.payload.opponent || {
             userId: msg.payload.opponentId, 
             userName: i18n.t('queue.opponent')
           };
 		  const delay = Number(import.meta.env.VITE_1V1_LAUNCH_DELAY ?? '5');
-          startCountdown1v1(gameSessionId, opponent, delay);
+		  if (currentGameId)
+        	startCountdown1v1(currentGameId, opponent, delay);
           break;
+		
+		case 'OPPONENT_FORFEIT':
+			cleanupMatchmaking(); 
+        	history.pushState(null, '', `/game?gameSessionId=${msg.payload.gameSessionId}`);
+        	window.dispatchEvent(new PopStateEvent('popstate'));
+		  
       }    
     } catch (error) {
       console.error(`${i18n.t('queue.errorProcessingMessage')}:`, error);
@@ -264,10 +286,19 @@ export default async function Queue() {
 
   const handlePageUnload = () => {
 	if (ws && ws.readyState === WebSocket.OPEN) {
-		ws.send(JSON.stringify({
-				action: 'QUEUE_LEAVE_1V1',
-				payload: {playerId: currentPlayerId}
+		if (!matchprep){
+			console.log("not_matchprep");
+			ws.send(JSON.stringify({
+					action: 'QUEUE_LEAVE_1V1',
+					payload: {playerId: currentPlayerId}
+			}));
+		} else {
+			console.log("matchprep");
+			ws.send(JSON.stringify({
+				action : 'MATCH_PREP_FORFEIT',
+				payload: { playerId: currentPlayerId, currentGameId }
 		}));
+		}
 	}
 	cleanupMatchmaking();
   };

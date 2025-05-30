@@ -153,7 +153,7 @@ export function initGame(){
     }
   });
 
-  window.addEventListener("keyup", (event) => {
+  document.addEventListener("keyup", (event) => {
     if (!isPaused) {
       if (event.key === "w" || event.key === "s") leftPaddle.dy = 0;
       if (event.key === "ArrowUp" || event.key === "ArrowDown") {

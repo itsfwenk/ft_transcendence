@@ -219,18 +219,20 @@ export default async function game() {
 		}
 	}
 
-	function updatePlayerAvatars(player1Id: string, player2Id: string) {
+	function updatePlayerAvatarsName(player1Id: string, player2Id: string, player1Name: string, player2Name: string) {
 		const player1Avatar = document.getElementById('player1-avatar') as HTMLImageElement;
 		const player2Avatar = document.getElementById('player2-avatar') as HTMLImageElement;
-		const player1Name = document.getElementById('player1-name') as HTMLDivElement;
-		const player2Name = document.getElementById('player2-name') as HTMLDivElement;
+		const player1N = document.getElementById('player1-name') as HTMLDivElement;
+		const player2N = document.getElementById('player2-name') as HTMLDivElement;
 		
 		if (player1Avatar && player1Id) {
 			player1Avatar.src = getAvatarUrl(player1Id);
+			player1N.textContent = player1Name || 'player 1';
 		}
 		
 		if (player2Avatar && player2Id) {
 			player2Avatar.src = getAvatarUrl(player2Id);
+			player2N.textContent = player2Name || 'player 2';
 		}
 	}                                                            
 
@@ -259,23 +261,27 @@ export default async function game() {
     app.innerHTML = /*html*/`
 		<!-- En-tête avec titre et photos de profil -->
 		<div class="flex justify-center items-center mb-2">
-			<!-- Photo de profil joueur 1 -->
-			<div class="w-30 h-30 mr-20 bg-pink-500 rounded-md flex items-center justify-center text-white">
-				<img id="player1-avatar" src="/avatars/default.png" alt="${i18n.t('game.player1')}" 
-						class="w-full h-full object-cover rounded-md"
-						onerror="this.src='/avatars/default.png'">
-				<div id="player1-name" >${i18n.t('general.loading')}</div>
+		<!-- Photo de profil joueur 1 -->
+			<div class="flex flex-col items-center justify-center mr-20">
+				<div class="w-30 h-30 bg-pink-500 rounded-md text-white">
+				<img id="player1-avatar" src="/avatars/default.png" alt="${i18n.t('game.player1')}"
+					class="w-full h-full object-cover rounded-md"
+					onerror="this.src='/avatars/default.png'">
+				</div>
+				<div id="player1-name" class="mt-2 text-center font-medium text-gray-600 font-jaro">${i18n.t('general.loading')}</div>
 			</div>
 			
 			<!-- Titre du jeu -->
 			<div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">${i18n.t('general.pongGame')}</div>
 
 			<!-- Photo de profil joueur 2 -->
-			<div class="w-30 h-30 ml-20 bg-yellow-500 rounded-md flex items-center justify-center text-white">
-				<img id="player2-avatar" src="/avatars/default.png" alt="${i18n.t('game.player2')}" 
-						class="w-full h-full object-cover rounded-md"
-						onerror="this.src='/avatars/default.png'">
-				<div id="player2-name" >${i18n.t('general.loading')}</div>
+			<div class="flex flex-col items-center justify-center ml-20">
+				<div class="w-30 h-30 bg-yellow-500 rounded-md text-white">
+				<img id="player2-avatar" src="/avatars/default.png" alt="${i18n.t('game.player2')}"
+					class="w-full h-full object-cover rounded-md"
+					onerror="this.src='/avatars/default.png'">
+				</div>
+				<div id="player2-name" class="mt-2 text-center font-medium text-gray-600 font-jaro">${i18n.t('general.loading')}</div>
 			</div>
 		</div>
 		
@@ -304,7 +310,6 @@ export default async function game() {
 				</div>
 			</div>
 
-			<!-- badge statut (facultatif, reste au même niveau que le canvas) -->
 			<div id="game-status"
 				class="absolute top-2 right-4 px-2 py-0.5
 						bg-black/70 text-white text-xs rounded hidden">
@@ -377,7 +382,6 @@ export default async function game() {
 			console.log("Ajout des AVATAR");
 			const player1Id = data.game_state.player1_id;
 			const player2Id = data.game_state.player2_id;
-			console.log("player1Id", player1Id);
 
 			const matchId = data.game_state?.matchId || data.matchId;
 			if (matchId) {
@@ -391,7 +395,22 @@ export default async function game() {
 			} else {
 				updateMatchType(i18n.t('gameMode.1v1Online'));
 			}
-			updatePlayerAvatars(player1Id, player2Id);
+			try {
+				const baseUrl = window.location.origin;
+				const response1 = await fetch(`${baseUrl}/user/${player1Id}`);
+				const response2 = await fetch(`${baseUrl}/user/${player2Id}`);
+				
+				const player1Data = await response1.json();
+				const player2Data = await response2.json();
+				
+				const player1Name = player1Data.userName;
+				const player2Name = player2Data.userName;
+				
+				updatePlayerAvatarsName(player1Id, player2Id, player1Name, player2Name);
+			} catch (error) {
+				console.error("Erreur lors de la récupération des noms:", error);
+				updatePlayerAvatarsName(player1Id, player2Id, i18n.t('player1'), i18n.t('player2'));
+			}
 			config = true;
 		}
 		switch (data.type) {

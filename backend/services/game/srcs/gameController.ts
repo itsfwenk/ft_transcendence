@@ -526,6 +526,24 @@ export async function websocketHandshake(fastify: FastifyInstance, connection: W
 				// else {
 				// 	console.log('game is not in ongoingGames :', game);
 				// }
+				if (game && readyPlayers.size === 1) {
+					let missingUser;
+					let waitingUser;
+					if ([...readyPlayers.values()][0] === game.player1_id){
+						waitingUser = game.player1_id;
+						missingUser = game.player2_id;
+					} else {
+						waitingUser = game.player2_id;
+						missingUser = game.player1_id;
+					}
+					if (activeUsers.get(missingUser) === undefined) {
+						game.status = 'finished';
+						game.winner_id = waitingUser;
+						endGameInOngoingGames(gameId);
+						console.log(`Player ${missingUser} is missing`);
+					}
+				}
+
                 if (game && readyPlayers.size === 2 && game.status !== 'ongoing') {
                     console.log(`Both players ready for game ${gameId}. Starting game.`);
                     // await updateGameStatusInDb(gameId, 'ongoing');
@@ -670,3 +688,25 @@ export function websocketAuthMiddleware(fastify: FastifyInstance, token: string)
 		return null;
 	}
   }
+
+//   function checkMissingUserConnection() {
+// 	for (const [gameId, readyPlayerIds] of gameReadyPlayers) {
+// 		if (readyPlayerIds.size === 1) {
+// 			let game = ongoingGames.get(gameId);
+// 			let missingUser;
+// 			let waitingUser;
+// 			if ([...readyPlayerIds.values()][0] === game.player1_id){
+// 				waitingUser = game.player1_id;
+// 				missingUser = game.player2_id;
+// 			} else {
+// 				waitingUser = game.player2_id;
+// 				missingUser = game.player1_id;
+// 			}
+// 			if (activeUsers.get(missingUser) === undefined) {
+// 				game.status = 'finished';
+// 				game.winner_id = waitingUser;
+// 				endGameInOngoingGames(gameId);
+// 			}
+// 		}
+// 	}
+//   }

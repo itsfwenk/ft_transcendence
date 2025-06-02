@@ -537,7 +537,7 @@ export default async function game() {
 	let title = '';
 	let subtitle = '';
 	let color = '';
-
+	cleanup();
 	switch (state) {
 		case 'waiting_next_round':
 		title = i18n.t('game.resultWin');

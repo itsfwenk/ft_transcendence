@@ -55,7 +55,9 @@
         "profileFetchError": "Profile retrieval error",
         "noUserConnected": "No user connected",
         "currentPlayerId": "Current player ID",
-        "currentPlayerAvatar": "Current player avatar"
+        "currentPlayerAvatar": "Current player avatar",
+		"stats": "Statistics",
+		"nb": "number"
     },
     "tournament": {
         "title": "Tournament",
@@ -185,6 +187,7 @@
         "or": "or",
         "errorLogin": "Login error. Check your credentials.",
         "backLog": "Back to login",
+        "creating": "Creating account...",
         "logTrue": "Account created successfully! Redirecting to login...",
         "logFalse": "An error occurred during registration. Please try again.",
         "googleError": "Login Error",

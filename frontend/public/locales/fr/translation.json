@@ -55,7 +55,9 @@
         "profileFetchError": "Erreur de récupération du profil",
         "noUserConnected": "Aucun utilisateur connecté",
         "currentPlayerId": "ID du joueur actuel",
-        "currentPlayerAvatar": "Avatar du joueur actuel"
+        "currentPlayerAvatar": "Avatar du joueur actuel",
+		"stat": "Statistiques",
+		"nb": "nombre"
     },
     "tournament": {
         "title": "Tournoi",
@@ -185,6 +187,7 @@
         "or": "ou",
         "errorLogin": "Erreur de connexion. Vérifiez vos identifiants.",
         "backLog": "Retour à la connexion",
+        "creating": "Création du compte...",
         "logTrue": "Compte créé avec succès ! Redirection vers la connexion…",
         "logFalse": "Une erreur s'est produite lors de l'inscription. Veuillez réessayer.",
         "googleError": "Erreur de connexion",

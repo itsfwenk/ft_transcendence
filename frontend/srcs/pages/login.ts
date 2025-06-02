@@ -143,7 +143,7 @@ export default async function login() {
             window.dispatchEvent(new PopStateEvent('popstate'));
         } catch (error) {
             console.error(`${i18n.t('login.loginError')}:`, error);
-            errorMessage.textContent = error as string;
+            // errorMessage.textContent = error as string;
             errorMessage.classList.remove('invisible', 'opacity-0');
         }
       });

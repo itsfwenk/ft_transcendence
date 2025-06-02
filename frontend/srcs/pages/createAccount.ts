@@ -22,7 +22,7 @@ export default function createAccount() {
             </div>
 
 		</form>
-		<div id="registerStatus" class="mt-4 font-jaro items-center justify-center"></div>
+		<div id="registerStatus" class="mt-4 font-jaro flex justify-center items-center invisible opacity-0 min-h-8 text-2xl"></div>
 		<div class="mt-12 flex justify-center">
 			<div id="backToLoginBtn" class='button w-32 h-10 bg-gray-700 rounded-full cursor-pointer select-none
 				hover:translate-y-[15px] hover:[box-shadow:0_0px_0_0_#000000,0_0px_0_0_#00000041]
@@ -52,11 +52,14 @@ async function handleRegistrationSubmit(e?: Event) {
     };
     
     const registerStatus = document.getElementById('registerStatus') as HTMLDivElement;
-    
+    registerStatus.classList.add('invisible', 'opacity-0');
+    registerStatus.innerHTML = '';
+
     try {
         registerStatus.innerHTML = `
-            <p class="text-blue-600 font-jaro">Creating account...</p>
+            <p class="text-blue-600 font-jaro">${i18n.t('login.creating')}</p>
         `;
+        registerStatus.classList.remove('invisible', 'opacity-0');
         const baseUrl = window.location.origin;
         const response = await fetch(`${baseUrl}/user/register`, {
             method: 'POST',
@@ -66,21 +69,25 @@ async function handleRegistrationSubmit(e?: Event) {
             body: JSON.stringify(userData)
         });
         
-        const data = await response.json();
+        // const data = await response.json();
         
         if (!response.ok) {
-            let errorMessage = data.error || 'Registration failed';
+            // let errorMessage = data.error || 'Registration failed';
             registerStatus.innerHTML = `
-                <p class="text-red-500 font-jaro">${errorMessage}</p>
+                <p class="text-red-500 font-jaro">${i18n.t('login.logFalse')}</p>
             `;
+            registerStatus.classList.remove('invisible', 'opacity-0');
             return;
         }
         
         registerStatus.innerHTML = /*html*/ `
-            <p class="text-green-500 font-jaro">${i18n.t('logTrue')}</p>
+            <p class="text-green-500 font-jaro">${i18n.t('login.logTrue')}</p>
         `;
+        registerStatus.classList.remove('invisible', 'opacity-0');
         
         setTimeout(() => {
+            registerStatus.classList.add('invisible', 'opacity-0');
+            registerStatus.innerHTML = '';
             history.pushState(null, '', '/');
             window.dispatchEvent(new PopStateEvent('popstate'));
         }, 2000);
@@ -88,8 +95,9 @@ async function handleRegistrationSubmit(e?: Event) {
     } catch (error) {
         console.error('Registration error:', error);
         registerStatus.innerHTML = /*html*/`
-            <p class="text-red-500 font-jaro">An error occurred during registration. Please try again.</p>
+            <p class="text-red-500 font-jaro">${i18n.t('login.logFalse')}</p>
         `;
+        registerStatus.classList.remove('invisible', 'opacity-0');
     }
 }
 

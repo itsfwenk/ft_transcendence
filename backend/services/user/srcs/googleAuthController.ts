@@ -62,6 +62,11 @@ export async function handlerGoogleCallback(this: GoogleOAuthContext, req: Fasti
 		console.log("resultat saveUser:", user);
 
 		if (user) {
+			if (user.status === 'online') {
+				console.log(`L'utilisateur ${user.userId} est déjà connecté ailleurs`);
+				 reply.redirect('/login_error');
+			}
+
 			updateUserStatus(user.userId, 'online');
 
 			await linkAccount(

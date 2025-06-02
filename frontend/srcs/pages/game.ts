@@ -222,6 +222,8 @@ export default async function game() {
 	function updatePlayerAvatars(player1Id: string, player2Id: string) {
 		const player1Avatar = document.getElementById('player1-avatar') as HTMLImageElement;
 		const player2Avatar = document.getElementById('player2-avatar') as HTMLImageElement;
+		const player1Name = document.getElementById('player1-name') as HTMLDivElement;
+		const player2Name = document.getElementById('player2-name') as HTMLDivElement;
 		
 		if (player1Avatar && player1Id) {
 			player1Avatar.src = getAvatarUrl(player1Id);
@@ -262,6 +264,7 @@ export default async function game() {
 				<img id="player1-avatar" src="/avatars/default.png" alt="${i18n.t('game.player1')}" 
 						class="w-full h-full object-cover rounded-md"
 						onerror="this.src='/avatars/default.png'">
+				<div id="player1-name" >${i18n.t('general.loading')}</div>
 			</div>
 			
 			<!-- Titre du jeu -->
@@ -272,6 +275,7 @@ export default async function game() {
 				<img id="player2-avatar" src="/avatars/default.png" alt="${i18n.t('game.player2')}" 
 						class="w-full h-full object-cover rounded-md"
 						onerror="this.src='/avatars/default.png'">
+				<div id="player2-name" >${i18n.t('general.loading')}</div>
 			</div>
 		</div>
 		

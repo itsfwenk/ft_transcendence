@@ -1,7 +1,7 @@
 import i18n from '../../i18n';
 
 let isPaused = false;
-import { Paddle, Ball, gamePalette } from '../../../gameInterfaces'
+import { Paddle, Ball, gamePalette } from '../../../../gameInterfaces'
 
 
 const canvasWidth: number = parseInt(import.meta.env.VITE_CANVAS_WIDTH as string, 10);

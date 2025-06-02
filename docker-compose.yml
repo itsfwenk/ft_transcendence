@@ -1,15 +1,15 @@
 services:
-  frontend:
-    build: 
-      context: ./
-      dockerfile: ./frontend/Dockerfile
-    volumes:
-      - ./frontend/dist:/app/dist
-    env_file: .env
-    command: sh -c "npm install && npm run build && /bin/bash"
-    tty: true
-    # command: /bin/bash
-    restart: no
+  # frontend:
+  #   build: 
+  #     context: ./
+  #     dockerfile: ./frontend/Dockerfile
+  #   volumes:
+  #     - ./frontend/dist:/app/dist
+  #   env_file: .env
+  #   command: sh -c "npm install && npm run build && /bin/bash"
+  #   tty: true
+  #   # command: /bin/bash
+  #   restart: no
 
   user:
     build: 
@@ -19,7 +19,7 @@ services:
       - "${USER_SERVICE_PORT}:4001"
       - "9231:9231"
     volumes:
-      - ./backend/db:/app/db
+      - user_db:/app/db
     restart: always
     networks:
       - app-network
@@ -33,7 +33,7 @@ services:
       - "${GAME_SERVICE_PORT}:4002"
       - "9232:9232"
     volumes:
-      - ./backend/db:/app/db
+      - game_db:/app/db
     restart: always
     networks:
       - app-network
@@ -47,14 +47,16 @@ services:
     - "${MATCHMAKING_SERVICE_PORT}:4003"
     - "9229:9229"
     volumes:
-      - ./backend/db:/app/db
+      - matchmaking_db:/app/db
     restart: always
     networks:
     - app-network
     env_file: .env
 
   caddy:
-    image: caddy:latest
+    build:
+      context: ./
+      dockerfile: ./backend/caddy/Dockerfile
     ports:
       - "0.0.0.0:8080:80"
       - "0.0.0.0:8443:8443"
@@ -64,10 +66,8 @@ services:
       # - "${GAME_SERVICE_PORT}:${GAME_SERVICE_PORT}"
       # - "${MATCHMAKING_SERVICE_PORT}:${MATCHMAKING_SERVICE_PORT}"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
-      - ./frontend/dist:/usr/share/caddy/frontend:ro
     networks:
       - app-network
     depends_on:
@@ -77,14 +77,14 @@ services:
     restart: always
   
   prometheus:
-    image: prom/prometheus:latest
+    build:
+      context: ./monitoring
+      dockerfile: prometheus/Dockerfile
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=15d'
     volumes:
       - prometheus_data:/prometheus
-      - ./monitoring:/etc/prometheus:ro
-
     ports:
       - "9090:9090"
     networks:
@@ -102,10 +102,12 @@ services:
    command:
       - '--path.rootfs=/host'
    volumes:
-      - /:/host:ro         #remettre ',rslave' lorsqu'on est pas sur mac
+      - /:/host:ro, rslave         #remettre ',rslave' lorsqu'on est pas sur mac
 
   grafana:
-    image: grafana/grafana-oss:latest
+    build:
+      context: ./monitoring
+      dockerfile: grafana/Dockerfile
     restart: always
     environment:
       GF_SECURITY_ADMIN_USER: admin
@@ -114,16 +116,15 @@ services:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
     networks:
       - app-network
     depends_on:
       - prometheus
   
-   
-
 volumes:
+  user_db:
+  game_db:
+  matchmaking_db:
   caddy_data:
   caddy_config:
   prometheus_data:

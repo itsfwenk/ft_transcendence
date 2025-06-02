@@ -16,7 +16,7 @@ build:
 	docker compose -f docker-compose.yml build
 
 production:
-	docker compose -f docker-compose.yml build --no-cache frontend
+	cd frontend/ && npm install && npm run build && cd ..
 	docker compose -f docker-compose.yml up --build
 
 install-deps:
@@ -26,8 +26,6 @@ install-deps:
 	cd backend/services/game && npm install
 	@echo "Installation des dépendances pour matchmaking..."
 	cd backend/services/matchmaking && npm install
-	@echo "Installation des dépendances pour gateway..."
-	cd backend/gateway && npm install
 	@echo "Installation des dépendances pour frontend..."
 	cd frontend && npm install
 

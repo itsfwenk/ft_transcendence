@@ -1,6 +1,6 @@
 import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
-import { Game, gamePalette } from '../../gameInterfaces'
+import { Game, gamePalette } from '../../../gameInterfaces'
 import i18n from '../i18n';
 
 // export interface Ball {

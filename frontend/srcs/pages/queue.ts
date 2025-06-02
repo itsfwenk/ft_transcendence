@@ -197,16 +197,6 @@ export default async function Queue() {
     if (statusMessage) {
       statusMessage.textContent = i18n.t('queue.gameStartingIn') + timeLeft;
     }
-
-	function handleExitBeforeStart() {
-		if (!ws) return;
-		if (ws.readyState === WebSocket.OPEN) {
-		ws.send(JSON.stringify({
-			action : 'MATCH_PREP_FORFEIT',
-			payload: { gameSessionId }
-		}));
-		}
-	}
     
     const intervalId = setInterval(() => {
       timeLeft--;
@@ -217,8 +207,6 @@ export default async function Queue() {
       
       if (timeLeft < 0) {
         clearInterval(intervalId);
-		window.removeEventListener('pagehide', handleExitBeforeStart);
-      	window.removeEventListener('beforeunload', handleExitBeforeStart);
 		cleanupMatchmaking(); 
         history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
         window.dispatchEvent(new PopStateEvent('popstate'));
@@ -231,6 +219,7 @@ export default async function Queue() {
     if (ws && ws.readyState === WebSocket.OPEN) {
       console.log("Cleanup matchmaking queue1v1");
       ws.removeEventListener('message', handleMessage1v1);
+	  ws.removeEventListener('beforeunload', handlePageUnload);
     }
   }
   
@@ -243,35 +232,33 @@ export default async function Queue() {
 
       switch (msg.type) {
         case 'QUEUE_1V1_PLAYER_JOINED':
-          const { userId, userName } = msg.player;
-          if (!userId || userId === currentPlayerId) break;
-          
-          updateOpponentDisplay({userId, userName: userName || i18n.t('queue.opponent')});
-          break;
+			const { userId, userName } = msg.player;
+			if (!userId || userId === currentPlayerId) break;
+			updateOpponentDisplay({userId, userName: userName || i18n.t('queue.opponent')});
+			break;
           
         case 'QUEUE_1V1_PLAYER_LEFT':
-          const container = document.getElementById('player2-container');
-          if (container) {
-            container.innerHTML = `<div class="w-16 h-16 bg-white rounded-md cube-3d"></div>`;
-          }
-          
-          const statusMessage = document.getElementById('status-message');
-          if (statusMessage) {
-            statusMessage.textContent = i18n.t('queue.opponentLeft');
-          }
-          break;
+			const container = document.getElementById('player2-container');
+			if (container) {
+				container.innerHTML = `<div class="w-16 h-16 bg-white rounded-md cube-3d"></div>`;
+			}
+			const statusMessage = document.getElementById('status-message');
+			if (statusMessage) {
+				statusMessage.textContent = i18n.t('queue.opponentLeft');
+			}
+			break;
           
         case 'MATCH_PREP':
-		  matchprep = true;
-          currentGameId  = msg.payload.gameSessionId;
-          const opponent = msg.payload.opponent || {
-            userId: msg.payload.opponentId, 
-            userName: i18n.t('queue.opponent')
-          };
-		  const delay = Number(import.meta.env.VITE_1V1_LAUNCH_DELAY ?? '5');
-		  if (currentGameId)
-        	startCountdown1v1(currentGameId, opponent, delay);
-          break;
+			matchprep = true;
+			currentGameId  = msg.payload.gameSessionId;
+			const opponent = msg.payload.opponent || {
+				userId: msg.payload.opponentId, 
+				userName: i18n.t('queue.opponent')
+			};
+			const delay = Number(import.meta.env.VITE_1V1_LAUNCH_DELAY ?? '5');
+			if (currentGameId)
+				startCountdown1v1(currentGameId, opponent, delay);
+			break;
 		
 		case 'OPPONENT_FORFEIT':
 			cleanupMatchmaking(); 
@@ -296,7 +283,7 @@ export default async function Queue() {
 			console.log("matchprep");
 			ws.send(JSON.stringify({
 				action : 'MATCH_PREP_FORFEIT',
-				payload: { playerId: currentPlayerId, currentGameId }
+				payload: { playerId: currentPlayerId, gameSessionId: currentGameId }
 		}));
 		}
 	}

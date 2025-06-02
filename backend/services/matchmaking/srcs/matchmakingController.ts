@@ -470,7 +470,7 @@ export async function handleMatchmakingMessage(
 			break;
 		case 'MATCH_PREP_FORFEIT':
 			console.log("MATCH_PREP_FORFEIT", msg);
-			const gameId = msg.payload?.currentGameId;
+			const gameId = msg.payload?.gameSessionId;
 			await declareForfeit(gameId, playerId);
 			break;
 

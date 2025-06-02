@@ -3,6 +3,8 @@ import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
 import i18n from '../i18n';
 
+let matchPrepTournament = false;
+let currentGameIdTournament: string | null = null;
 
 export default async function Queuetournament() {
 	const app = document.getElementById('app');
@@ -100,6 +102,7 @@ export default async function Queuetournament() {
 		if (statusMessage) {
 			statusMessage.textContent = i18n.t('tournament.startsIn') + seconds;
 		}
+
 		if (backBtn) backBtn.classList.add('hidden');
 		countdownHandle = window.setInterval(() => {
 			seconds--;
@@ -164,6 +167,7 @@ function showError(messageKey: string) {
 		if (ws && ws.readyState === WebSocket.OPEN) {
 			console.log(i18n.t('tournament.cleanupMatchmaking'));
 			ws.removeEventListener('message', handleMessageTournament);
+			ws.removeEventListener('beforeunload', handlePageUnload);
 			cancelCountdown();
 		}
 	}
@@ -247,19 +251,26 @@ function showError(messageKey: string) {
 					removePlayerFromSlot(msg.playerId as string);
 					break;
 				case 'MATCH_PREP':
-					const gameSessionId = msg.payload.gameSessionId;
+					matchPrepTournament = true;
+					currentGameIdTournament = msg.payload.gameSessionId;
+					console.log("currentGameID", currentGameIdTournament);
 					const round = msg.payload.round;
 					if (round === 2) {
-						history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
+						history.pushState(null, '', `/game?gameSessionId=${currentGameIdTournament}`);
 						window.dispatchEvent(new PopStateEvent('popstate'));
 					} else {
 					startCountdown(time, () => {
-						history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
+						history.pushState(null, '', `/game?gameSessionId=${currentGameIdTournament}`);
 						window.dispatchEvent(new PopStateEvent('popstate'));
 					});
 					}
 					break;
-			}		
+				case 'OPPONENT_FORFEIT':
+					cleanupMatchmaking(); 
+					history.pushState(null, '', `/game?gameSessionId=${currentGameIdTournament}`);
+					window.dispatchEvent(new PopStateEvent('popstate'));
+					break;
+				}		
 		} catch (error) {
 			console.error(`${i18n.t('queue.errorProcessingMessage')}:`, error);
 		}
@@ -267,10 +278,17 @@ function showError(messageKey: string) {
 	
 		const handlePageUnload = () => {
 			if (ws && ws.readyState === WebSocket.OPEN) {
-				ws.send(JSON.stringify({
-						action: 'QUEUE_LEAVE_TOURNAMENT',
-						payload: {playerId: currentPlayerId}
-				}));
+				if (!matchPrepTournament) {
+					ws.send(JSON.stringify({
+							action: 'QUEUE_LEAVE_TOURNAMENT',
+							payload: {playerId: currentPlayerId}
+					}));
+				} else {
+					ws.send(JSON.stringify({
+						action : 'MATCH_PREP_FORFEIT',
+						payload: { playerId: currentPlayerId, gameSessionId: currentGameIdTournament }
+					}));
+				}
 			}
 			cleanupMatchmaking();
 		}

@@ -59,8 +59,8 @@ function mapMatchTypeToI18nKey(matchType: string): string {
 }
 
 export default async function game() {
-	const params = new URLSearchParams(location.search);
-  	const gameId = params.get('gameSessionId');
+	//const params = new URLSearchParams(location.search);
+  	//const gameId = params.get('gameSessionId');
 	// if (!gameId || !(await checkGameExistsAndNotFinished(gameId))) {
 	// 	console.log("finished");
     // 	return showError(i18n.t('game.errorLink'));

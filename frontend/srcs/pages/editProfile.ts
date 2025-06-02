@@ -399,12 +399,6 @@ function updateUIForGoogleUser(isGoogle: boolean) {
       changePasswordBtn.classList.add('opacity-50', 'cursor-not-allowed');
       changePasswordBtn.setAttribute('title', i18n.t('editProfile.notAvailableForGoogle'));
       
-      changePasswordBtn.classList.remove(
-        'hover:translate-y-2', 
-        'hover:[box-shadow:0_0px_0_0_#d49218,0_0px_0_0_#1b70f841]',
-        'hover:border-b-[0px]'
-      );
-      
       changePasswordBtn.addEventListener('mouseenter', () => {
         showNotification(i18n.t('editProfile.googlePasswordRestriction'), false);
       });

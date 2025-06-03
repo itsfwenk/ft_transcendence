@@ -99,10 +99,10 @@ services:
    pid: host
    networks:
       - app-network
-   command:
-      - '--path.rootfs=/host'
-   volumes:
-      - /:/host:ro, rslave         #remettre ',rslave' lorsqu'on est pas sur mac
+  #  command:
+  #     - '--path.rootfs=/host'
+  #  volumes:
+  #     - /:/host:ro, rslave         #remettre ',rslave' lorsqu'on est pas sur mac
 
   grafana:
     build:

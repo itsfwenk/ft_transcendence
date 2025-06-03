@@ -31,6 +31,10 @@ export async function registerUser(req:RegisterRequest, reply:FastifyReply) {
 		if (getUserByUserName(userName)) {
 			return reply.status(400).send({ error: 'UserName already use' });
 		}
+
+		if (userName.length > 7) {
+			return reply.status(400).send({ error: 'UserName too long' });
+		}
 	
 		if (!password || password.length < 6) {
 			return reply.status(400).send({ error: 'Password must be at least 6 characters long'});

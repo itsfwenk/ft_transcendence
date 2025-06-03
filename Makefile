@@ -16,6 +16,7 @@ build:
 	docker compose -f docker-compose.yml build
 
 production:
+	cp .env frontend/.env
 	cd frontend/ && npm install && npm run build && cd ..
 	docker compose -f docker-compose.yml up --build
 

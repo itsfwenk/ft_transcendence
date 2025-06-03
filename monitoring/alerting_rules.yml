@@ -22,7 +22,7 @@ groups:
           description: "La latence p95 sur SQLite dans {{ $labels.service }} est > 100 ms"
 
       - alert: SQLiteFileLarge
-        expr: sqlite_db_file_bytes > 500000
+        expr: sqlite_db_file_bytes > 100000000
         for: 2m
         labels:
           severity: info

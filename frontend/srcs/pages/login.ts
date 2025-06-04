@@ -102,7 +102,7 @@ export default async function login() {
 
       const allButtons = document.querySelectorAll('.button');
       allButtons.forEach(btn => {
-          setButtonThemeVars(btn as HTMLElement); // Cast to HTMLElement
+          setButtonThemeVars(btn as HTMLElement);
       });
 
       loginForm.addEventListener('submit', async (e) => {
@@ -143,7 +143,6 @@ export default async function login() {
             window.dispatchEvent(new PopStateEvent('popstate'));
         } catch (error) {
             console.error(`${i18n.t('login.loginError')}:`, error);
-            // errorMessage.textContent = error as string;
             errorMessage.classList.remove('invisible', 'opacity-0');
         }
       });

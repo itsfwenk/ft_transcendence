@@ -2,8 +2,6 @@ import './styles.css'
 import { matchmakingWebSocket } from "./wsClient";
 import './i18n';
 import { waitForI18n } from './i18n';
-// import { handleDisconnect } from './pages/menu';
-// import { fetchUserProfile } from './pages/mode';
 
 async function initApp() {
   try {
@@ -19,19 +17,11 @@ async function initApp() {
 
 initApp();
 
-
-// window.addEventListener('beforeunload', () => {
-//     handleDisconnect()
-// });
-
 window.addEventListener("load", async () => {
 	try {
 			const baseUrl = window.location.origin;
 			const currentPath = window.location.pathname;
 
-			// if (currentPath === '/') {
-			// return;
-			// }
 			const response = await fetch(`${baseUrl}/user/status/userId`, {
 		  		method: 'GET',
 		  		credentials: 'include',

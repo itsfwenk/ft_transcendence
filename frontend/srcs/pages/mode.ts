@@ -29,8 +29,6 @@ export default function mode() {
 	const app = document.getElementById('app');
 	if (app) {
 		app.innerHTML = /*html*/`
-		<!-- component -->
-
 		<div class="text-black font-jaro text-9xl mt-16 mb-36 select-none">${i18n.t('general.pongGame')}</div>
 		<div class="flex justify-center items-center gap-9">
 			<div id="localBtn"class='button h-36 w-80 bg-red-600 rounded-lg cursor-pointer select-none
@@ -40,7 +38,6 @@ export default function mode() {
 			border-b-[1px] border-red-400'>
 				<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-5xl '>${i18n.t('gameMode.1v1Local')}</span>
 			</div>
-			<!-- <button type="button" id="localBtn" class="text-5xl h-36 font-jaro w-80 bg-red-600  hover:bg-red-700  hover:outline-none focus:outline-none text-white px-4 py-2 rounded">1v1 local</button> -->
 			<div id="onlineBtn"class='button h-36 w-80 bg-red-600 rounded-lg cursor-pointer select-none
 			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#A31F1F,0_0px_0_0_#A31F1F41]
 			hover:border-b-[0px]
@@ -48,7 +45,6 @@ export default function mode() {
 			border-b-[1px] border-red-400'>
 				<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-5xl '>${i18n.t('gameMode.1v1Online')}</span>
 			</div>
-			<!-- <button type="button" id="onlineBtn" class="text-5xl h-36 font-jaro w-80 bg-red-600  hover:bg-red-700  hover:outline-none focus:outline-none text-white px-4 py-2 rounded">1v1 online</button> -->
 		</div>
 		<div class="flex flex-col justify-center items-center">
 			<div id="tournamentBtn" class='button mt-6 h-36 w-170 bg-blue-700 rounded-lg cursor-pointer select-none
@@ -58,7 +54,6 @@ export default function mode() {
 			border-b-[1px] border-blue-400'>
 				<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-5xl'>${i18n.t('gameMode.tournament')}</span>
 			</div>
-			<!-- <button type="button" id="tournamentBtn" class="text-6xl h-36 font-jaro w-170 mt-6 bg-blue-700 hover:bg-blue-800 hover:outline-none focus:outline-none text-white px-4 py-2 rounded">Tournament</button> -->
 
 			<div id="backBtn" class='button w-24 h-13 mt-10 bg-gray-700 rounded-full cursor-pointer select-none
 			hover:translate-y-2  hover:[box-shadow:0_0px_0_0_#000000,0_0px_0_0_#00000041]
@@ -67,7 +62,6 @@ export default function mode() {
 			border-b-[1px] border-gray-400'>
 				<span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('general.back')}</span>
 			</div>
-			<!-- <button id="disconnectBtn" type="button" class="font-jaro w-24 h-13 mt-10 border border-black rounded-md font-medium text-white bg-black hover:bg-gray-900 focus:outline-none">back</button> -->
 		</div>
 		`;
 
@@ -80,28 +74,6 @@ export default function mode() {
             window.dispatchEvent(new PopStateEvent('popstate'));
         });
 		
-	// 	const playLocalButton = document.getElementById('localBtn') as HTMLFormElement;
-    // 	playLocalButton.addEventListener('click', async(e) => {
-    //     e.preventDefault();
-    //     console.log("local button...");
-	// 	try {
-	// 		const baseUrl = window.location.origin;
-	// 		const response = await fetch(`${baseUrl}/game/start`, {
-	// 		  method: 'POST',
-	// 		});
-	
-	// 		if (!response.ok) {
-	// 		  throw new Error(`Erreur lors du lancement de la page: ${response.statusText}`);
-	// 		}
-	
-	// 		const data = await response.json();
-	// 		console.log("Réponse de login:", data);
-	// 		history.pushState(null, '', '/game');
-	// 		window.dispatchEvent(new PopStateEvent('popstate'));
-	// 	  } catch (error) {
-	// 		console.error("Erreur de login:", error);
-	// 	  }
-	// });
 
 	const playOnlineButton = document.getElementById('onlineBtn') as HTMLFormElement;
 	playOnlineButton.addEventListener('click', async(e) => {
@@ -122,10 +94,6 @@ export default function mode() {
 			console.error(i18n.t('gameMode.socketNotConnected'));
 			return;
 		}
-		// socket.send(JSON.stringify({
-		// 	action: "join_queue_1v1",
-		// 	payload: {}
-		// }));
 		history.pushState(null, '', '/queue');
 		window.dispatchEvent(new PopStateEvent('popstate'));
 	});
@@ -149,10 +117,6 @@ export default function mode() {
 			console.error(i18n.t('gameMode.socketNotConnected'));
 			return;
 		}
-		// socket.send(JSON.stringify({
-		// 	action: "join_queue_tournament",
-		// 	payload: {}
-		// }));
 		history.pushState(null, '', '/queue_tournament');
 		window.dispatchEvent(new PopStateEvent('popstate'));
 	});

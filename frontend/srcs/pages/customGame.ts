@@ -173,7 +173,6 @@ export default function customGame() {
             drawCanvas(activeThemePalette);
 
             themeButtons.forEach(buttonElement => {
-                // const button = buttonElement;
                 const divButton = buttonElement as HTMLDivElement
                 const themePaletteString = divButton.dataset.themePalette;
 
@@ -257,10 +256,6 @@ export default function customGame() {
             allButtons.forEach(divButton => {
                 setButtonThemeVars(divButton as HTMLDivElement);
             });
-            // const defaultButton = document.getElementById('defaultTheme') as HTMLButtonElement;
-            // if (defaultButton) {
-            //     defaultButton.click();
-            // }
 
             const backBtn = document.getElementById('backBtn');
                 backBtn?.addEventListener('click', () => {

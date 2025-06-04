@@ -55,26 +55,22 @@ export function initGame(){
     throw new Error('Failed to get 2D context');
   }
 
-  // Paddle settings
 
   let player1Score = 0;
   let player2Score = 0;
 
-  // Left paddle (Player 1)
   let leftPaddle: Paddle = {
     x: 0,
     y: canvas.height / 2 - paddleHeight / 2,
     dy: 0
   };
 
-  // Right paddle (Player 2 or AI)
   let rightPaddle: Paddle = {
     x: canvas.width - 10,
     y: canvas.height / 2 - paddleHeight / 2,
     dy: 0
   };
 
-  // Ball settings
   let angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
   if (Math.random() > 0.5) {
     angle += Math.PI;
@@ -115,13 +111,11 @@ export function initGame(){
       };
   }
 
-  // Variables pour stocker l'état du jeu pendant la pause
   let lastBallX = 0;
   let lastBallY = 0;
   let lastBallDx = 0;
   let lastBallDy = 0;
   
-  // Sauvegarder l'état du jeu avant la pause
   function saveGameState() {
     lastBallX = ball.x;
     lastBallY = ball.y;
@@ -129,7 +123,6 @@ export function initGame(){
     lastBallDy = ball.dy;
   }
   
-  // Restaurer l'état du jeu après la pause
   function restoreGameState() {
     ball.x = lastBallX;
     ball.y = lastBallY;
@@ -137,7 +130,6 @@ export function initGame(){
     ball.dy = lastBallDy;
   }
 
-  //Keyboard event listeners
   document.addEventListener("keydown", (event) => {
     if (!isPaused) {
       if (event.key === "w") leftPaddle.dy = -paddleSpeed;
@@ -163,7 +155,6 @@ export function initGame(){
     }
   });
 
-  // Gestion des boutons
   document.getElementById('pauseLocalBtn')?.addEventListener('click', pauseGame);
   document.getElementById('btnHome')?.addEventListener('click', () => {
     history.pushState(null, '', '/menu');
@@ -227,29 +218,24 @@ export function initGame(){
     }
   }
 
-  // Update paddle positions
   function update() {
     leftPaddle.y += leftPaddle.dy;
     rightPaddle.y += rightPaddle.dy;
 
-    // Prevent paddles from moving off-screen
     leftPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddle.y));
     rightPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddle.y));
 
-    // Ball collision with top and bottom walls
     if (ball.y - ball.radius <= 0) {
-      ball.dy *= -1; // Reverse direction
+      ball.dy *= -1;
       ball.y += 3;
     }
     else if (ball.y + ball.radius >= canvas.height) {
-      ball.dy *= -1; // Reverse direction
+      ball.dy *= -1;
       ball.y -= 3;
     }
 
-    // Define constant ball speed
     const SPEED_INCREASE = speedIncrease;
 
-    // Ball collision with paddles (with speed normalization)
     if (
       ball.x - ball.radius <= leftPaddle.x + paddleWidth &&
       ball.y >= leftPaddle.y && ball.y <= leftPaddle.y + paddleHeight
@@ -257,8 +243,8 @@ export function initGame(){
       let relativeIntersectY = ball.y - (leftPaddle.y + paddleHeight / 2);
       let normalizedIntersectY = relativeIntersectY / (paddleHeight / 2);
       
-      ball.dx *= -1; // Reverse horizontal direction
-      ball.dy = normalizedIntersectY * Math.abs(ball.dx);; // Adjust vertical direction
+      ball.dx *= -1;
+      ball.dy = normalizedIntersectY * Math.abs(ball.dx);
       ball.x += 2;
 
       ball.dx *= SPEED_INCREASE;
@@ -272,24 +258,22 @@ export function initGame(){
       let relativeIntersectY = ball.y - (rightPaddle.y + paddleHeight / 2);
       let normalizedIntersectY = relativeIntersectY / (paddleHeight / 2);
       
-      ball.dx *= -1; // Reverse horizontal direction
-      ball.dy = normalizedIntersectY * Math.abs(ball.dx); // Adjust vertical direction
+      ball.dx *= -1;
+      ball.dy = normalizedIntersectY * Math.abs(ball.dx);
       ball.x -= 2;
 
       ball.dx *= SPEED_INCREASE;
       ball.dy *= SPEED_INCREASE;
     }
 
-    // Ball movement
     ball.x += ball.dx;
     ball.y += ball.dy;
 
-    // Reset ball if it goes past paddles
     if (ball.x < 0) { 
-      player2Score++; // Player 2 scores a point
+      player2Score++;
       resetBall();
     } else if (ball.x > canvas.width) { 
-      player1Score++; // Player 1 scores a point
+      player1Score++;
       resetBall();
     }
 
@@ -307,19 +291,17 @@ export function initGame(){
     }
   }
 
-  // Draw paddles and ball
   function draw() {
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
 
     if (ctx) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = gamePalette.background;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // Dessiner la ligne centrale
       ctx.beginPath();
-      ctx.setLineDash([5, 5]); // Ligne en pointillé
+      ctx.setLineDash([5, 5]);
       ctx.moveTo(canvasWidth / 2, 0);
       ctx.lineTo(canvasWidth / 2, canvasHeight);
       ctx.strokeStyle = gamePalette.line;
@@ -327,26 +309,20 @@ export function initGame(){
       ctx.stroke();
       ctx.setLineDash([]);
       
-      // Dessiner la raquette gauche
       ctx.fillStyle = gamePalette.paddle1;
       ctx.fillRect(0, leftPaddle.y, paddleWidth, paddleHeight);
       
-      // Dessiner la raquette droite
       ctx.fillStyle = gamePalette.paddle2;
       ctx.fillRect(canvasWidth - paddleWidth, rightPaddle.y, paddleWidth, paddleHeight);
       
-      // Dessiner les scores
       ctx.font = 'bold 120px Arial';
       ctx.fillStyle = gamePalette.score;
       ctx.textAlign = 'center';
       
-      // Score gauche
       ctx.fillText(`${player1Score}`, canvasWidth / 4, canvasHeight / 2 + 40);
       
-      // Score droit
       ctx.fillText(`${player2Score}`, (canvasWidth / 4) * 3, canvasHeight / 2 + 40);
 
-      // Dessiner la balle en noir au centre
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
       ctx.fillStyle = gamePalette.ball;
@@ -355,13 +331,12 @@ export function initGame(){
     }
   }
 
-  // Game loop
   function loop() {
     if (!isPaused) {
-      saveGameState(); // Sauvegarder l'état avant update
+      saveGameState();
       update();
     } else {
-      restoreGameState(); // Maintenir la balle à sa dernière position
+      restoreGameState();
     }
     
     draw();

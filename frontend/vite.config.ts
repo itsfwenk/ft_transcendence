@@ -5,7 +5,7 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
-        host: '0.0.0.0',  // Permet l'accès depuis l'extérieur du conteneur
+        host: '0.0.0.0',
         port: 5173
       }
 })

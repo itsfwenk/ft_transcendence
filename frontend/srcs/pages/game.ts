@@ -3,42 +3,11 @@ import { getAvatarUrl } from "./profile";
 import { Game, gamePalette } from '../../../gameInterfaces'
 import i18n from '../i18n';
 
-// export interface Ball {
-// 	x: number;
-// 	y: number;
-// 	radius: number;
-// 	dx: number;
-// 	dy: number
-// }
-
-// export interface Paddle {
-// 	x: number;
-// 	y: number;
-// 	dy: number
-// }
-
-// export interface Game {
-// 	gameId: string;
-// 	player1_id: string;
-// 	player2_id: string;
-// 	score1: number;
-// 	score2: number;
-// 	leftPaddle: Paddle;
-// 	rightPaddle: Paddle;
-// 	ball: Ball;
-// 	status: 'waiting' | 'ongoing' | 'finished';
-// 	winner_id?: string | null;
-// 	matchId?: string | null;
-// 	canvasWidth: number;
-// 	canvasHeight: number;
-// }
 const canvasWidth: number = parseInt(import.meta.env.VITE_CANVAS_WIDTH as string, 10);
 const canvasHeight: number = parseInt(import.meta.env.VITE_CANVAS_HEIGHT as string, 10);
 const paddleWidth: number = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
 const paddleHeight: number = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
-// const paddleSpeed: number = parseInt(import.meta.env.VITE_PADDLE_SPEED as string, 10);
 const ballRadius: number = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
-// const speedIncrease: number = parseFloat(import.meta.env.VITE_SPEED_INCREASE as string);
 
 function mapMatchTypeToI18nKey(matchType: string): string {
   if (!matchType) return 'gameMode.1v1Online';
@@ -101,8 +70,6 @@ export default async function game() {
 			return false
 		else
 			return true;
-		// const { status } = await res.json();
-		// return status !== 'finished';
 	}
 
     let gameStarted = false;
@@ -262,9 +229,7 @@ export default async function game() {
     }
 
     app.innerHTML = /*html*/`
-		<!-- En-tête avec titre et photos de profil -->
 		<div class="flex justify-center items-center mb-2">
-		<!-- Photo de profil joueur 1 -->
 			<div class="flex flex-col items-center justify-center mr-20">
 				<div class="w-30 h-30 bg-pink-500 rounded-md text-white">
 				<img id="player1-avatar" src="/avatars/default.png" alt="${i18n.t('game.player1')}"
@@ -274,10 +239,8 @@ export default async function game() {
 				<div id="player1-name" class="mt-2 text-center font-medium text-gray-600 font-jaro">${i18n.t('general.loading')}</div>
 			</div>
 			
-			<!-- Titre du jeu -->
 			<div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">${i18n.t('general.pongGame')}</div>
 
-			<!-- Photo de profil joueur 2 -->
 			<div class="flex flex-col items-center justify-center ml-20">
 				<div class="w-30 h-30 bg-yellow-500 rounded-md text-white">
 				<img id="player2-avatar" src="/avatars/default.png" alt="${i18n.t('game.player2')}"
@@ -288,20 +251,16 @@ export default async function game() {
 			</div>
 		</div>
 		
-		<!-- Conteneur du canvas avec bordure -->
 		<div id="game-wrapper" class="inline-block">
-			<!-- Sous-titre -->
 			<div id="match-type"
 				class="text-left text-gray-600 text-2xl mb-2 ml-3 font-jaro">
 				${i18n.t('general.loading')}
 			</div>
 
-			<!-- === Bloc canvas + overlay ==================================== -->
 			<div id="canvas-box"
 					class="relative inline-block border-4 border-black bg-gray-300">
 				<canvas id="game-canvas" width="${canvasWidth}" height="${canvasHeight}" class="block"></canvas>
 
-				<!-- Overlay centré sur le canvas, transparent pour voir le jeu en arrière-plan -->
 				<div id="result-overlay"
 					class="hidden absolute inset-0 flex flex-col justify-center items-center
 							pointer-events-none z-10">
@@ -442,18 +401,12 @@ export default async function game() {
             
 	function renderGame(state: Game) {
 		if (!ctx || !canvas || !gameStarted) return;
-		// const canvasWidth = canvas.width;
-		// const canvasHeight = canvas.height;
-		// const paddleWidth = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
-		// const paddleHeight = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
-		// const ballRadius = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
 		
 		ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 		ctx.fillStyle = gamePalette.background;
     	ctx.fillRect(0, 0, canvas.width, canvas.height);
-		// Dessiner la ligne centrale
 		ctx.beginPath();
-		ctx.setLineDash([5, 5]); // Ligne en pointillé
+		ctx.setLineDash([5, 5]);
 		ctx.moveTo(canvasWidth / 2, 0);
 		ctx.lineTo(canvasWidth / 2, canvasHeight);
 		ctx.strokeStyle = gamePalette.line;
@@ -461,26 +414,20 @@ export default async function game() {
 		ctx.stroke();
 		ctx.setLineDash([]);
 		
-		// Dessiner la raquette gauche
 		ctx.fillStyle = gamePalette.paddle1;
 		ctx.fillRect(0, state.leftPaddle.y, paddleWidth, paddleHeight);
 		
-		// Dessiner la raquette droite
 		ctx.fillStyle = gamePalette.paddle2;
 		ctx.fillRect(canvasWidth - paddleWidth, state.rightPaddle.y, paddleWidth, paddleHeight);
 		
-		// Dessiner les scores
 		ctx.font = 'bold 120px Arial';
 		ctx.fillStyle = gamePalette.score;
 		ctx.textAlign = 'center';
 		
-		// Score gauche
 		ctx.fillText(state.score1.toString(), canvasWidth / 4, canvasHeight / 2 + 40);
 		
-		// Score droit
 		ctx.fillText(state.score2.toString(), (canvasWidth / 4) * 3, canvasHeight / 2 + 40);
 
-		// Dessiner la balle en noir au centre
 		ctx.beginPath();
 		ctx.arc(state.ball.x, state.ball.y, ballRadius, 0, Math.PI * 2);
 		ctx.fillStyle = gamePalette.ball;

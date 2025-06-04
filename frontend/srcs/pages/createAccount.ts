@@ -69,10 +69,7 @@ async function handleRegistrationSubmit(e?: Event) {
             body: JSON.stringify(userData)
         });
         
-        // const data = await response.json();
-        
         if (!response.ok) {
-            // let errorMessage = data.error || 'Registration failed';
             registerStatus.innerHTML = `
                 <p class="text-red-500 font-jaro">${i18n.t('login.logFalse')}</p>
             `;
@@ -116,67 +113,3 @@ function setupEventListeners() {
         window.dispatchEvent(new PopStateEvent('popstate'));
     });
 }
-
-//   function setupEventListeners() {
-// 	const registerForm = document.getElementById('registerForm') as HTMLFormElement;
-// 	const registerStatus = document.getElementById('registerStatus') as HTMLDivElement;
-// 	const backToLoginBtn = document.getElementById('backToLoginBtn');
-	
-// 	registerForm?.addEventListener('submit', async (e) => {
-// 	  e.preventDefault();
-	  
-// 	  const userName = (document.getElementById('username') as HTMLInputElement).value;
-// 	  const email = (document.getElementById('email') as HTMLInputElement).value;
-// 	  const password = (document.getElementById('password') as HTMLInputElement).value;
-	  
-// 	  const userData = {
-// 		userName: userName,
-// 		email: email,
-// 		password: password
-// 	  };
-	  
-// 	  try {
-// 		registerStatus.innerHTML = `
-// 		  <p class="text-blue-600 font-jaro">Creating account...</p>
-// 		`;
-// 		const baseUrl = window.location.origin;
-// 		const response = await fetch(`${baseUrl}/user/register`, {
-// 		  method: 'POST',
-// 		  headers: {
-// 			'Content-Type': 'application/json'
-// 		  },
-// 		  body: JSON.stringify(userData)
-// 		});
-		
-// 		const data = await response.json();
-		
-// 		if (!response.ok) {
-// 		  let errorMessage = data.error || 'Registration failed';
-// 		  registerStatus.innerHTML = `
-// 			<p class="text-red-500 font-jaro">${errorMessage}</p>
-// 		  `;
-// 		  return;
-// 		}
-		
-// 		registerStatus.innerHTML = /*html*/ `
-// 		  <p class="text-green-500 font-jaro">${i18n.t('logTrue')}</p>
-// 		`;
-		
-// 		setTimeout(() => {
-// 		  history.pushState(null, '', '/');
-// 		  window.dispatchEvent(new PopStateEvent('popstate'));
-// 		}, 2000);
-		
-// 	  } catch (error) {
-// 		console.error('Registration error:', error);
-// 		registerStatus.innerHTML = /*html*/`
-// 		  <p class="text-red-500 font-jaro">An error occurred during registration. Please try again.</p>
-// 		`;
-// 	  }
-// 	});
-
-// 	backToLoginBtn?.addEventListener('click', () => {
-//         history.pushState(null, '', '/');
-//         window.dispatchEvent(new PopStateEvent('popstate'));
-//     });
-//   }

@@ -14,7 +14,6 @@ import historyProfile from './pages/history';
 import customGame from './pages/customGame';
 import { waitForI18n } from './i18n';
 
-// Définir vos routes sous forme d'un objet
 const routes: { [key: string]: () => void } = {
   '/': login,
   '/profile': Profile,

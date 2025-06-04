@@ -61,7 +61,7 @@ export default async function Queuetournament() {
 		if (document.querySelector(`[data-user-id="${p.userId}"]`)) return;
 
 		const slot = slots.find(s => s.dataset.filled === 'false');
-		if (!slot) return; // queue full
+		if (!slot) return;
 
 		slot.dataset.filled = 'true';
 		slot.dataset.userId = p.userId;
@@ -91,13 +91,10 @@ export default async function Queuetournament() {
 
 
 	function startCountdown(delay: number, cb: () => void) {
-		//const box   = document.getElementById('tournament-timer')!;
-		//const label = document.getElementById('timer-value')!;
 		const statusMessage = document.getElementById('status-message');
 
 		if (countdownHandle) 
 			clearInterval(countdownHandle);
-		//box.classList.remove('hidden');
 		let seconds = delay > 0 ? delay : 5;
 		if (statusMessage) {
 			statusMessage.textContent = i18n.t('tournament.startsIn') + seconds;
@@ -171,63 +168,7 @@ function showError(messageKey: string) {
 			cancelCountdown();
 		}
 	}
-	// function updatePlayerStateUI(state: string) {
-	// 	const app = document.getElementById('app');
-	// 	if (!app) return;
-	
-	// 	switch (state) {
-	// 		case 'eliminated':
-	// 			app.innerHTML = `
-	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-	// 					<h2 class="text-2xl font-bold mb-4">Dommage, vous êtes éliminé !</h2>
-	// 					<p class="text-gray-600">Vous pourrez retenter votre chance la prochaine fois.</p>
-	// 					<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
-	// 				</div>
-	// 			`;
-	// 		break;
-		
-	// 		case 'waiting_next_round':
-	// 			app.innerHTML = `
-	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-	// 					<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
-	// 					<p class="text-gray-600">En attente du prochain tour...</p>
-	// 				</div>
-	// 			`;
-	// 		break;
 
-	// 		case 'waiting_final_prep':
-	// 			app.innerHTML = `
-	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-	// 					<h2 class="text-2xl font-bold mb-4">Félicitations, vous avez gagné ce match !</h2>
-	// 					<p class="text-gray-600">La finale est en preparation...</p>
-	// 				</div>
-	// 			`;
-	// 		break;
-		
-	// 		case 'winner':
-	// 			app.innerHTML = `
-	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-	// 					<h2 class="text-2xl font-bold mb-4">Bravo, vous avez gagné le tournoi !</h2>
-	// 					<p class="text-gray-600">Vous êtes le champion. Félicitations&nbsp;!</p>
-	// 					<button id="backToMenuBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Revenir au Menu</button>
-	// 				</div>
-	// 			`;
-	// 		break;
-		
-	// 		default:
-	// 			app.innerHTML = `
-	// 				<div class="bg-white min-h-screen flex flex-col items-center justify-center text-black">
-	// 					<h2 class="text-2xl font-bold mb-4">Votre état joueur : ${state}</h2>
-	// 					<p class="text-gray-600">En attente d'informations supplémentaires.</p>
-	// 				</div>
-	// 			`;
-	// 	}
-	// 	const backToMenuBtn = document.getElementById('backToMenuBtn');
-	// 	backToMenuBtn?.addEventListener('click', () => {
-	// 		history.pushState(null, '', '/menu');
-	// 		window.dispatchEvent(new PopStateEvent('popstate'));
-	// 	});
-  	// }
 	addPlayerToSlot({
 		userId: currentPlayerId,
 		userName: userProfile.userName ?? i18n.t('queue.you'),

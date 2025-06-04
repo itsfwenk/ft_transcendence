@@ -2,8 +2,6 @@ import Database from 'better-sqlite3';
 import { Game, Ball, Paddle } from '../gameInterfaces'
 import { instrumentedRun } from '../metrics/sqlite';
 
-
-
 if (!process.env.CANVAS_WIDTH
 		|| !process.env.CANVAS_HEIGHT
 		|| !process.env.PADDLE_WIDTH
@@ -20,7 +18,6 @@ const paddleBasePosition = canvasHeight / 2 - paddleHeight / 2;
 
 const db = new Database('/app/db/games.db');
  
-
 //Creation de la table
 db.exec(`
 	PRAGMA foreign_keys = OFF;
@@ -41,8 +38,6 @@ db.exec(`
 	  canvasHeight INTEGER DEFAULT ${canvasHeight}
 	);
 `);
-
-  
 
 export function saveGame(player1_id: string, player2_id: string, matchId?: string): Game {
   return instrumentedRun('game', 'INSERT game', () => {

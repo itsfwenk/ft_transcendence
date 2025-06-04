@@ -37,10 +37,7 @@ clean:
 	@docker network prune -f || true
 	@docker system prune -a --volumes -f
 
-re: clean rm-db up
+re: clean up
 
-rm-db:
-	rm ./backend/db/games.db ./backend/db/users.db ./backend/db/matchmaking.db
-
-prune: clean rm-db
+prune: clean
 	@docker system prune -a --volumes -f

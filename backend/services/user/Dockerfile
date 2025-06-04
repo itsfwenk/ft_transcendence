@@ -32,6 +32,6 @@ COPY services/user ./
 
 RUN npm run build
 
-EXPOSE 4001 9231
+EXPOSE 4001
 
 CMD ["node", "dist/srcs/userIndex.js"]

@@ -17,7 +17,6 @@ services:
       dockerfile: services/user/Dockerfile
     ports:
       - "${USER_SERVICE_PORT}:4001"
-      - "9231:9231"
     volumes:
       - user_db:/app/db
     restart: always
@@ -31,7 +30,6 @@ services:
       dockerfile: ./backend/services/game/Dockerfile
     ports:
       - "${GAME_SERVICE_PORT}:4002"
-      - "9232:9232"
     volumes:
       - game_db:/app/db
     restart: always
@@ -45,7 +43,6 @@ services:
       dockerfile: services/matchmaking/Dockerfile
     ports:
     - "${MATCHMAKING_SERVICE_PORT}:4003"
-    - "9229:9229"
     volumes:
       - matchmaking_db:/app/db
     restart: always

@@ -26,6 +26,6 @@ COPY services/matchmaking ./
 
 RUN npm run build
 
-EXPOSE 4003 9229
+EXPOSE 4003
 
 CMD ["node", "dist/srcs/matchmakingIndex.js"]

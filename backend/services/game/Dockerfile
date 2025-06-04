@@ -20,7 +20,7 @@ RUN rm -rf node_modules package-lock.json
 
 #RUN npm cache clean --force
 
-RUN npm install || npm install || npm install
+RUN npm install
 
 RUN npm rebuild better-sqlite3 --build-from-source
 
@@ -28,6 +28,6 @@ COPY backend/services/game ./
 
 RUN npm run build
 
-EXPOSE 4002 9232
+EXPOSE 4002
 
 CMD ["node", "dist/srcs/gameIndex.js"]

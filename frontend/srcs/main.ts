@@ -3,6 +3,12 @@ import { matchmakingWebSocket } from "./wsClient";
 import "./i18n";
 import { waitForI18n } from "./i18n";
 
+console.log = () => {};
+console.error = () => {};
+console.warn = () => {};
+console.info = () => {};
+console.debug = () => {};
+
 async function initApp() {
 	try {
 		await waitForI18n();

@@ -2,13 +2,9 @@ import Fastify from 'fastify';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import matchmakingRoutes from './matchmakingRoutes.js';
-import { WebSocket } from "ws";
 import websocket from '@fastify/websocket';
 import { websocketClients } from './matchmakingRoutes.js';
 import { connectedUsers} from '../metrics/matchmakingMetrics.js'
-
-
-
 
 const app = Fastify();
 
@@ -17,7 +13,6 @@ const app = Fastify();
 	
 	app.register(require('fastify-metrics'), { routeMetrics:true });
 	
-	// Configurer Swagger
 	app.register(swagger, {
 	swagger: {
 		info: {
@@ -28,7 +23,6 @@ const app = Fastify();
 	}
 	});
 
-	// Debug hook
 	app.addHook('onRequest', (req, reply, done) => {
 		if (req.url === '/metrics') {
 			connectedUsers.set(websocketClients.size);
@@ -42,11 +36,7 @@ const app = Fastify();
 	staticCSP: true
 	});
 
-
-
-	// Enregistrer les routes utilisateur
 	app.register(matchmakingRoutes, { prefix: '/matchmaking' });
-
 
 	app.listen({port: 4003 , host: '0.0.0.0'}, () => {
 		console.log('Matchmaking Service running on http://localhost:4003');

@@ -1,9 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { getUserById, updateUser, updateUserAvatar, getUserAvatar, deleteUserAvatar } from "./userDb";
 import { randomUUID } from "crypto";
-import util from 'util';
-import { pipeline } from "stream";
-const pump = util.promisify(pipeline);
 
 const DEFAULT_AVATAR_URL = '/avatars/default.png';
 

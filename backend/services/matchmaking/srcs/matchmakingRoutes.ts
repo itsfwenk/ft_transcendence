@@ -1,9 +1,7 @@
 import { FastifyRequest, FastifyReply, FastifySchema } from 'fastify';
 import { queue1v1, queueTournament, attemptTournament, launchMatch, joinQueue1v1, joinTournamentQueue, getMatchTypeById } from './matchmakingController.js';
 import {  updateMatch, getMatchbyId, getTournamentById, scheduleFinal, finishTournament, getMatchHistoryByUserId} from './matchmakingDb.js'
-import { request } from 'axios';
 import { WebSocket } from "ws";
-//import WebSocket from '@fastify/websocket';
 import { handleMatchmakingMessage, onMatchCompleted } from './matchmakingController';
 import axios from 'axios';
 
@@ -68,7 +66,7 @@ const queueStatusSchema: FastifySchema = {
 	},
 };
 
-// YOYO
+
 const userIdParamSchema: FastifySchema = {
 	params: {
 		type: 'object',
@@ -78,7 +76,6 @@ const userIdParamSchema: FastifySchema = {
 		required: ['userId']
 	}
 };
-// END - YOYO
 
 export default async function matchmakingRoutes(fastify: any) {
 	fastify.post('/join', { schema: playerIdSchema }, async (request:FastifyRequest, reply:FastifyReply) => {
@@ -152,7 +149,7 @@ export default async function matchmakingRoutes(fastify: any) {
 		finishTournament(tournament_Id);
   		reply.send({ success: true});
 	})
-// YOYO
+
 	fastify.get('/history/:userId', { schema: userIdParamSchema }, async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
 		const { userId } = req.params;
 
@@ -184,7 +181,7 @@ export default async function matchmakingRoutes(fastify: any) {
 		}
 	}
 	}, getMatchTypeById);
-// END - YOYO
+
 	fastify.get('/ws', { websocket: true }, async (connection: WebSocket, request: FastifyRequest) => {
 		const { playerId } = request.query as { playerId?: string };
 		console.log('Query params:', request.query);
@@ -193,8 +190,6 @@ export default async function matchmakingRoutes(fastify: any) {
 			connection.close();
 			return;
 		}
-
-			// Vérifier si une connexion existe déjà pour ce playerId
 		if (websocketClients.has(playerId)) {
 			console.warn(`Une connexion existe déjà pour le playerId: ${playerId}. Fermeture de la nouvelle connexion.`);
 			connection.close();
@@ -211,7 +206,6 @@ export default async function matchmakingRoutes(fastify: any) {
 			}
 		});
 		console.log(`Un client WebSocket est connecté pour le playerId: ${playerId}`);
-		// Stocker la connexion dans la Map avec le playerId comme clé
 		websocketClients.set(playerId, connection);
 		
 		connection.on('close', async () => {

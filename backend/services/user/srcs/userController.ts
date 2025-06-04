@@ -256,10 +256,6 @@ interface UpdateRoleRequest extends FastifyRequest {
 }
 
 export async function updateRole(req: UpdateRoleRequest, reply: FastifyReply) {
-	// if (req.user.role !== 'admin') {
-	// 	return reply.status(403).send({ error: 'Permission denied' });
-	// } Pour plus tard si utilisation de admin
-
 	const { userId, role } = req.body;
 
 	if (!['user', 'admin'].includes(role)) {

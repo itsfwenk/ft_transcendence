@@ -1,9 +1,7 @@
 import axios from 'axios';
-import type { WebSocket as WS } from 'ws';
 import {createMatch, createTournament, getTournamentById, Tournament, getMatchbyId, Match, updateMatchv2, scheduleFinal} from './matchmakingDb';
 import { websocketClients } from './matchmakingRoutes';
 import WebSocket from 'ws';
-//import {Game} from '../../../../gameInterfaces';
 
 interface Ball {
 	x: number;
@@ -55,7 +53,6 @@ export function getPlayerState(playerId: string) {
 	return playerStates.get(playerId);
 }
 
-//join 1v1 queue
 export async function joinQueue1v1(playerId: string) {
 	if (queue1v1.has(playerId)) return;
 	queue1v1.add(playerId);
@@ -89,8 +86,6 @@ export async function fetchPublicProfile(playerId: string) {
 	return data as { userId: string; userName: string; avatarUrl: string };
 }
 
-
-//join tournament 1
 export async function joinTournamentQueue(playerId: string) {
 	if (queueTournament.has(playerId)) return;
 	queueTournament.add(playerId);
@@ -195,35 +190,6 @@ export async function createGameSession(player1_id:string, player2_id:string, ma
 	}
 }
 
-// export async function attemptMatch() {
-// 	if (queue1v1.length >= 2) {
-// 		const player1 = queue1v1.shift();
-// 		const player2 = queue1v1.shift();
-// 		if (player1 && player2) {
-// 			console.log('creating a matching betweenm', player1, player2)
-// 			try {
-// 				const gameSessionId = await createGameSession(player1, player2);
-// 				if (gameSessionId) {
-// 					const message = JSON.stringify({
-// 						type: 'launch_1v1',
-// 						gameSessionId
-// 					});
-// 					const socket1 = websocketClients.get(player1);
-// 					const socket2 = websocketClients.get(player2);
-
-// 					socket1?.send(message);
-// 					socket2?.send(message);
-// 				}
-// 			} catch (error) {
-// 				console.error('Erreur lors de la création de la game session:', error);
-// 			}
-// 		}
-	
-// 	}
-// }
-
-
-
 export async function attemptMatchv2(): Promise<Match | undefined>  {
 	if (queue1v1.size >= 2) {
 		const player1 = queue1v1.values().next().value as string | undefined;
@@ -262,17 +228,6 @@ export async function attemptTournament(): Promise<Tournament | undefined> {
 			if (!tournament) {
 				throw Error ("No tournament created");
 			}
-			// const message = JSON.stringify({
-			// 	type: 'TOURNAMENT_LAUNCH',
-			// 	payload: {tournament}
-			// });
-			// players.forEach((playerId) => {
-			// 	const socket = websocketClients.get(playerId!);
-			// 	if (socket && socket.readyState === WebSocket.OPEN) {
-			// 		socket.send(message);
-			// 	}
-			// });
-			// console.log("Tournoi cree:", tournament);
 			return (tournament);
 		}
 	} 
@@ -305,8 +260,6 @@ export function onMatchCompleted(matchId: string): void {
 	if (tournament_Id) {
 		const tournament = getTournamentById(tournament_Id);
 		if (!tournament) return;
-
-		//const match = tournament.matches.find(m => m.id === matchId);
 		setPlayerState(loserId, 'eliminated');
 		const losersocket = websocketClients.get(loserId);
 		losersocket?.send(JSON.stringify({
@@ -393,8 +346,6 @@ interface MatchmakingMessage {
 	payload?: any;
 }
 
-
-
 async function declareForfeit(gameId: string, loserId: string) {
 	console.log("declare Forfeit", gameId, loserId);
 	const baseUrl = process.env.GAME_SERVICE_BASE_URL || 'http://game:4001';
@@ -461,7 +412,6 @@ export async function handleMatchmakingMessage(
 				}
 			}
 			break;		
-		
 		case 'QUEUE_LEAVE_1V1':
 			leaveQueue1v1(playerId);
 			break;
@@ -473,8 +423,6 @@ export async function handleMatchmakingMessage(
 			const gameId = msg.payload?.gameSessionId;
 			await declareForfeit(gameId, playerId);
 			break;
-
-
 		default:
 			console.warn(`[MM] Action inconnue : ${msg.action}`);
 			const ws = clients.get(playerId);
@@ -497,9 +445,7 @@ export async function getMatchTypeById(req: any, reply: any) {
 		if (!match) {
 		return reply.status(404).send({ error: 'Match non trouvé' });
 		}
-		
 		let matchType = '';
-		
 		if (match.tournament_Id) {
 			if (match.round === 2) {
 				matchType = 'Tournament Final';

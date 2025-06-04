@@ -1,7 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions, FastifySchema } from 'fastify';
-import { startGame, getGame, websocketHandshake, getStatus, endOngoingGamesForfeit } from './gameController.js'
+import { startGame, getGame, getStatus, endOngoingGamesForfeit } from './gameController.js'
 
-//definir un schema pour 'start game'
 const startGameSchema: FastifySchema = {
 	body: {
 	  type: 'object',
@@ -14,7 +13,7 @@ const startGameSchema: FastifySchema = {
 	}
 };
 
-// Définir un schéma pour `/update-score`
+
 const updateScoreSchema: FastifySchema = {
 	body: {
 	  type: 'object',
@@ -25,16 +24,6 @@ const updateScoreSchema: FastifySchema = {
 	  }
 	}
 };
-
-// const websocketSchema: FastifySchema = {
-// 	querystring: {
-// 	  type: 'object',
-// 	  required: ['token'],
-// 	  properties: {
-// 		token: { type: 'string' }
-// 	  },
-// 	}
-// };
 
 const forfeitGameSchema: FastifySchema = {
 	body: {
@@ -58,10 +47,4 @@ export default async function gameRoutes(fastify: FastifyInstance, options: Fast
 	fastify.get('/:gameId', getGame );
 	fastify.get('/:gameId/status', getStatus);
 	fastify.patch('/:gameId/forfeit', {schema: forfeitGameSchema}, endOngoingGamesForfeit)
-	// fastify.put('/:gameId/score', { schema: updateScoreSchema }, updateScore);
-	// fastify.post('/:gameId/end', endGame);
-	// fastify.get('/ws', { websocket: true }, (connection, req) => {
-	// 	console.log("Websocket route triggered");
-	// 	websocketHandshake(connection, req)
-	// });
 }

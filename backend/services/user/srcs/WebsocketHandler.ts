@@ -2,10 +2,6 @@ import { FastifyInstance, FastifyRequest } from 'fastify';
 import { WebSocket } from 'ws';
 import { updateUserStatus } from './userDb.js';
 
-interface SocketStream {
-	socket: WebSocket;
-}
-
 interface JwtPayload {
 	userId: string;
 }

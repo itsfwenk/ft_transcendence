@@ -1,4 +1,3 @@
-// metrics/sqlite.ts
 import { Histogram, Counter, Gauge } from 'prom-client';
 import fs from 'fs';
 import path from 'path';

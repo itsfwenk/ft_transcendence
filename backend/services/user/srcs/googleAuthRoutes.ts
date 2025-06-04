@@ -16,9 +16,7 @@ declare module 'fastify' {
   };
 
 export default async function googleAuthRoutes(fastify: FastifyInstance) {
-	// const baseUrl = window.location.origin;
 	const baseUrl = process.env.USER_SERVICE_BASE_URL || 'http://user:4001';
-	// console.log(`${baseUrl}/user/auth/google/callback`);
 	fastify.register(oauthPlugin, {
 		name: 'googleOAuth2',
 		credentials: {

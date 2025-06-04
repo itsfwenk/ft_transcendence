@@ -1,7 +1,6 @@
-import fastify, { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest, FastifySchema } from 'fastify';
+import { FastifyReply, FastifyRequest} from 'fastify';
 import { registerUser, loginUser, getUserProfile, getUserByIdController, updateProfile, deleteAccount, updateRole, updateStatus, getOnlineUsers, logoutUser, checkUserConnectionStatus, changePassword, internalLogoutUser } from './userController.js';
-// import jwt from '@fastify/jwt'
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import { JwtPayload } from 'jsonwebtoken';
 import multipart from '@fastify/multipart';
 import { deleteAvatar, getAvatar, uploadAvatar } from './avatarController.js';
 import { addFriendController, checkFriendshipController, getFriendsController, getOnlineFriendsController, removeFriendController } from './friendController.js';
@@ -204,13 +203,6 @@ export default async function userRoutes(fastify: any) {
 
   fastify.get('/status/userId', {
 	schema: {
-		// params: {
-		// 	type:'object',
-		// 	properties: {
-		// 		userId: { type: 'string' }
-		// 	},
-		// 	// required: ['userId']
-		// },
 		response: {
 			200: {
 				type: 'object',
@@ -367,10 +359,6 @@ export default async function userRoutes(fastify: any) {
     handler: checkFriendshipController
   });
   
-  // interface JwtPayload {
-	// userId: string;
-  // }
-
 	fastify.get('/getProfile', async (req:FastifyRequest, reply:FastifyReply) => {
 		try {
 			console.log("Cookies:", req.cookies)

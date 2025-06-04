@@ -1,5 +1,4 @@
 import Database from "better-sqlite3";
-import { createTypeReferenceDirectiveResolutionCache } from "typescript";
 
 const db = new Database('/app/db/users.db');
 
@@ -13,7 +12,6 @@ interface LinkedAccount {
 	tokenExpiry: number | null;
 }
 
-// Lier un compte externe a un user
 export function linkAccount(
 	userId: string,
 	provider: string,

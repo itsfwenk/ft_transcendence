@@ -34,6 +34,4 @@ RUN npm run build
 
 EXPOSE 4001 9231
 
-#CMD ["sh"]
 CMD ["node", "dist/srcs/userIndex.js"]
-#CMD ["node", "--inspect=0.0.0.0:9231", "dist/srcs/userIndex.js"]

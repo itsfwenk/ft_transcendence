@@ -14,50 +14,16 @@ if (!process.env.CANVAS_WIDTH
 
 const canvasWidth = parseInt(process.env.CANVAS_WIDTH as string, 10);
 const canvasHeight = parseInt(process.env.CANVAS_HEIGHT as string, 10);
-// const paddleWidth = parseInt(process.env.PADDLE_WIDTH as string, 10);
 const paddleHeight = parseInt(process.env.PADDLE_HEIGHT as string, 10);
 const ballRadius = parseInt(process.env.BALL_RADIUS as string, 10);
 const paddleBasePosition = canvasHeight / 2 - paddleHeight / 2;
 
-// export interface Ball {
-// 	x: number;
-// 	y: number;
-// 	radius: number;
-// 	dx: number;
-// 	dy: number
-// }
-
-// export interface Paddle {
-// 	x: number;
-// 	y: number;
-// 	dy: number
-// }
-
-// export interface Game {
-// 	gameId: string;
-// 	player1_id: string;
-// 	player2_id: string;
-// 	score1: number;
-// 	score2: number;
-// 	leftPaddle: Paddle;
-// 	rightPaddle: Paddle;
-// 	ball: Ball;
-// 	status: 'waiting' | 'ongoing' | 'finished';
-// 	winner_id?: string | null;
-// 	matchId?: string | null;
-// 	canvasWidth: number;
-// 	canvasHeight: number;
-// }
-
-//const games: Game[] = [];
-
-//connexion a la database game
 const db = new Database('/app/db/games.db');
  
 
 //Creation de la table
 db.exec(`
-	PRAGMA foreign_keys = OFF;  -- ✅ Désactiver les FK pour éviter les erreurs
+	PRAGMA foreign_keys = OFF;
 
 	CREATE TABLE IF NOT EXISTS games (
 	  gameId INTEGER DEFAULT 0,
@@ -95,9 +61,7 @@ export function getGamebyId(gameId: string): Game | null {
     try {
       const stmt = db.prepare(`SELECT * FROM games WHERE gameId = ?`);
       const row: any = stmt.get(gameId);
-
       if (!row) return null;
-
       const game: Game = {
         gameId: row.gameId,
         player1_id: row.player1_id,
@@ -113,7 +77,6 @@ export function getGamebyId(gameId: string): Game | null {
         canvasWidth: row.canvasWidth, 
         canvasHeight: row.canvasHeight
       };
-
       return game;
     } catch (error) {
       console.error(`Error fetching game ${gameId}:`, error);
@@ -217,7 +180,6 @@ export function updateGameStatusInDb(gameId: string, status: string) {
     }
   });
 }
-
 
 export function updatePaddlesInDb(gameId: string) {
     try {

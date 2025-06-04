@@ -1,4 +1,4 @@
-import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import Fastify, { FastifyInstance} from 'fastify';
 import gameRoutes from './gameRoutes.js';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
@@ -7,12 +7,8 @@ import { updateGames } from './gameController.js'
 import fastifyCookie from '@fastify/cookie';
 import fastifyJwt from '@fastify/jwt';
 import { websocketHandshake } from './gameController.js';
-import websocket from '@fastify/websocket';
-import cors from '@fastify/cors';
 import { ongoingGames } from './gameController.js';
 import {gamesInProgress} from '../metrics/gameMetrics.js'
-
-// import Database from 'better-sqlite3';
 
 const app: FastifyInstance = Fastify( {
 	logger: true,
@@ -21,7 +17,6 @@ const app: FastifyInstance = Fastify( {
 const activeUsers = new Map<number, WebSocket>(); // userId -> WebSocket
 export default activeUsers;
 
-// Debug hook
 app.addHook('onRequest', (req, reply, done) => {
 	if (req.url === '/metrics') {
         gamesInProgress.set(ongoingGames.size);
@@ -37,14 +32,6 @@ app.register(fastifyJwt, {
 	  signed: true,
 	}
 });
-
-// app.decorate("authenticate", async function (req: FastifyRequest, reply: FastifyReply) {
-// 	try {
-// 	  await req.jwtVerify();
-// 	} catch (err) {
-// 	  reply.status(401).send({ error: "Unauthorized" });
-// 	}
-//   });
 
 app.register(swagger, {
 	swagger: {
@@ -62,11 +49,6 @@ app.register(fastifyCookie, {
 	secret: process.env.COOKIE_SECRET,
 });
 
-// app.register(cors, {
-// 	origin: 'http://localhost:4001',
-// 	credentials: true,
-//   });
-
 app.register(require('fastify-metrics'), { routeMetrics:true });
 
 app.register(swaggerUI, {
@@ -74,7 +56,6 @@ app.register(swaggerUI, {
   staticCSP: true
 });
 
-//enregistrer les routes
 app.register(gameRoutes, { prefix: '/game' });
 
 app.register(async function (fastify) {

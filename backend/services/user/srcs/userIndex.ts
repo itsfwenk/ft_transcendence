@@ -6,10 +6,6 @@ import swaggerUI from '@fastify/swagger-ui';
 import userRoutes from './userRoutes.js';
 import dotenv from 'dotenv'
 import googleAuthRoutes from './googleAuthRoutes.js';
-import path from 'path';
-import fs from 'fs';
-import fastifyCors from '@fastify/cors';
-
 import websocket from '@fastify/websocket';
 import { handleWebSocketConnection } from './WebsocketHandler.js';
 import fastifyStatic from '@fastify/static';
@@ -21,12 +17,6 @@ const app = Fastify({
   maxParamLength: 1000000,
 });
 
-// dotenv.config();
-// app.register(fastifyCors, {
-// 	origin: true, // allow all origins dynamically
-// 	credentials: true
-//   });
-
 app.register(fastifyCookie, {
 	secret: process.env.COOKIE_SECRET,
 });
@@ -36,21 +26,6 @@ app.register(fastifyStatic, {
 	prefix: '/avatars/',
 	decorateReply: false
 });
-
-// app.register(cors, {
-// 	origin:  process.env.CORS_ORIGIN,
-// 	credentials: true, // Allow sending/receiving cookies
-//   });
-
-// app.register(cors, {
-// 	origin: '*',  // Allow all origins (adjust for production)
-// 	methods: ['GET', 'POST', 'PUT', 'DELETE'],
-// 	allowedHeaders: ['Content-Type', 'Authorization'],
-// 	credentials: true, // Allow cookies or authorization headers to be sent
-//   });
-
-// Configurer JWT
-//app.register(jwt, { secret: 'supersecretkey' });
 
 app.register(jwt, {
 	secret: process.env.JWT_SECRET!,
@@ -111,10 +86,6 @@ app.addHook('onRequest', (req, reply, done) => {
 app.listen({port: 4001 , host: '0.0.0.0'}, () => {
 	console.log('User Service running on http://localhost:4001');
 });
-
-// app.addHook('onRequest', async (req, reply) => {
-// 	console.log('Incoming cookies:', req.cookies);
-// });
 
 app.addHook('onReady', async function () {
   const userIds = await getAllUserId() as Array<{ userId: string }>;

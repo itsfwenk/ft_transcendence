@@ -1,12 +1,13 @@
 import { getMatchmakingSocket, getUserSocket } from "../wsClient";
-import i18n from '../i18n';
-
+import i18n from "../i18n";
 
 export default function menu() {
-	const app = document.getElementById('app');
+	const app = document.getElementById("app");
 	if (app) {
-	  app.innerHTML = /*html*/`
-	  <div class="text-black font-jaro text-9xl mt-16 mb-36 select-none">${i18n.t('general.pongGame')}</div>
+		app.innerHTML = /*html*/ `
+	  <div class="text-black font-jaro text-9xl mt-16 mb-36 select-none">${i18n.t(
+			"general.pongGame"
+		)}</div>
 	  <div class="flex flex-col justify-center items-center gap-6">
 
 			<div 
@@ -19,7 +20,9 @@ export default function menu() {
 					[box-shadow:0_10px_0_0_#A31F1F,0_15px_0_0_#A31F1F41]
 					border-b-[1px] border-red-400'
 			>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-6xl '>${i18n.t('menu.playGame')}</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-6xl '>${i18n.t(
+				"menu.playGame"
+			)}</span>
 			</div>
 
 			<div 
@@ -32,7 +35,9 @@ export default function menu() {
 					[box-shadow:0_10px_0_0_#193cb8,0_15px_0_0_#1b70f841]
 					border-b-[1px] border-blue-400'
 			>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-6xl '>${i18n.t('menu.profile')}</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-6xl '>${i18n.t(
+				"menu.profile"
+			)}</span>
 			</div>
 
 			<div 
@@ -45,66 +50,73 @@ export default function menu() {
 					[box-shadow:0_10px_0_0_#000000,0_15px_0_0_#00000041]
 					border-b-[1px] border-gray-400'
 			>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('menu.disconnect')}</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t(
+				"menu.disconnect"
+			)}</span>
 			</div>
 
 	  </div>
 	  `;
-		
-      const playBtn = document.getElementById('PlayBtn');
-      playBtn?.addEventListener('click', () => {
-        history.pushState(null, '', '/mode');
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      });
 
-		const profileBtn = document.getElementById('profileBtn');
-		profileBtn?.addEventListener('click', () => {
-			history.pushState(null, '', '/profile');
-			window.dispatchEvent(new PopStateEvent('popstate'));
-		});
-      
-		const customBtn = document.getElementById('customBtn');
-		customBtn?.addEventListener('click', () => {
-			history.pushState(null, '', '/customGame');
-			window.dispatchEvent(new PopStateEvent('popstate'));
+		const playBtn = document.getElementById("PlayBtn");
+		playBtn?.addEventListener("click", () => {
+			history.pushState(null, "", "/mode");
+			window.dispatchEvent(new PopStateEvent("popstate"));
 		});
 
-      const disconnectBtn = document.getElementById('disconnectBtn');
-      disconnectBtn?.addEventListener('click', async () => {
-		console.log(i18n.t('menu.clickDisconnect'));
-		handleDisconnect();
-      });
-      };
+		const profileBtn = document.getElementById("profileBtn");
+		profileBtn?.addEventListener("click", () => {
+			history.pushState(null, "", "/profile");
+			window.dispatchEvent(new PopStateEvent("popstate"));
+		});
+
+		const customBtn = document.getElementById("customBtn");
+		customBtn?.addEventListener("click", () => {
+			history.pushState(null, "", "/customGame");
+			window.dispatchEvent(new PopStateEvent("popstate"));
+		});
+
+		const disconnectBtn = document.getElementById("disconnectBtn");
+		disconnectBtn?.addEventListener("click", async () => {
+			console.log(i18n.t("menu.clickDisconnect"));
+			handleDisconnect();
+		});
+	}
 }
 
 export const handleDisconnect = async () => {
 	try {
 		const baseUrl = window.location.origin;
 		const response = await fetch(`${baseUrl}/user/logout`, {
-			method: 'POST'
+			method: "POST",
 		});
 		if (!response.ok) {
-			console.error(`${i18n.t('menu.errorLogout')}: ${response.statusText}`);
+			console.error(
+				`${i18n.t("menu.errorLogout")}: ${response.statusText}`
+			);
 		} else {
-			console.log(i18n.t('menu.userStatusOffline'));
+			console.log(i18n.t("menu.userStatusOffline"));
 		}
 		const matchmakingsocket = getMatchmakingSocket();
-		console.log(i18n.t('menu.websocketMatchmaking'), matchmakingsocket);
-		if (matchmakingsocket && matchmakingsocket.readyState === WebSocket.OPEN) {
-			console.log(i18n.t('menu.closingMatchmakingSocket'));
+		console.log(i18n.t("menu.websocketMatchmaking"), matchmakingsocket);
+		if (
+			matchmakingsocket &&
+			matchmakingsocket.readyState === WebSocket.OPEN
+		) {
+			console.log(i18n.t("menu.closingMatchmakingSocket"));
 			matchmakingsocket.close();
 		}
 		const usersocket = getUserSocket();
 		if (usersocket && usersocket.readyState === WebSocket.OPEN) {
-			console.log(i18n.t('menu.closingUserSocket'));
+			console.log(i18n.t("menu.closingUserSocket"));
 			usersocket.close();
 		}
 		localStorage.removeItem("userId");
-		history.pushState(null, '', '/');
-		window.dispatchEvent(new PopStateEvent('popstate'));
+		history.pushState(null, "", "/");
+		window.dispatchEvent(new PopStateEvent("popstate"));
 	} catch (error) {
-		console.error(`${i18n.t('menu.errorLogout')}:`, error);
-		history.pushState(null, '', '/');
-		window.dispatchEvent(new PopStateEvent('popstate'));
+		console.error(`${i18n.t("menu.errorLogout")}:`, error);
+		history.pushState(null, "", "/");
+		window.dispatchEvent(new PopStateEvent("popstate"));
 	}
 };

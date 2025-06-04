@@ -1,6 +1,13 @@
 {
-    "editor.autoIndent": "keep",
-    "editor.formatOnPaste": false,
-    "editor.detectIndentation": false,
-    "editor.insertSpaces": false
+	"editor.autoIndent": "keep",
+	"editor.formatOnPaste": false,
+	"editor.detectIndentation": false,
+	"editor.insertSpaces": false,
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"prettier.useTabs": true,
+	"prettier.tabWidth": 4,
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	}
 }

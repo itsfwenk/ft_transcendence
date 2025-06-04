@@ -1,121 +1,144 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import bcrypt from 'bcrypt';
-import jwt from '@fastify/jwt';
-import { saveUser, getUserByEmail, getUserById, isValidEmail, updateUser, deleteUser, updateUserRole, updateUserStatus, getUsersByRole, getUserWithStatus, User, getUserByUserName } from './userDb.js';
-import { getConnectedUsers, isUserConnected } from './WebsocketHandler.js';
-import { error } from 'console';
+import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import bcrypt from "bcrypt";
+import {
+	saveUser,
+	getUserByEmail,
+	getUserById,
+	isValidEmail,
+	updateUser,
+	deleteUser,
+	updateUserRole,
+	updateUserStatus,
+	getUserByUserName,
+} from "./userDb.js";
+import { getConnectedUsers, isUserConnected } from "./WebsocketHandler.js";
 
 // Interface pour les requêtes de création d'utilisateur
 interface RegisterRequest extends FastifyRequest {
 	body: {
-	  userName: string;
-	  email: string;
-	  password: string;
+		userName: string;
+		email: string;
+		password: string;
 	};
-  }
+}
 
 // Inscription
-export async function registerUser(req:RegisterRequest, reply:FastifyReply) {
+export async function registerUser(req: RegisterRequest, reply: FastifyReply) {
 	const { userName, email, password } = req.body;
 
 	if (!isValidEmail(email)) {
-		return reply.status(400).send({ error: 'Invalid email format' });
+		return reply.status(400).send({ error: "Invalid email format" });
 	}
 
 	try {
 		// Vérifier si l'utilisateur existe déjà
 		if (getUserByEmail(email)) {
-			return reply.status(400).send({ error: 'Email already use' });
+			return reply.status(400).send({ error: "Email already use" });
 		}
 
 		if (getUserByUserName(userName)) {
-			return reply.status(400).send({ error: 'UserName already use' });
+			return reply.status(400).send({ error: "UserName already use" });
 		}
 
 		if (userName.length > 7) {
-			return reply.status(400).send({ error: 'UserName too long' });
+			return reply.status(400).send({ error: "UserName too long" });
 		}
-	
+
 		if (!password || password.length < 6) {
-			return reply.status(400).send({ error: 'Password must be at least 6 characters long'});
+			return reply
+				.status(400)
+				.send({ error: "Password must be at least 6 characters long" });
 		}
-	
+
 		// Hasher le mot de passe
 		const hashedPassword = await bcrypt.hash(password, 10);
 
 		// Ajouter l'utilisateur
 		const newUser = saveUser(userName, email, hashedPassword);
-		reply.send({ success: true, user: { userId: newUser.userId, userName, email } });
-
+		reply.send({
+			success: true,
+			user: { userId: newUser.userId, userName, email },
+		});
 	} catch (error) {
 		console.error(error);
-		return reply.status(500).send({ error: 'Internal server error' });
+		return reply.status(500).send({ error: "Internal server error" });
 	}
 }
 
 // Interface pour la requête de connexion
 interface LoginRequest extends FastifyRequest {
 	body: {
-	  email: string;
-	  password: string;
+		email: string;
+		password: string;
 	};
-  }
+}
 
 // Connexion
 export async function loginUser(req: LoginRequest, reply: FastifyReply) {
-  const { email, password } = req.body;
-  try {
-    const user = getUserByEmail(email);
+	const { email, password } = req.body;
+	try {
+		const user = getUserByEmail(email);
 
-    if (user) {
-      const passwordMatch = await bcrypt.compare(password, user.passwordHsh);
-      if (passwordMatch === false) {
-        return reply.status(401).send({ error: 'Invalid password' });
-      }
-      console.log("Login user:", user);
+		if (user) {
+			const passwordMatch = await bcrypt.compare(
+				password,
+				user.passwordHsh
+			);
+			if (passwordMatch === false) {
+				return reply.status(401).send({ error: "Invalid password" });
+			}
+			console.log("Login user:", user);
 
-      const connectedUsers = getConnectedUsers();
-      console.log("Currently connected users:", connectedUsers);
-      
-      if (user.status === 'online' || isUserConnected(user.userId)) {
-        console.log("User already online. Status:", user.status, "WebSocket connected:", isUserConnected(user.userId));
-        return reply.status(401).send({ error: 'Already logged in somewhere else' });
-      }
+			const connectedUsers = getConnectedUsers();
+			console.log("Currently connected users:", connectedUsers);
 
-      updateUserStatus(user.userId, 'online');
+			if (user.status === "online" || isUserConnected(user.userId)) {
+				console.log(
+					"User already online. Status:",
+					user.status,
+					"WebSocket connected:",
+					isUserConnected(user.userId)
+				);
+				return reply
+					.status(401)
+					.send({ error: "Already logged in somewhere else" });
+			}
 
-      const token = req.server.jwt.sign(
-        { userId: user.userId },
-        { expiresIn: '24h' }
-      );
+			updateUserStatus(user.userId, "online");
 
-      reply.setCookie('authToken', token, {
-        signed: true,
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 60 * 60 * 24,
-      });
+			const token = req.server.jwt.sign(
+				{ userId: user.userId },
+				{ expiresIn: "24h" }
+			);
 
-      reply.send({ 
-        token,
-        user: { 
-          userId: user.userId,
-          userName: user.userName,
-          role: user.role,
-          status: user.status,
-        }
-      });
-    } else {
-      return reply.status(401).send({ error: 'Invalid email or password' });
-    }
-  } catch (error) {
-    console.error(error);
-    reply.status(500).send({ error: 'Internal server error' });
-  }
+			reply.setCookie("authToken", token, {
+				signed: true,
+				httpOnly: true,
+				secure: true,
+				sameSite: "lax",
+				path: "/",
+				maxAge: 60 * 60 * 24,
+			});
+
+			reply.send({
+				token,
+				user: {
+					userId: user.userId,
+					userName: user.userName,
+					role: user.role,
+					status: user.status,
+				},
+			});
+		} else {
+			return reply
+				.status(401)
+				.send({ error: "Invalid email or password" });
+		}
+	} catch (error) {
+		console.error(error);
+		reply.status(500).send({ error: "Internal server error" });
+	}
 }
-
 
 //interface pour '/profile'
 interface ProfileRequest extends FastifyRequest {
@@ -125,20 +148,27 @@ interface ProfileRequest extends FastifyRequest {
 // Profil utilisateur (protégé avec JWT)
 export async function getUserProfile(req: ProfileRequest, reply: FastifyReply) {
 	const user = getUserById(req.user.userId);
-	if (!user)
-		return reply.status(404).send({ error: 'User not found' });
+	if (!user) return reply.status(404).send({ error: "User not found" });
 
-	reply.send({ UserId: user.userId, username: user.userName, email: user.email, avatarUrl: user.avatarUrl });
+	reply.send({
+		UserId: user.userId,
+		username: user.userName,
+		email: user.email,
+		avatarUrl: user.avatarUrl,
+	});
 }
 
-export async function getUserByIdController(req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) {
-    const { userId } = req.params;
-    const user = getUserById(userId);
+export async function getUserByIdController(
+	req: FastifyRequest<{ Params: { userId: string } }>,
+	reply: FastifyReply
+) {
+	const { userId } = req.params;
+	const user = getUserById(userId);
 
-    if (!user) {
-        return reply.status(404).send({ error: "User not found" });
-    }
-    reply.send(user);
+	if (!user) {
+		return reply.status(404).send({ error: "User not found" });
+	}
+	reply.send(user);
 }
 
 interface updateProfileRequest extends FastifyRequest {
@@ -146,37 +176,44 @@ interface updateProfileRequest extends FastifyRequest {
 		userName: string;
 		email: string;
 		password: string;
-	}>
+	}>;
 	user: { userId: string };
 }
 
-export async function updateProfile(req: updateProfileRequest, reply: FastifyReply) {
+export async function updateProfile(
+	req: updateProfileRequest,
+	reply: FastifyReply
+) {
 	const userId = req.user.userId;
 	const updates: any = {};
 
 	if (req.body.userName !== undefined) {
-		if (req.body.userName.trim() === '') {
-			return reply.status(400).send({ error: 'Username cannot be empty' });
+		if (req.body.userName.trim() === "") {
+			return reply
+				.status(400)
+				.send({ error: "Username cannot be empty" });
 		}
 		updates.userName = req.body.userName;
 	}
 
 	if (req.body.email !== undefined) {
-		if ((!isValidEmail(req.body.email))) {
-			return (reply.status(400).send({ error: 'Invalid email format' }));
+		if (!isValidEmail(req.body.email)) {
+			return reply.status(400).send({ error: "Invalid email format" });
 		}
 	}
 
 	if (req.body.email !== undefined) {
 		const existingUser = getUserByEmail(req.body.email);
 		if (existingUser && existingUser.userId !== userId)
-			return reply.status(400).send({ error: 'Email already use' });
+			return reply.status(400).send({ error: "Email already use" });
 		updates.email = req.body.email;
 	}
 
 	if (req.body.password !== undefined) {
 		if (req.body.password.length < 6) {
-			return reply.status(400).send({ error : 'Password must be at least 6 character long' });
+			return reply
+				.status(400)
+				.send({ error: "Password must be at least 6 character long" });
 		}
 		updates.password = req.body.password;
 	}
@@ -185,7 +222,7 @@ export async function updateProfile(req: updateProfileRequest, reply: FastifyRep
 		const updtUser = updateUser(userId, updates);
 
 		if (!updtUser) {
-			return reply.status(500).send({ error: 'Failed to update' });
+			return reply.status(500).send({ error: "Failed to update" });
 		}
 
 		reply.send({
@@ -193,11 +230,11 @@ export async function updateProfile(req: updateProfileRequest, reply: FastifyRep
 			user: {
 				userId: updtUser.userId,
 				userName: updtUser.userName,
-				email: updtUser.email
-			}
+				email: updtUser.email,
+			},
 		});
 	} catch (error) {
-		reply.status(500).send({ error: 'Insternal server error' });
+		reply.status(500).send({ error: "Insternal server error" });
 	}
 }
 
@@ -207,43 +244,53 @@ export async function deleteAccount(req: ProfileRequest, reply: FastifyReply) {
 	try {
 		const success = deleteUser(userId);
 		if (success) {
-			reply.send({ success: true, user: `${userId}`, message: 'Account deleted successfully'});
+			reply.send({
+				success: true,
+				user: `${userId}`,
+				message: "Account deleted successfully",
+			});
 		} else {
-			reply.status(404).send({ error: 'User not found' });
+			reply.status(404).send({ error: "User not found" });
 		}
 	} catch (error) {
-		reply.status(500).send({ error: 'Internal server error' });
+		reply.status(500).send({ error: "Internal server error" });
 	}
 }
 
 interface LogoutUserRequest extends FastifyRequest {
-	user: { userId: string};
+	user: { userId: string };
 }
 
 export async function logoutUser(req: LogoutUserRequest, reply: FastifyReply) {
 	try {
-		console.log(req.user.userId, 'called logoutUser');
-		reply.clearCookie('authToken', {
-		path: '/',
+		console.log(req.user.userId, "called logoutUser");
+		reply.clearCookie("authToken", {
+			path: "/",
 		});
-		updateUserStatus(req.user.userId, 'offline');
-		reply.send({ success: true, message: `UserId: ${req.user.userId} loggout` });
+		updateUserStatus(req.user.userId, "offline");
+		reply.send({
+			success: true,
+			message: `UserId: ${req.user.userId} loggout`,
+		});
 	} catch (error) {
 		console.error(error);
-		return reply.status(500).send({ error: 'Internal server error' });
+		return reply.status(500).send({ error: "Internal server error" });
 	}
 }
 
-export async function internalLogoutUser(req: FastifyRequest, reply: FastifyReply) {
+export async function internalLogoutUser(
+	req: FastifyRequest,
+	reply: FastifyReply
+) {
 	try {
-		const { userId } = req.params as {userId: string};
-		console.log(userId, 'called internalLogoutUser');
+		const { userId } = req.params as { userId: string };
+		console.log(userId, "called internalLogoutUser");
 
-		updateUserStatus(userId, 'offline');
+		updateUserStatus(userId, "offline");
 		reply.send({ success: true, message: `UserId: ${userId} loggout` });
 	} catch (error) {
 		console.error(error);
-		return reply.status(500).send({ error: 'Internal user server error' });
+		return reply.status(500).send({ error: "Internal user server error" });
 	}
 }
 
@@ -258,69 +305,79 @@ interface UpdateRoleRequest extends FastifyRequest {
 export async function updateRole(req: UpdateRoleRequest, reply: FastifyReply) {
 	const { userId, role } = req.body;
 
-	if (!['user', 'admin'].includes(role)) {
-		return reply.status(400).send({ error: 'Invalid role' });
+	if (!["user", "admin"].includes(role)) {
+		return reply.status(400).send({ error: "Invalid role" });
 	}
 
 	try {
 		const success = updateUserRole(userId, role);
 		if (success) {
-			return reply.send({ success: true, message: 'Role updated successfully' });
+			return reply.send({
+				success: true,
+				message: "Role updated successfully",
+			});
 		} else {
-			return reply.status(404).send({ error: 'User not found' });
+			return reply.status(404).send({ error: "User not found" });
 		}
 	} catch (error) {
 		console.error(error);
-		return reply.status(500).send({ error: 'Internal server error' });
+		return reply.status(500).send({ error: "Internal server error" });
 	}
 }
 
 interface UpdateStatusRequest extends FastifyRequest {
 	body: {
 		status: string;
-	}
+	};
 	user: { userId: string };
 }
 
-export async function updateStatus(req: UpdateStatusRequest, reply: FastifyReply) {
+export async function updateStatus(
+	req: UpdateStatusRequest,
+	reply: FastifyReply
+) {
 	const { status } = req.body;
 	const userId = req.user.userId;
 
-	if (!['online', 'offline'].includes(status)) {
-		return reply.status(400).send({ error: 'Invalid status' });
+	if (!["online", "offline"].includes(status)) {
+		return reply.status(400).send({ error: "Invalid status" });
 	}
 
 	try {
 		const success = updateUserStatus(userId, status);
 		// if (success) {
-			// return reply.send({ success: true, message: `Status updated in ${status}.`});
+		// return reply.send({ success: true, message: `Status updated in ${status}.`});
 		// } else {
-			// return reply.status(404).send({ error: 'User not found' });
+		// return reply.status(404).send({ error: 'User not found' });
 		// }
 	} catch (error) {
 		console.error(error);
-		return reply.status(500).send({ error: 'Internal server error' });
+		return reply.status(500).send({ error: "Internal server error" });
 	}
 }
 
 export async function getOnlineUsers(req: FastifyRequest, reply: FastifyReply) {
 	try {
 		const connectedUsersIds = getConnectedUsers();
-		const onlineUsers = connectedUsersIds.map(userId => {
-			const user = getUserById(userId);
-			return user ? {
-				userId: user.userId,
-				userName: user.userName,
-				status: 'online',
-			} : null;
-		}).filter(Boolean);
+		const onlineUsers = connectedUsersIds
+			.map((userId) => {
+				const user = getUserById(userId);
+				return user
+					? {
+							userId: user.userId,
+							userName: user.userName,
+							status: "online",
+					  }
+					: null;
+			})
+			.filter(Boolean);
 
 		return reply.send({
-			users: onlineUsers
+			users: onlineUsers,
 		});
 	} catch (error) {
 		console.error(error);
-		return reply.status(500).send({ error: 'Internal server error' });
+		return reply.status(500).send({ error: "Internal server error" });
 	}
 }
 
@@ -328,22 +385,27 @@ interface JwtPayload {
 	userId: string;
 }
 
-export async function checkUserConnectionStatus(fastify: FastifyInstance, req: FastifyRequest, reply: FastifyReply) {
+export async function checkUserConnectionStatus(
+	fastify: FastifyInstance,
+	req: FastifyRequest,
+	reply: FastifyReply
+) {
 	console.log("checkUserConnectionStatus triggered");
 	try {
 		const cookie = req.cookies;
 		if (!cookie) {
 			console.log("No cookie", cookie);
 			return reply.status(401).send({ error: "No cookie found" });
-		}
-		else {
+		} else {
 			console.log("cookie :", cookie);
 		}
 
 		const token = req.cookies?.authToken;
 		if (!token) {
 			console.log("No authToken cookie found");
-			return reply.status(401).send({ error: "No authToken cookie found" });
+			return reply
+				.status(401)
+				.send({ error: "No authToken cookie found" });
 		}
 		const { value: unsignedToken, valid } = req.unsignCookie(token);
 		if (!valid) {
@@ -359,25 +421,28 @@ export async function checkUserConnectionStatus(fastify: FastifyInstance, req: F
 			return null;
 		}
 		const { userId } = decoded;
-		const user =getUserById(userId);
+		const user = getUserById(userId);
 		if (!user) {
-			console.log('User not found');
-			return reply.status(404).send({ error: 'User not found' });
+			console.log("User not found");
+			return reply.status(404).send({ error: "User not found" });
 		}
 		console.log("connected user =", user?.userName);
 		// const isConnected = isUserConnected(userId);
 		// if (isConnected) {
-			try {
-					updateUserStatus(userId, 'online');
-				// if (success) {
-					return reply.send({ success: true, message: `User ${userId} status updated to online.`});
-				// } else {
-					// return reply.status(404).send({ error: 'User not found' });
-				// }
-			} catch (error) {
-				console.error(error);
-				return reply.status(500).send({ error: 'Internal server error' });
-			}
+		try {
+			updateUserStatus(userId, "online");
+			// if (success) {
+			return reply.send({
+				success: true,
+				message: `User ${userId} status updated to online.`,
+			});
+			// } else {
+			// return reply.status(404).send({ error: 'User not found' });
+			// }
+		} catch (error) {
+			console.error(error);
+			return reply.status(500).send({ error: "Internal server error" });
+		}
 		// }
 		// return reply.send({
 		// 	userId,
@@ -385,52 +450,67 @@ export async function checkUserConnectionStatus(fastify: FastifyInstance, req: F
 		// 	isConnected,
 		// 	status: isConnected ? 'online' : 'offline'
 		// });
-	
+	} catch (error) {
+		console.log(error);
+		return reply.status(404).send({ error: "User not found" });
 	}
- catch(error) {
-	console.log(error);
-	return reply.status(404).send({ error: 'User not found' });
- }
 }
 
 interface ChangePasswordRequest extends FastifyRequest {
-  body: {
-    currentPassword: string;
-    newPassword: string;
-  };
-  user: { userId: string };
+	body: {
+		currentPassword: string;
+		newPassword: string;
+	};
+	user: { userId: string };
 }
 
-export async function changePassword(req: ChangePasswordRequest, reply: FastifyReply) {
-  const { currentPassword, newPassword } = req.body;
-  const userId = req.user.userId;
+export async function changePassword(
+	req: ChangePasswordRequest,
+	reply: FastifyReply
+) {
+	const { currentPassword, newPassword } = req.body;
+	const userId = req.user.userId;
 
-  try {
-    const user = getUserById(userId);
-    if (!user) {
-      return reply.status(404).send({ error: 'User not found' });
-    }
+	try {
+		const user = getUserById(userId);
+		if (!user) {
+			return reply.status(404).send({ error: "User not found" });
+		}
 
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHsh);
-    if (!isPasswordValid) {
-      return reply.status(401).send({ error: 'Current password is incorrect' });
-    }
+		const isPasswordValid = await bcrypt.compare(
+			currentPassword,
+			user.passwordHsh
+		);
+		if (!isPasswordValid) {
+			return reply
+				.status(401)
+				.send({ error: "Current password is incorrect" });
+		}
 
-    if (!newPassword || newPassword.length < 6) {
-      return reply.status(400).send({ error: 'New password must be at least 6 characters long' });
-    }
+		if (!newPassword || newPassword.length < 6) {
+			return reply
+				.status(400)
+				.send({
+					error: "New password must be at least 6 characters long",
+				});
+		}
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+		const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    const updatedUser = updateUser(userId, { passwordHsh: hashedPassword });
-    
-    if (!updatedUser) {
-      return reply.status(500).send({ error: 'Failed to update password' });
-    }
+		const updatedUser = updateUser(userId, { passwordHsh: hashedPassword });
 
-    return reply.send({ success: true, message: 'Password updated successfully' });
-  } catch (error) {
-    console.error('Error in changePassword:', error);
-    return reply.status(500).send({ error: 'Internal server error' });
-  }
+		if (!updatedUser) {
+			return reply
+				.status(500)
+				.send({ error: "Failed to update password" });
+		}
+
+		return reply.send({
+			success: true,
+			message: "Password updated successfully",
+		});
+	} catch (error) {
+		console.error("Error in changePassword:", error);
+		return reply.status(500).send({ error: "Internal server error" });
+	}
 }

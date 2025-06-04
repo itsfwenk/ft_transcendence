@@ -3,13 +3,13 @@ export interface Ball {
 	y: number;
 	radius: number;
 	dx: number;
-	dy: number
+	dy: number;
 }
 
 export interface Paddle {
 	x: number;
 	y: number;
-	dy: number
+	dy: number;
 }
 
 export interface Game {
@@ -21,7 +21,7 @@ export interface Game {
 	leftPaddle: Paddle;
 	rightPaddle: Paddle;
 	ball: Ball;
-	status: 'waiting' | 'ongoing' | 'finished';
+	status: "waiting" | "ongoing" | "finished";
 	winner_id?: string | null;
 	matchId?: string | null;
 	canvasWidth: number;
@@ -29,10 +29,10 @@ export interface Game {
 }
 
 export interface gamePalette {
-	background: string,
-	paddle1: string,
-	paddle2: string,
-	ball: string,
-	line: string,
-	score: string
+	background: string;
+	paddle1: string;
+	paddle2: string;
+	ball: string;
+	line: string;
+	score: string;
 }

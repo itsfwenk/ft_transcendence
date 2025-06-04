@@ -1,20 +1,29 @@
-import axios from 'axios';
-import {createMatch, createTournament, getTournamentById, Tournament, getMatchbyId, Match, updateMatchv2, scheduleFinal} from './matchmakingDb';
-import { websocketClients } from './matchmakingRoutes';
-import WebSocket from 'ws';
+import axios from "axios";
+import {
+	createMatch,
+	createTournament,
+	getTournamentById,
+	Tournament,
+	getMatchbyId,
+	Match,
+	updateMatchv2,
+	scheduleFinal,
+} from "./matchmakingDb";
+import { websocketClients } from "./matchmakingRoutes";
+import WebSocket from "ws";
 
 interface Ball {
 	x: number;
 	y: number;
 	radius: number;
 	dx: number;
-	dy: number
+	dy: number;
 }
 
 interface Paddle {
 	x: number;
 	y: number;
-	dy: number
+	dy: number;
 }
 
 interface Game {
@@ -26,7 +35,7 @@ interface Game {
 	leftPaddle: Paddle;
 	rightPaddle: Paddle;
 	ball: Ball;
-	status: 'waiting' | 'ongoing' | 'finished';
+	status: "waiting" | "ongoing" | "finished";
 	winner_id?: string | null;
 	matchId?: string | null;
 	canvasWidth: number;
@@ -38,14 +47,14 @@ export const queueTournament = new Set<string>();
 export const tournamentReadiness: Map<string, Set<string>> = new Map();
 
 export type PlayerTournamentState =
-|	'in_queue'
-|	'eliminated'
-|	'waiting_next_round'
-|	'winner';
+	| "in_queue"
+	| "eliminated"
+	| "waiting_next_round"
+	| "winner";
 
 const playerStates = new Map<string, PlayerTournamentState>();
 
-export function setPlayerState(playerId: string, state:PlayerTournamentState) {
+export function setPlayerState(playerId: string, state: PlayerTournamentState) {
 	playerStates.set(playerId, state);
 }
 
@@ -56,33 +65,31 @@ export function getPlayerState(playerId: string) {
 export async function joinQueue1v1(playerId: string) {
 	if (queue1v1.has(playerId)) return;
 	queue1v1.add(playerId);
-	const {userName} = await fetchPublicProfile(playerId);
+	const { userName } = await fetchPublicProfile(playerId);
 	broadcastToQueue(queue1v1, {
-		type: 'QUEUE_1V1_PLAYER_JOINED',
+		type: "QUEUE_1V1_PLAYER_JOINED",
 		player: {
 			userId: playerId,
-			userName
-		}
+			userName,
+		},
 	});
-	console.log(`Joueur ${playerId} a rejoint de la queue 1v1`)
+	console.log(`Joueur ${playerId} a rejoint de la queue 1v1`);
 	console.log(queue1v1);
 }
 
 export async function leaveQueue1v1(playerId: string) {
 	if (!queue1v1.delete(playerId)) return;
 	broadcastToQueue(queue1v1, {
-		type     : 'QUEUE_1V1_PLAYER_LEFT',
-		playerId
-	  });
+		type: "QUEUE_1V1_PLAYER_LEFT",
+		playerId,
+	});
 	console.log(`Joueur ${playerId} retiré de la queue 1v1`);
-	console.log('Queue 1v1 actuelle :', queue1v1);
+	console.log("Queue 1v1 actuelle :", queue1v1);
 }
 
 export async function fetchPublicProfile(playerId: string) {
-	const USER_SVC = process.env.USER_SERVICE_BASE_URL ?? 'http://user:4001';
-	const { data } = await axios.get(
-		`${USER_SVC}/user/public/${playerId}`
-	);
+	const USER_SVC = process.env.USER_SERVICE_BASE_URL ?? "http://user:4001";
+	const { data } = await axios.get(`${USER_SVC}/user/public/${playerId}`);
 	return data as { userId: string; userName: string; avatarUrl: string };
 }
 
@@ -91,56 +98,61 @@ export async function joinTournamentQueue(playerId: string) {
 	queueTournament.add(playerId);
 	console.log("queueTouranment", queueTournament);
 	const playersList = await Promise.all(
-		[...queueTournament].map(async id => {
-		  const pub = await fetchPublicProfile(id);
-		  return {
-			userId   : pub.userId,
-			userName : pub.userName,
-			avatarUrl: pub.avatarUrl
-		  };
+		[...queueTournament].map(async (id) => {
+			const pub = await fetchPublicProfile(id);
+			return {
+				userId: pub.userId,
+				userName: pub.userName,
+				avatarUrl: pub.avatarUrl,
+			};
 		})
 	);
 	console.log("joinTQueue", playersList);
 	broadcastToQueue(queueTournament, {
-		type: 'QUEUE_TOURNAMENT_PLAYER_JOINED',
-		players : playersList
+		type: "QUEUE_TOURNAMENT_PLAYER_JOINED",
+		players: playersList,
 	});
-	console.log(`Joueur ${playerId} a rejoint de la queue Tournament`)
+	console.log(`Joueur ${playerId} a rejoint de la queue Tournament`);
 	console.log(queueTournament);
 }
 
 export async function leaveTournamentQueue(playerId: string) {
 	if (!queueTournament.delete(playerId)) return;
 	broadcastToQueue(queueTournament, {
-		type     : 'QUEUE_TOURNAMENT_PLAYER_LEFT',
-		playerId
-	  });
+		type: "QUEUE_TOURNAMENT_PLAYER_LEFT",
+		playerId,
+	});
 	console.log(`Joueur ${playerId} retiré de la queue tournament`);
-	console.log('Queue Tournament actuelle :', queueTournament);
+	console.log("Queue Tournament actuelle :", queueTournament);
 }
 
 function broadcastToQueue(setQueue: Set<string>, msg: unknown) {
 	const str = JSON.stringify(msg);
 
-	setQueue.forEach(playerId => {
+	setQueue.forEach((playerId) => {
 		console.log("broadcastplayerid", playerId);
 		const ws = websocketClients.get(playerId);
-		if (ws && ws.readyState === WebSocket.OPEN)
-			ws.send(str);
+		if (ws && ws.readyState === WebSocket.OPEN) ws.send(str);
 	});
 }
 
-export async function  launchMatch(matchId: string): Promise<Match | undefined> {
+export async function launchMatch(matchId: string): Promise<Match | undefined> {
 	const match = getMatchbyId(matchId);
 	if (!match) {
 		throw new Error("Aucun match avec cet id.");
 	}
 	console.log("launch match", match);
-	if (match.status !== 'pending') {
+	if (match.status !== "pending") {
 		throw new Error("Match deja lance");
 	}
-	console.log(`Lancement du match ${match.id} entre le joueur ${match.player1_Id} et le joueur ${match.player2_Id}`);
-	const gameSessionId = await createGameSession(match.player1_Id, match.player2_Id, match.id);
+	console.log(
+		`Lancement du match ${match.id} entre le joueur ${match.player1_Id} et le joueur ${match.player2_Id}`
+	);
+	const gameSessionId = await createGameSession(
+		match.player1_Id,
+		match.player2_Id,
+		match.id
+	);
 	if (!gameSessionId) {
 		throw new Error("La session de jeu n'a pas pu être créée.");
 	}
@@ -149,61 +161,72 @@ export async function  launchMatch(matchId: string): Promise<Match | undefined> 
 		const socket1 = websocketClients.get(match.player1_Id);
 		const socket2 = websocketClients.get(match.player2_Id);
 		const message1 = JSON.stringify({
-			type: 'MATCH_PREP',
+			type: "MATCH_PREP",
 			payload: {
 				gameSessionId,
 				matchId: match.id,
 				opponentId: match.player2_Id,
-				round: match.round
-			}
+				round: match.round,
+			},
 		});
 		const message2 = JSON.stringify({
-			type: 'MATCH_PREP',
+			type: "MATCH_PREP",
 			payload: {
 				gameSessionId,
 				matchId: match.id,
 				opponentId: match.player1_Id,
-				round: match.round
-			}
+				round: match.round,
+			},
 		});
 		socket1?.send(message1);
 		socket2?.send(message2);
 	}
-	console.log(` la game session est: ${gameSessionId}`)
-	match.status = 'in_progress';
+	console.log(` la game session est: ${gameSessionId}`);
+	match.status = "in_progress";
 	console.log(`match ${match.id} lance avec gameSessionId: ${gameSessionId}`);
 	updateMatchv2(match);
-	return (match);
+	return match;
 }
 
-export async function createGameSession(player1_id:string, player2_id:string, matchId:string): Promise<string | undefined> {
+export async function createGameSession(
+	player1_id: string,
+	player2_id: string,
+	matchId: string
+): Promise<string | undefined> {
 	try {
-		const baseUrl = process.env.GAME_SERVICE_BASE_URL || 'http://game:4002';
+		const baseUrl = process.env.GAME_SERVICE_BASE_URL || "http://game:4002";
 		let response;
 		console.log(matchId);
-		response = await axios.post(`${baseUrl}/game/start`, {player1_id, player2_id, matchId});
-		console.log('Partie creee:', response.data);
+		response = await axios.post(`${baseUrl}/game/start`, {
+			player1_id,
+			player2_id,
+			matchId,
+		});
+		console.log("Partie creee:", response.data);
 		return response.data.game.gameId;
 	} catch (error) {
-		console.error('Erreur lors du lancement de la partie:', error);
+		console.error("Erreur lors du lancement de la partie:", error);
 		throw error;
 	}
 }
 
-export async function attemptMatchv2(): Promise<Match | undefined>  {
+export async function attemptMatchv2(): Promise<Match | undefined> {
 	if (queue1v1.size >= 2) {
 		const player1 = queue1v1.values().next().value as string | undefined;
 		if (player1) queue1v1.delete(player1);
 		const player2 = queue1v1.values().next().value as string | undefined;
 		if (player2) queue1v1.delete(player2);
 		if (player1 && player2) {
-			console.log('creating a matching betweenm', player1, player2)
+			console.log("creating a matching betweenm", player1, player2);
 			try {
 				const match: Match = createMatch(player1, player2, 0);
 				console.log("Match attempt", match);
-				return (match);
+				return match;
 			} catch (error) {
-				console.error('Erreur lors de la création de la game session:', error);
+				console.error(
+					"Erreur lors de la création de la game session:",
+					error
+				);
 			}
 		}
 	}
@@ -220,17 +243,19 @@ export async function attemptTournament(): Promise<Tournament | undefined> {
 		const player3 = it.next().value as string | undefined;
 		const player4 = it.next().value as string | undefined;
 
-		[player1, player2, player3, player4].forEach(p => p && queueTournament.delete(p));
+		[player1, player2, player3, player4].forEach(
+			(p) => p && queueTournament.delete(p)
+		);
 		if (player1 && player2 && player3 && player4) {
-            let players: string[] = [player1, player2, player3, player4];
-			console.log('creating a tournament between')
+			let players: string[] = [player1, player2, player3, player4];
+			console.log("creating a tournament between");
 			const tournament = createTournament(players);
 			if (!tournament) {
-				throw Error ("No tournament created");
+				throw Error("No tournament created");
 			}
-			return (tournament);
+			return tournament;
 		}
-	} 
+	}
 }
 
 export function onMatchCompleted(matchId: string): void {
@@ -243,14 +268,14 @@ export function onMatchCompleted(matchId: string): void {
 	console.log("OnMatchCompleted", match);
 	const p1 = match.player1_Id;
 	const p2 = match.player2_Id;
-	const winner_Id = match.winner_Id
+	const winner_Id = match.winner_Id;
 	const score1 = match.player1Score;
 	const score2 = match.player2Score;
 	if (!winner_Id) {
 		console.error("Winner ID is undefined");
 		return;
 	}
-	const loserId = (p1 === winner_Id) ? p2 : p1;
+	const loserId = p1 === winner_Id ? p2 : p1;
 	if (!loserId) {
 		console.error("loser_id not defined");
 		return;
@@ -260,47 +285,55 @@ export function onMatchCompleted(matchId: string): void {
 	if (tournament_Id) {
 		const tournament = getTournamentById(tournament_Id);
 		if (!tournament) return;
-		setPlayerState(loserId, 'eliminated');
+		setPlayerState(loserId, "eliminated");
 		const losersocket = websocketClients.get(loserId);
-		losersocket?.send(JSON.stringify({
-			type: 'PLAYER_STATE_UPDATE',
-			payload: {
-				state: 'eliminated',
-				tournament
-			}
-		}));
-		const semiFinals = tournament.matches.filter(m => m.round === 1);
-		const semiDone = semiFinals.every(m => m.status === 'completed');
-		const final_match = tournament.matches.find(m => m.round === 2);
-		const finalDone = final_match?.status === 'completed';
+		losersocket?.send(
+			JSON.stringify({
+				type: "PLAYER_STATE_UPDATE",
+				payload: {
+					state: "eliminated",
+					tournament,
+				},
+			})
+		);
+		const semiFinals = tournament.matches.filter((m) => m.round === 1);
+		const semiDone = semiFinals.every((m) => m.status === "completed");
+		const final_match = tournament.matches.find((m) => m.round === 2);
+		const finalDone = final_match?.status === "completed";
 		console.log("final Done ? ", finalDone);
 		console.log("Semi Done ? ", semiDone);
 		if (finalDone) {
 			console.log("final Done ? ", finalDone);
-			setPlayerState(winner_Id, 'winner');
+			setPlayerState(winner_Id, "winner");
 			const tournamentWinnerSocket = websocketClients.get(winner_Id);
-			tournamentWinnerSocket?.send(JSON.stringify({
-				type: 'PLAYER_STATE_UPDATE',
-				payload: {
-					state: 'winner',
-					tournament
-				}
-			}));
+			tournamentWinnerSocket?.send(
+				JSON.stringify({
+					type: "PLAYER_STATE_UPDATE",
+					payload: {
+						state: "winner",
+						tournament,
+					},
+				})
+			);
 		} else if (semiDone) {
 			console.log(`[MM] Demi-finales terminées, lancement de la finale`);
 			const winnersocket = websocketClients.get(winner_Id);
-			winnersocket?.send(JSON.stringify({
-				type: 'PLAYER_STATE_UPDATE',
-				payload: {
-					state: 'waiting_final',
-					tournament
-				}
-			}));
+			winnersocket?.send(
+				JSON.stringify({
+					type: "PLAYER_STATE_UPDATE",
+					payload: {
+						state: "waiting_final",
+						tournament,
+					},
+				})
+			);
 			scheduleFinal(tournament.id);
 			const updatedtournament = getTournamentById(tournament_Id);
 			if (!updatedtournament) return;
 			console.log("updated_tournament_with_final", updatedtournament);
-			const final_match = updatedtournament.matches.find(m => m.round === 2);
+			const final_match = updatedtournament.matches.find(
+				(m) => m.round === 2
+			);
 			console.log("final_match", final_match);
 			if (final_match?.id) {
 				launchMatch(final_match.id);
@@ -308,36 +341,37 @@ export function onMatchCompleted(matchId: string): void {
 				console.error("Finale non trouvee");
 			}
 		} else {
-			setPlayerState(winner_Id, 'waiting_next_round')
+			setPlayerState(winner_Id, "waiting_next_round");
 			const winnersocket = websocketClients.get(winner_Id);
-			winnersocket?.send(JSON.stringify({
-				type: 'PLAYER_STATE_UPDATE',
-				payload: {
-					state: 'waiting_next_round',
-					tournament
-				}
-			}));
+			winnersocket?.send(
+				JSON.stringify({
+					type: "PLAYER_STATE_UPDATE",
+					payload: {
+						state: "waiting_next_round",
+						tournament,
+					},
+				})
+			);
 		}
 	} else {
 		console.log("1v1_Match_end", match);
 		const winnersocket = websocketClients.get(winner_Id);
 		const losersocket = websocketClients.get(loserId);
 		const payloadwinner = {
-			type: 'PLAYER_STATE_UPDATE',
+			type: "PLAYER_STATE_UPDATE",
 			payload: {
-			  state: 'winner'
-			}
+				state: "winner",
+			},
 		};
 		const payloadloser = {
-			type: 'PLAYER_STATE_UPDATE',
+			type: "PLAYER_STATE_UPDATE",
 			payload: {
-			  state: 'eliminated'
-			}
+				state: "eliminated",
+			},
 		};
-		
+
 		winnersocket?.send(JSON.stringify(payloadwinner));
 		losersocket?.send(JSON.stringify(payloadloser));
-
 	}
 }
 
@@ -348,77 +382,75 @@ interface MatchmakingMessage {
 
 async function declareForfeit(gameId: string, loserId: string) {
 	console.log("declare Forfeit", gameId, loserId);
-	const baseUrl = process.env.GAME_SERVICE_BASE_URL || 'http://game:4001';
-	const {data: game} = await axios.get<Game>(`${baseUrl}/game/${gameId}`);
+	const baseUrl = process.env.GAME_SERVICE_BASE_URL || "http://game:4001";
+	const { data: game } = await axios.get<Game>(`${baseUrl}/game/${gameId}`);
 
-  	if (!game || game.status === 'finished') return;
+	if (!game || game.status === "finished") return;
 	console.log("declare Forfeit", game);
- 	const winnerId = game.player1_id === loserId ? game.player2_id : game.player1_id;
+	const winnerId =
+		game.player1_id === loserId ? game.player2_id : game.player1_id;
 	console.log("declareForfeit winnerId", winnerId);
 
-  	await axios.patch<Game>(`${baseUrl}/game/${gameId}/forfeit`, {winnerId})
+	await axios.patch<Game>(`${baseUrl}/game/${gameId}/forfeit`, { winnerId });
 
-  	const ws = websocketClients.get(winnerId);
+	const ws = websocketClients.get(winnerId);
 
 	const str = {
-		type: 'OPPONENT_FORFEIT',
+		type: "OPPONENT_FORFEIT",
 		payload: {
-			gameSessionId: gameId
-		}
-	}
-	if (ws && ws.readyState === WebSocket.OPEN)
-		ws.send(JSON.stringify(str));
+			gameSessionId: gameId,
+		},
+	};
+	if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(str));
 	const str2 = {
-		type: 'PLAYER_STATE_UPDATE',
-			payload: {
-				state: 'winner'
-			}
-	}
-	if (ws && ws.readyState === WebSocket.OPEN)
-		ws.send(JSON.stringify(str2));
+		type: "PLAYER_STATE_UPDATE",
+		payload: {
+			state: "winner",
+		},
+	};
+	if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(str2));
 }
-
-
 
 // message provenant du front vers le back
 export async function handleMatchmakingMessage(
 	msg: MatchmakingMessage,
 	playerId: string,
 	clients: Map<string, WebSocket>
-  ) {
-
+) {
 	const action = msg.action.trim();
-	console.log('ACTION =', JSON.stringify(action));
+	console.log("ACTION =", JSON.stringify(action));
 	switch (action) {
-		case 'QUEUE_JOIN_1V1':
+		case "QUEUE_JOIN_1V1":
 			console.log(`[MM] ${playerId} rejoint la file 1v1`);
 			joinQueue1v1(playerId);
 			const match = await attemptMatchv2();
 			if (match) {
-					launchMatch(match.id);
+				launchMatch(match.id);
 			}
 			break;
-	  
-		case 'QUEUE_JOIN_TOURNAMENT':
+
+		case "QUEUE_JOIN_TOURNAMENT":
 			console.log(`[MM] ${playerId} rejoint la file tournoi`);
 			await joinTournamentQueue(playerId);
 			const tournament = await attemptTournament();
 			if (tournament) {
-				const semiFinals = tournament.matches.filter(m => m.round === 1);
+				const semiFinals = tournament.matches.filter(
+					(m) => m.round === 1
+				);
 				console.log("voici les demis finales", semiFinals);
 				for (const match of semiFinals) {
 					console.log("match qui va etre lance", match.id);
 					launchMatch(match.id);
 				}
 			}
-			break;		
-		case 'QUEUE_LEAVE_1V1':
+			break;
+		case "QUEUE_LEAVE_1V1":
 			leaveQueue1v1(playerId);
 			break;
-		case 'QUEUE_LEAVE_TOURNAMENT':
+		case "QUEUE_LEAVE_TOURNAMENT":
 			leaveTournamentQueue(playerId);
 			break;
-		case 'MATCH_PREP_FORFEIT':
+		case "MATCH_PREP_FORFEIT":
 			console.log("MATCH_PREP_FORFEIT", msg);
 			const gameId = msg.payload?.gameSessionId;
 			await declareForfeit(gameId, playerId);
@@ -427,7 +459,7 @@ export async function handleMatchmakingMessage(
 			console.warn(`[MM] Action inconnue : ${msg.action}`);
 			const ws = clients.get(playerId);
 			if (ws?.readyState === WebSocket.OPEN) {
-				ws.send(JSON.stringify({ error: 'Action inconnue' }));
+				ws.send(JSON.stringify({ error: "Action inconnue" }));
 			}
 	}
 }
@@ -437,26 +469,28 @@ export async function getMatchTypeById(req: any, reply: any) {
 		const { matchId } = req.params;
 
 		if (!matchId) {
-		return reply.status(400).send({ error: 'matchId est requis' });
+			return reply.status(400).send({ error: "matchId est requis" });
 		}
 
 		const match = getMatchbyId(matchId);
-		
+
 		if (!match) {
-		return reply.status(404).send({ error: 'Match non trouvé' });
+			return reply.status(404).send({ error: "Match non trouvé" });
 		}
-		let matchType = '';
+		let matchType = "";
 		if (match.tournament_Id) {
 			if (match.round === 2) {
-				matchType = 'Tournament Final';
-			} else if (match.round === 1)
-				matchType = 'Tournament Semifinal';
+				matchType = "Tournament Final";
+			} else if (match.round === 1) matchType = "Tournament Semifinal";
 		} else {
-		matchType = '1v1 online';
-		}		
+			matchType = "1v1 online";
+		}
 		return reply.send({ matchType });
 	} catch (error) {
-		console.error('Erreur lors de la récupération du type de match:', error);
-		return reply.status(500).send({ error: 'Erreur interne du serveur' });
+		console.error(
+			"Erreur lors de la récupération du type de match:",
+			error
+		);
+		return reply.status(500).send({ error: "Erreur interne du serveur" });
 	}
 }

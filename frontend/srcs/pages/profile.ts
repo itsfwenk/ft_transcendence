@@ -1,5 +1,5 @@
-import i18n, { changeLanguage, supportedLanguages, t } from '../i18n';
-import Chart from 'chart.js/auto';
+import i18n, { changeLanguage, supportedLanguages, t } from "../i18n";
+import Chart from "chart.js/auto";
 
 export interface UserData {
 	user: {
@@ -22,7 +22,7 @@ export interface UserData {
 			userId: string;
 			userName: string;
 		};
-		result: 'win' | 'loss';
+		result: "win" | "loss";
 		score: {
 			player: number;
 			opponent: number;
@@ -51,20 +51,28 @@ export async function fetchUserProfile(): Promise<UserData | null> {
 	try {
 		const baseUrl = window.location.origin;
 		const response = await fetch(`${baseUrl}/user/dashboard`, {
-			method: 'GET',
-			credentials: 'include'
+			method: "GET",
+			credentials: "include",
 		});
 
 		if (!response.ok) {
-			throw new Error(`Échec de la récupération du profil: ${response.statusText}`);
+			throw new Error(
+				`Échec de la récupération du profil: ${response.statusText}`
+			);
 		}
-		
+
 		const data = await response.json();
-		console.log("Structure des données reçues:", JSON.stringify(data, null, 2));
-		
+		console.log(
+			"Structure des données reçues:",
+			JSON.stringify(data, null, 2)
+		);
+
 		return data;
 	} catch (error) {
-		console.error("Erreur lors de la recuperation du profil utilisateur:", error);
+		console.error(
+			"Erreur lors de la recuperation du profil utilisateur:",
+			error
+		);
 		return null;
 	}
 }
@@ -73,21 +81,23 @@ export async function fetchFriends(): Promise<Friend[]> {
 	try {
 		const baseUrl = window.location.origin;
 		const response = await fetch(`${baseUrl}/user/friends`, {
-			method: 'GET',
-			credentials: 'include'
+			method: "GET",
+			credentials: "include",
 		});
 
 		if (!response.ok) {
-			throw new Error(`Échec de la récupération des amis: ${response.statusText}`);
+			throw new Error(
+				`Échec de la récupération des amis: ${response.statusText}`
+			);
 		}
 
 		const data = await response.json();
 		console.log("Liste d'amis reçue:", data);
-		
+
 		if (data.success && Array.isArray(data.friends)) {
 			return data.friends;
 		}
-		
+
 		return [];
 	} catch (error) {
 		console.error("Erreur lors de la récupération des amis:", error);
@@ -95,332 +105,345 @@ export async function fetchFriends(): Promise<Friend[]> {
 	}
 }
 
-export async function addFriend(userName: string): Promise<{ success: boolean; message: string; friend?: Friend }> {
+export async function addFriend(
+	userName: string
+): Promise<{ success: boolean; message: string; friend?: Friend }> {
 	try {
 		const baseUrl = window.location.origin;
-		console.log('debut de fonction addfriend', userName);
+		console.log("debut de fonction addfriend", userName);
 		const response = await fetch(`${baseUrl}/user/friends/${userName}`, {
-			method: 'POST',
-			credentials: 'include'
+			method: "POST",
+			credentials: "include",
 		});
 
 		const data = await response.json();
-		
+
 		if (!response.ok) {
-			return { 
-				success: false, 
-				message: data.error || "Échec de l'ajout d'ami" 
+			return {
+				success: false,
+				message: data.error || "Échec de l'ajout d'ami",
 			};
 		}
 
-		return { 
-			success: true, 
+		return {
+			success: true,
 			message: data.message || "Ami ajouté avec succès",
-			friend: data.friend
+			friend: data.friend,
 		};
 	} catch (error) {
 		console.error("Erreur lors de l'ajout d'un ami:", error);
-		return { 
-			success: false, 
-			message: "Une erreur est survenue lors de l'ajout d'ami" 
+		return {
+			success: false,
+			message: "Une erreur est survenue lors de l'ajout d'ami",
 		};
 	}
 }
 
 function initWinLossChart(wins: number, losses: number): void {
-  const chartCanvas = document.getElementById('winLossChart') as HTMLCanvasElement;
-  if (!chartCanvas) return;
-  
-  const ctx = chartCanvas.getContext('2d');
-  if (!ctx) return;
-  
-  if (winLossChartInstance) {
-    winLossChartInstance.destroy();
-  }
-  
-  winLossChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: [i18n.t('profile.win'), i18n.t('profile.losses')],
-      datasets: [{
-        label: i18n.t('profile.nb'),
-        data: [wins, losses],
-        backgroundColor: [
-          'rgba(75, 192, 75, 0.8)',
-          'rgba(255, 99, 71, 0.8)'
-        ],
-        borderColor: [
-          'rgba(75, 192, 75, 1)',
-          'rgba(255, 99, 71, 1)'
-        ],
-        borderWidth: 1,
-        borderRadius: 5,
-        hoverBackgroundColor: [
-          'rgba(75, 192, 75, 1)',
-          'rgba(255, 99, 71, 1)'
-        ]
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context: any) {
-              return `${context.dataset.label}: ${context.raw}`;
-            }
-          },
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          titleFont: {
-            size: 12,
-            family: 'font-jaro, sans-serif'
-          },
-          bodyFont: {
-            size: 12,
-            family: 'font-jaro, sans-serif'
-          },
-          padding: 8
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            color: 'white',
-            font: {
-              family: 'font-jaro, sans-serif',
-              size: 10
-            },
-            precision: 0
-          },
-          grid: {
-            display: false
-          }
-        },
-        x: {
-          ticks: {
-            color: 'white',
-            font: {
-              family: 'font-jaro, sans-serif',
-              size: 10
-            }
-          },
-          grid: {
-            display: false
-          }
-        }
-      },
-      animation: {
-        duration: 1000
-      }
-    }
-  });
-  
-  const winLossContainer = document.getElementById('winLossChartContainer');
-  const winsElement = document.getElementById('statWin');
-  const lossesElement = document.getElementById('statLosses');
-  
-  if (winsElement && lossesElement) {
-    winsElement.textContent = String(wins);
-    lossesElement.textContent = String(losses);
-  }
-  
-  if (winLossContainer) {
-    winLossContainer.addEventListener('mouseenter', () => {
-      if (winsElement && lossesElement) {
-        winsElement.classList.add('text-yellow-300');
-        lossesElement.classList.add('text-yellow-300');
-      }
-    });
-    
-    winLossContainer.addEventListener('mouseleave', () => {
-      if (winsElement && lossesElement) {
-        winsElement.classList.remove('text-yellow-300');
-        lossesElement.classList.remove('text-yellow-300');
-      }
-    });
-  }
+	const chartCanvas = document.getElementById(
+		"winLossChart"
+	) as HTMLCanvasElement;
+	if (!chartCanvas) return;
+
+	const ctx = chartCanvas.getContext("2d");
+	if (!ctx) return;
+
+	if (winLossChartInstance) {
+		winLossChartInstance.destroy();
+	}
+
+	winLossChartInstance = new Chart(ctx, {
+		type: "bar",
+		data: {
+			labels: [i18n.t("profile.win"), i18n.t("profile.losses")],
+			datasets: [
+				{
+					label: i18n.t("profile.nb"),
+					data: [wins, losses],
+					backgroundColor: [
+						"rgba(75, 192, 75, 0.8)",
+						"rgba(255, 99, 71, 0.8)",
+					],
+					borderColor: [
+						"rgba(75, 192, 75, 1)",
+						"rgba(255, 99, 71, 1)",
+					],
+					borderWidth: 1,
+					borderRadius: 5,
+					hoverBackgroundColor: [
+						"rgba(75, 192, 75, 1)",
+						"rgba(255, 99, 71, 1)",
+					],
+				},
+			],
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: {
+					display: false,
+				},
+				tooltip: {
+					callbacks: {
+						label: function (context: any) {
+							return `${context.dataset.label}: ${context.raw}`;
+						},
+					},
+					backgroundColor: "rgba(0, 0, 0, 0.7)",
+					titleFont: {
+						size: 12,
+						family: "font-jaro, sans-serif",
+					},
+					bodyFont: {
+						size: 12,
+						family: "font-jaro, sans-serif",
+					},
+					padding: 8,
+				},
+			},
+			scales: {
+				y: {
+					beginAtZero: true,
+					ticks: {
+						color: "white",
+						font: {
+							family: "font-jaro, sans-serif",
+							size: 10,
+						},
+						precision: 0,
+					},
+					grid: {
+						display: false,
+					},
+				},
+				x: {
+					ticks: {
+						color: "white",
+						font: {
+							family: "font-jaro, sans-serif",
+							size: 10,
+						},
+					},
+					grid: {
+						display: false,
+					},
+				},
+			},
+			animation: {
+				duration: 1000,
+			},
+		},
+	});
+
+	const winLossContainer = document.getElementById("winLossChartContainer");
+	const winsElement = document.getElementById("statWin");
+	const lossesElement = document.getElementById("statLosses");
+
+	if (winsElement && lossesElement) {
+		winsElement.textContent = String(wins);
+		lossesElement.textContent = String(losses);
+	}
+
+	if (winLossContainer) {
+		winLossContainer.addEventListener("mouseenter", () => {
+			if (winsElement && lossesElement) {
+				winsElement.classList.add("text-yellow-300");
+				lossesElement.classList.add("text-yellow-300");
+			}
+		});
+
+		winLossContainer.addEventListener("mouseleave", () => {
+			if (winsElement && lossesElement) {
+				winsElement.classList.remove("text-yellow-300");
+				lossesElement.classList.remove("text-yellow-300");
+			}
+		});
+	}
 }
 
 function initWinRateChart(wins: number, losses: number): void {
-  const chartCanvas = document.getElementById('winRateChart') as HTMLCanvasElement;
-  if (!chartCanvas) return;
-  
-  const ctx = chartCanvas.getContext('2d');
-  if (!ctx) return;
-  
-  if (winRateChartInstance) {
-    winRateChartInstance.destroy();
-  }
-  
-  const totalGames = wins + losses;
-  const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
-  const lossRate = 100 - winRate;
-  
-  const percentageText = document.getElementById('winRatePercentage');
-  if (percentageText) {
-    percentageText.textContent = `${winRate}%`;
-  }
-  
-  winRateChartInstance = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: [i18n.t('profile.win'), i18n.t('profile.losses')],
-      datasets: [{
-        data: [winRate, lossRate],
-        backgroundColor: [
-          'rgba(75, 192, 75, 0.8)',
-          'rgba(255, 99, 71, 0.8)'
-        ],
-        borderColor: [
-          'rgba(75, 192, 75, 1)',
-          'rgba(255, 99, 71, 1)'
-        ],
-        borderWidth: 1,
-        hoverBackgroundColor: [
-          'rgba(75, 192, 75, 1)',
-          'rgba(255, 99, 71, 1)'
-        ],
-        hoverBorderColor: '#FFFFFF',
-        hoverBorderWidth: 2,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '70%',
-      animation: {
-        animateRotate: true,
-        animateScale: true,
-        duration: 1000
-      },
-      plugins: {
-        legend: {
-          display: false,
-          position: 'bottom',
-          labels: {
-            font: {
-              size: 12,
-              family: 'font-jaro, sans-serif'
-            },
-            color: 'white',
-            padding: 10,
-            boxWidth: 12
-          }
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context: any) {
-              return `${context.label}: ${context.raw}%`;
-            }
-          },
-          titleFont: {
-            size: 14,
-            family: 'font-jaro, sans-serif'
-          },
-          bodyFont: {
-            size: 12,
-            family: 'font-jaro, sans-serif'
-          },
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          padding: 10,
-          cornerRadius: 6,
-          caretSize: 6
-        }
-      }
-    }
-  });
-  
-  const chartContainer = document.getElementById('winRateChartContainer');
-  const percentageElement = document.getElementById('winRatePercentage');
-  
-  if (chartContainer && percentageElement) {
-    chartContainer.addEventListener('mouseenter', () => {
-      if (winRateChartInstance) {
-        winRateChartInstance.options.plugins!.legend!.display = true;
-        winRateChartInstance.update();
-        
-        percentageElement.style.opacity = '0';
-      }
-    });
-    
-    chartContainer.addEventListener('mouseleave', () => {
-      if (winRateChartInstance) {
-        winRateChartInstance.options.plugins!.legend!.display = false;
-        winRateChartInstance.update();
-        
-        percentageElement.style.opacity = '1';
-      }
-    });
-  }
+	const chartCanvas = document.getElementById(
+		"winRateChart"
+	) as HTMLCanvasElement;
+	if (!chartCanvas) return;
+
+	const ctx = chartCanvas.getContext("2d");
+	if (!ctx) return;
+
+	if (winRateChartInstance) {
+		winRateChartInstance.destroy();
+	}
+
+	const totalGames = wins + losses;
+	const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
+	const lossRate = 100 - winRate;
+
+	const percentageText = document.getElementById("winRatePercentage");
+	if (percentageText) {
+		percentageText.textContent = `${winRate}%`;
+	}
+
+	winRateChartInstance = new Chart(ctx, {
+		type: "doughnut",
+		data: {
+			labels: [i18n.t("profile.win"), i18n.t("profile.losses")],
+			datasets: [
+				{
+					data: [winRate, lossRate],
+					backgroundColor: [
+						"rgba(75, 192, 75, 0.8)",
+						"rgba(255, 99, 71, 0.8)",
+					],
+					borderColor: [
+						"rgba(75, 192, 75, 1)",
+						"rgba(255, 99, 71, 1)",
+					],
+					borderWidth: 1,
+					hoverBackgroundColor: [
+						"rgba(75, 192, 75, 1)",
+						"rgba(255, 99, 71, 1)",
+					],
+					hoverBorderColor: "#FFFFFF",
+					hoverBorderWidth: 2,
+				},
+			],
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			cutout: "70%",
+			animation: {
+				animateRotate: true,
+				animateScale: true,
+				duration: 1000,
+			},
+			plugins: {
+				legend: {
+					display: false,
+					position: "bottom",
+					labels: {
+						font: {
+							size: 12,
+							family: "font-jaro, sans-serif",
+						},
+						color: "white",
+						padding: 10,
+						boxWidth: 12,
+					},
+				},
+				tooltip: {
+					callbacks: {
+						label: function (context: any) {
+							return `${context.label}: ${context.raw}%`;
+						},
+					},
+					titleFont: {
+						size: 14,
+						family: "font-jaro, sans-serif",
+					},
+					bodyFont: {
+						size: 12,
+						family: "font-jaro, sans-serif",
+					},
+					backgroundColor: "rgba(0, 0, 0, 0.7)",
+					padding: 10,
+					cornerRadius: 6,
+					caretSize: 6,
+				},
+			},
+		},
+	});
+
+	const chartContainer = document.getElementById("winRateChartContainer");
+	const percentageElement = document.getElementById("winRatePercentage");
+
+	if (chartContainer && percentageElement) {
+		chartContainer.addEventListener("mouseenter", () => {
+			if (winRateChartInstance) {
+				winRateChartInstance.options.plugins!.legend!.display = true;
+				winRateChartInstance.update();
+
+				percentageElement.style.opacity = "0";
+			}
+		});
+
+		chartContainer.addEventListener("mouseleave", () => {
+			if (winRateChartInstance) {
+				winRateChartInstance.options.plugins!.legend!.display = false;
+				winRateChartInstance.update();
+
+				percentageElement.style.opacity = "1";
+			}
+		});
+	}
 }
 
 export function updateProfileBoxUI(userData: UserData | null) {
 	if (!userData) return;
 
-	const profileImage = document.getElementById('profileImage') as HTMLImageElement;
+	const profileImage = document.getElementById(
+		"profileImage"
+	) as HTMLImageElement;
 	if (profileImage && userData.user) {
 		const userId = userData.user.userId;
 		if (userId) {
 			profileImage.src = getAvatarUrl(userId);
-			profileImage.onerror = function() {
+			profileImage.onerror = function () {
 				this.onerror = null;
-				this.src = '/avatars/default.png';
+				this.src = "/avatars/default.png";
 			};
 		} else if (userData.user.avatarUrl) {
 			profileImage.src = userData.user.avatarUrl;
 		} else {
-			profileImage.src = '/avatars/default.png';
+			profileImage.src = "/avatars/default.png";
 		}
 	}
 
-	const usernameElement = document.getElementById('username');
+	const usernameElement = document.getElementById("username");
 	if (usernameElement && userData.user && userData.user.userName) {
 		usernameElement.textContent = userData.user.userName;
 	}
 
-	const emailElement = document.getElementById('email');
+	const emailElement = document.getElementById("email");
 	if (emailElement && userData.user && userData.user.email) {
 		emailElement.textContent = userData.user.email;
 	}
 
 	if (userData.stats) {
-		const nbGamesElement = document.getElementById('nbGames');
+		const nbGamesElement = document.getElementById("nbGames");
 		if (nbGamesElement) {
 			nbGamesElement.textContent = String(userData.stats.totalGames || 0);
 		}
 
 		const wins = userData.stats.wins || 0;
 		const losses = userData.stats.losses || 0;
-		
+
 		initWinLossChart(wins, losses);
 		initWinRateChart(wins, losses);
 	}
 }
 
 export function renderFriendsList(friends: Friend[]) {
-	const friendsListElement = document.getElementById('friendsList');
+	const friendsListElement = document.getElementById("friendsList");
 	if (!friendsListElement) return;
 
 	if (friends.length === 0) {
 		friendsListElement.innerHTML = `
 			<div class="text-center text-gray-300 mt-8">
-				<p>${i18n.t('profile.noFriends')}</p>
-				<p class="mt-2 text-sm">${i18n.t('profile.useAddButton')}</p>
+				<p>${i18n.t("profile.noFriends")}</p>
+				<p class="mt-2 text-sm">${i18n.t("profile.useAddButton")}</p>
 			</div>
 		`;
 		return;
 	}
 
-	const friendsHTML = friends.map((friend, index) => {
-		const isOnline = friend.status === 'online';
-		const statusColor = isOnline ? 'bg-green-500' : 'bg-gray-500';
-		
-		return `
+	const friendsHTML = friends
+		.map((friend, index) => {
+			const isOnline = friend.status === "online";
+			const statusColor = isOnline ? "bg-green-500" : "bg-gray-500";
+
+			return `
 			<div class="flex items-center mb-3 bg-red-800 rounded-md p-2 hover:bg-red-900 transition-colors">
 				<div class="relative mr-3">
 					<div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
@@ -435,16 +458,21 @@ export function renderFriendsList(friends: Friend[]) {
 				</div>
 				<div class="flex-grow">
 					<div class="font-bold select-none" data-username="${index}"></div>
-					<div class="text-xs text-gray-300 select-none">${isOnline ? t('profile.online') : t('profile.offline')}</div>
+					<div class="text-xs text-gray-300 select-none">${
+						isOnline ? t("profile.online") : t("profile.offline")
+					}</div>
 				</div>
 			</div>
 		`;
-	}).join('');
+		})
+		.join("");
 
 	friendsListElement.innerHTML = friendsHTML;
 
 	friends.forEach((friend, index) => {
-		const usernameElement = document.querySelector(`[data-username="${index}"]`);
+		const usernameElement = document.querySelector(
+			`[data-username="${index}"]`
+		);
 		if (usernameElement) {
 			usernameElement.textContent = friend.userName;
 		}
@@ -452,38 +480,42 @@ export function renderFriendsList(friends: Friend[]) {
 }
 
 export function showFriendStatus(message: string, isSuccess: boolean) {
-	const statusElement = document.getElementById('friendStatus');
-	const contentElement = document.getElementById('friendStatusContent');
-	
+	const statusElement = document.getElementById("friendStatus");
+	const contentElement = document.getElementById("friendStatusContent");
+
 	if (statusElement && contentElement) {
 		contentElement.textContent = message;
-		contentElement.className = isSuccess 
-			? 'px-4 py-2 rounded-md bg-green-500 text-white select-none'
-			: 'px-4 py-2 rounded-md bg-red-500 text-white select-none';
-		
-		statusElement.classList.remove('hidden');
-		
+		contentElement.className = isSuccess
+			? "px-4 py-2 rounded-md bg-green-500 text-white select-none"
+			: "px-4 py-2 rounded-md bg-red-500 text-white select-none";
+
+		statusElement.classList.remove("hidden");
+
 		setTimeout(() => {
-			statusElement.classList.add('hidden');
+			statusElement.classList.add("hidden");
 		}, 3000);
 	}
 }
 
 export function toggleFriendSearch(show: boolean) {
-	const searchContainer = document.getElementById('friendSearchContainer');
-	
+	const searchContainer = document.getElementById("friendSearchContainer");
+
 	if (searchContainer) {
 		if (show) {
-			searchContainer.classList.remove('hidden');
-			const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
+			searchContainer.classList.remove("hidden");
+			const searchInput = document.getElementById(
+				"friendSearchInput"
+			) as HTMLInputElement;
 			if (searchInput) {
 				searchInput.focus();
 			}
 		} else {
-			searchContainer.classList.add('hidden');
-			const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
+			searchContainer.classList.add("hidden");
+			const searchInput = document.getElementById(
+				"friendSearchInput"
+			) as HTMLInputElement;
 			if (searchInput) {
-				searchInput.value = '';
+				searchInput.value = "";
 			}
 		}
 	}
@@ -520,7 +552,7 @@ function createCustomizeButton(): string {
 			}
 		</style>
 	`;
-	
+
 	return `
 		${gradientAnimationStyle}
 		<div class="relative group">
@@ -534,13 +566,15 @@ function createCustomizeButton(): string {
 }
 
 function createHeaderControls(): string {
-	const currentLang = i18n.language || 'en';
-	
-	const options = supportedLanguages.map(lang => {
-		const selected = lang.code === currentLang ? 'selected' : '';
-		return `<option value="${lang.code}" ${selected}>${lang.name}</option>`;
-	}).join('');
-	
+	const currentLang = i18n.language || "en";
+
+	const options = supportedLanguages
+		.map((lang) => {
+			const selected = lang.code === currentLang ? "selected" : "";
+			return `<option value="${lang.code}" ${selected}>${lang.name}</option>`;
+		})
+		.join("");
+
 	return `
 		<div class="flex justify-between items-center mb-4 w-full px-4">
 			${createCustomizeButton()}
@@ -560,16 +594,20 @@ function createHeaderControls(): string {
 }
 
 export default function Profile() {
-	const app = document.getElementById('app');
+	const app = document.getElementById("app");
 	if (app) {
-		app.innerHTML = /*html*/`
+		app.innerHTML = /*html*/ `
 		${createHeaderControls()}
 		
-		<div class="text-black font-jaro text-9xl mt-10 mb-16 select-none">${i18n.t('general.pongGame')}</div>
+		<div class="text-black font-jaro text-9xl mt-10 mb-16 select-none">${i18n.t(
+			"general.pongGame"
+		)}</div>
 		
 		<div id="friendSearchContainer" class="hidden flex justify-center items-center mb-12 gap-10">
 			<div class="flex items-center bg-white rounded-md shadow-md w-1/3">
-				<input type="text" id="friendSearchInput" class="flex-grow py-2 px-4 rounded-l-md focus:outline-none text-black" placeholder="${i18n.t('profile.searchUser')}" />
+				<input type="text" id="friendSearchInput" class="flex-grow py-2 px-4 rounded-l-md focus:outline-none text-black" placeholder="${i18n.t(
+					"profile.searchUser"
+				)}" />
 				<button id="confirmFriendSearch" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -590,16 +628,24 @@ export default function Profile() {
 					<div id="img" class="w-28 h-28 rounded-lg bg-gray-300 mr-4 overflow-hidden">
 						<img id="profileImage" src="/avatars/default.png" alt="Profile" class="w-full h-full object-cover select-none"/>
 					</div>
-					<div id="username" class="flex justify-center items-center text-xl font-bold font-jaro bg-white text-black rounded-lg pl-2 pr-2 pb-0.5 select-none">${i18n.t('general.loading')}</div>
+					<div id="username" class="flex justify-center items-center text-xl font-bold font-jaro bg-white text-black rounded-lg pl-2 pr-2 pb-0.5 select-none">${i18n.t(
+						"general.loading"
+					)}</div>
 				</div>
-				<div id="email" class="flex mb-3 font-jaro select-none">${i18n.t('general.loading')}</div>
+				<div id="email" class="flex mb-3 font-jaro select-none">${i18n.t(
+					"general.loading"
+				)}</div>
 				<div id="totalGames" class="flex mb-2">
-					<div class="font-jaro text-2xl select-none">${i18n.t('profile.totalGames')}: </div>
+					<div class="font-jaro text-2xl select-none">${i18n.t(
+						"profile.totalGames"
+					)}: </div>
 					<div id="nbGames" class="ml-2 pt-0.5 font-jaro text-xl">0</div>
 				</div>
 				<div id="stats" class="flex justify-around items-center mt-3 text-center">
 					<div id="win-loss-stats" class="flex flex-col items-center">
-						<div class="font-bold font-jaro text-2xl select-none">${i18n.t('profile.stats')}</div>
+						<div class="font-bold font-jaro text-2xl select-none">${i18n.t(
+							"profile.stats"
+						)}</div>
 						<div id="winLossChartContainer" class="relative h-28 w-36 mb-6">
 							<canvas id="winLossChart" height="112" width="144"></canvas>
 							<div class="absolute -bottom-6 left-0 w-full flex justify-between px-6">
@@ -609,7 +655,9 @@ export default function Profile() {
 						</div>
 					</div>
 					<div id="winrate" class="flex flex-col items-center">
-						<div class="font-bold font-jaro text-2xl select-none mb-3">${i18n.t('profile.winRate')}</div>
+						<div class="font-bold font-jaro text-2xl select-none mb-3">${i18n.t(
+							"profile.winRate"
+						)}</div>
 						<div id="winRateChartContainer" class="relative h-28 w-28">
 							<canvas id="winRateChart" height="112" width="112"></canvas>
 							<div id="winRatePercentage" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-white select-none text-shadow transition-opacity duration-300">0%</div>
@@ -619,9 +667,11 @@ export default function Profile() {
 			</div>
 	
 			<div id="friendBox" class="h-103 w-1/3 bg-red-700 rounded-lg p-4 text-white">
-				<div class="text-xl font-bold mb-4 font-jaro select-none">${i18n.t('profile.friends')}</div>
+				<div class="text-xl font-bold mb-4 font-jaro select-none">${i18n.t(
+					"profile.friends"
+				)}</div>
 				<div id="friendsList" class="overflow-y-auto h-64 pr-2">
-					<div class="text-center text-gray-300 mt-10">${i18n.t('general.loading')}</div>
+					<div class="text-center text-gray-300 mt-10">${i18n.t("general.loading")}</div>
 				</div>
 			</div>
 		</div>
@@ -636,7 +686,9 @@ export default function Profile() {
 			hover:border-b-[0px]
 			transition-all duration-150 [box-shadow:0_10px_0_0_#787f8e,0_15px_0_0_#787f8e41]
 			border-b-[1px] border-gray-300'>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t('profile.editProfile')}</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t(
+				"profile.editProfile"
+			)}</span>
 			</div>
 	
 			<div id="historyBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-yellow-500 rounded-lg cursor-pointer select-none
@@ -644,7 +696,9 @@ export default function Profile() {
 			hover:border-b-[0px]
 			transition-all duration-150 [box-shadow:0_10px_0_0_#d49218,0_15px_0_0_#d4921841]
 			border-b-[1px] border-yellow-200'>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t('profile.matchHistory')}</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t(
+				"profile.matchHistory"
+			)}</span>
 			</div>
 	
 			<div id="addFriendBtn" class='button mb-2 text-6xl h-20 w-1/6 bg-green-600 rounded-lg cursor-pointer select-none
@@ -652,7 +706,9 @@ export default function Profile() {
 			hover:border-b-[0px]
 			transition-all duration-150 [box-shadow:0_10px_0_0_#15803d,0_15px_0_0_#15803d41]
 			border-b-[1px] border-green-400'>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t('profile.addFriend')}</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro text-2xl '>${i18n.t(
+				"profile.addFriend"
+			)}</span>
 			</div>
 	
 		</div>
@@ -662,7 +718,9 @@ export default function Profile() {
 			hover:border-b-[0px]
 			transition-all duration-150 [box-shadow:0_10px_0_0_#181818,0_15px_0_0_#1b70f841]
 			border-b-[1px] border-gray-400'>
-			<span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('general.back')}</span>
+			<span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t(
+				"general.back"
+			)}</span>
 			</div>
 		</div>
 		</div>
@@ -673,7 +731,7 @@ export default function Profile() {
 		  }
 		</style>
 		`;
-	
+
 		setupProfilePage();
 	}
 }
@@ -685,100 +743,109 @@ async function setupProfilePage() {
 	} else {
 		console.error("Impossible de charger les données du profil");
 	}
-	
+
 	const friends = await fetchFriends();
 	renderFriendsList(friends);
-	
+
 	setupEventListeners();
 }
 
 function setupEventListeners() {
-	const customizeButton = document.getElementById('customize-button');
+	const customizeButton = document.getElementById("customize-button");
 	if (customizeButton) {
-		customizeButton.addEventListener('click', () => {
-			history.pushState(null, '', '/customGame');
-			window.dispatchEvent(new PopStateEvent('popstate'));
+		customizeButton.addEventListener("click", () => {
+			history.pushState(null, "", "/customGame");
+			window.dispatchEvent(new PopStateEvent("popstate"));
 		});
 	}
-	
-	const languageSelector = document.getElementById('language-selector');
+
+	const languageSelector = document.getElementById("language-selector");
 	if (languageSelector) {
-		languageSelector.addEventListener('change', (event) => {
+		languageSelector.addEventListener("change", (event) => {
 			const target = event.target as HTMLSelectElement;
 			const selectedLang = target.value;
-			
-			changeLanguage(selectedLang).then(() => {
-				window.location.reload();
-			}).catch(error => {
-				console.error("Erreur lors du changement de langue:", error);
-			});
+
+			changeLanguage(selectedLang)
+				.then(() => {
+					window.location.reload();
+				})
+				.catch((error) => {
+					console.error(
+						"Erreur lors du changement de langue:",
+						error
+					);
+				});
 		});
 	}
 
-	const backBtn = document.getElementById('backBtn');
+	const backBtn = document.getElementById("backBtn");
 	if (backBtn) {
-		backBtn.addEventListener('click', () => {
-			history.pushState(null, '', '/menu');
-			window.dispatchEvent(new PopStateEvent('popstate'));
+		backBtn.addEventListener("click", () => {
+			history.pushState(null, "", "/menu");
+			window.dispatchEvent(new PopStateEvent("popstate"));
 		});
 	}
 
-	const editBtn = document.getElementById('editBtn');
+	const editBtn = document.getElementById("editBtn");
 	if (editBtn) {
-		editBtn.addEventListener('click', () => {
-			history.pushState(null, '', '/edit_profile');
-			window.dispatchEvent(new PopStateEvent('popstate'));
+		editBtn.addEventListener("click", () => {
+			history.pushState(null, "", "/edit_profile");
+			window.dispatchEvent(new PopStateEvent("popstate"));
 		});
 	}
 
-	const historyBtn = document.getElementById('historyBtn');
+	const historyBtn = document.getElementById("historyBtn");
 	if (historyBtn) {
-		historyBtn.addEventListener('click', () => {
-			history.pushState(null, '', '/history');
-			window.dispatchEvent(new PopStateEvent('popstate'));
+		historyBtn.addEventListener("click", () => {
+			history.pushState(null, "", "/history");
+			window.dispatchEvent(new PopStateEvent("popstate"));
 		});
 	}
 
-	const addFriendBtn = document.getElementById('addFriendBtn');
+	const addFriendBtn = document.getElementById("addFriendBtn");
 	if (addFriendBtn) {
-		addFriendBtn.addEventListener('click', () => {
+		addFriendBtn.addEventListener("click", () => {
 			toggleFriendSearch(true);
 		});
 	}
-	
-	const confirmFriendSearch = document.getElementById('confirmFriendSearch');
+
+	const confirmFriendSearch = document.getElementById("confirmFriendSearch");
 	if (confirmFriendSearch) {
-		confirmFriendSearch.addEventListener('click', async () => {
-			const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
-			
+		confirmFriendSearch.addEventListener("click", async () => {
+			const searchInput = document.getElementById(
+				"friendSearchInput"
+			) as HTMLInputElement;
+
 			if (searchInput && searchInput.value.trim()) {
 				const userName = searchInput.value.trim();
-				
+
 				const result = await addFriend(userName);
-				
+
 				showFriendStatus(result.message, result.success);
-				
+
 				if (result.success && result.friend) {
 					const friends = await fetchFriends();
 					renderFriendsList(friends);
 				}
-				
+
 				toggleFriendSearch(false);
 			}
 		});
 	}
-	
-	const cancelFriendSearch = document.getElementById('cancelFriendSearch');
+
+	const cancelFriendSearch = document.getElementById("cancelFriendSearch");
 	if (cancelFriendSearch) {
-		cancelFriendSearch.addEventListener('click', () => {
+		cancelFriendSearch.addEventListener("click", () => {
 			toggleFriendSearch(false);
 		});
 	}
-	
-	const searchInput = document.getElementById('friendSearchInput') as HTMLInputElement;
+
+	const searchInput = document.getElementById(
+		"friendSearchInput"
+	) as HTMLInputElement;
 	if (searchInput) {
-		searchInput.addEventListener('keypress', (event) => {
-			if (event.key === 'Enter') {
+		searchInput.addEventListener("keypress", (event) => {
+			if (event.key === "Enter") {
 				event.preventDefault();
 				confirmFriendSearch?.click();
 			}

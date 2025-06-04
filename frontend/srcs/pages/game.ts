@@ -1,42 +1,69 @@
 import { getMatchmakingSocket } from "../wsClient";
 import { getAvatarUrl } from "./profile";
-import { Game, gamePalette } from '../../../gameInterfaces'
-import i18n from '../i18n';
+import { Game, gamePalette } from "../../../gameInterfaces";
+import i18n from "../i18n";
 
-const canvasWidth: number = parseInt(import.meta.env.VITE_CANVAS_WIDTH as string, 10);
-const canvasHeight: number = parseInt(import.meta.env.VITE_CANVAS_HEIGHT as string, 10);
-const paddleWidth: number = parseInt(import.meta.env.VITE_PADDLE_WIDTH as string, 10);
-const paddleHeight: number = parseInt(import.meta.env.VITE_PADDLE_HEIGHT as string, 10);
-const ballRadius: number = parseInt(import.meta.env.VITE_BALL_RADIUS as string, 10);
+const canvasWidth: number = parseInt(
+	import.meta.env.VITE_CANVAS_WIDTH as string,
+	10
+);
+const canvasHeight: number = parseInt(
+	import.meta.env.VITE_CANVAS_HEIGHT as string,
+	10
+);
+const paddleWidth: number = parseInt(
+	import.meta.env.VITE_PADDLE_WIDTH as string,
+	10
+);
+const paddleHeight: number = parseInt(
+	import.meta.env.VITE_PADDLE_HEIGHT as string,
+	10
+);
+const ballRadius: number = parseInt(
+	import.meta.env.VITE_BALL_RADIUS as string,
+	10
+);
 
 function mapMatchTypeToI18nKey(matchType: string): string {
-  if (!matchType) return 'gameMode.1v1Online';
-  
-  const lowerCaseType = matchType.toLowerCase();
-  
-  if (lowerCaseType.includes('tournament') && lowerCaseType.includes('semifinal')) {
-    return 'tournament.semifinalMatch';
-  } else if (lowerCaseType.includes('tournament') && lowerCaseType.includes('final')) {
-    return 'tournament.finalMatch';
-  } else if (lowerCaseType.includes('1v1') && lowerCaseType.includes('online')) {
-    return 'gameMode.1v1Online';
-  } else if (lowerCaseType.includes('1v1') && lowerCaseType.includes('local')) {
-    return 'gameMode.1v1Local';
-  }
-  
-  return 'gameMode.commonMatchType';
+	if (!matchType) return "gameMode.1v1Online";
+
+	const lowerCaseType = matchType.toLowerCase();
+
+	if (
+		lowerCaseType.includes("tournament") &&
+		lowerCaseType.includes("semifinal")
+	) {
+		return "tournament.semifinalMatch";
+	} else if (
+		lowerCaseType.includes("tournament") &&
+		lowerCaseType.includes("final")
+	) {
+		return "tournament.finalMatch";
+	} else if (
+		lowerCaseType.includes("1v1") &&
+		lowerCaseType.includes("online")
+	) {
+		return "gameMode.1v1Online";
+	} else if (
+		lowerCaseType.includes("1v1") &&
+		lowerCaseType.includes("local")
+	) {
+		return "gameMode.1v1Local";
+	}
+
+	return "gameMode.commonMatchType";
 }
 
 export default async function game() {
 	const params = new URLSearchParams(location.search);
-  	const gameId = params.get('gameSessionId');
+	const gameId = params.get("gameSessionId");
 	if (!gameId || !(await checkGameExists(gameId))) {
 		console.log("finished");
-    	return showError(i18n.t('game.errorLink'));
-  	}
+		return showError(i18n.t("game.errorLink"));
+	}
 
 	function showError(text: string) {
-		const app = document.getElementById('app')!;
+		const app = document.getElementById("app")!;
 		app.innerHTML = `
 			<div class="flex flex-col items-center justify-center h-screen">
 			<p class="text-4xl mb-6 font-jaro text-red-500">${text}</p>
@@ -53,45 +80,47 @@ export default async function game() {
                     data-shadow-accent="#00000041"
                     data-border-color="#4D4D4D"
                 >
-                    <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t('general.back')}</span>
+                    <span class='flex flex-col justify-center items-center h-full text-white font-jaro'>${i18n.t(
+						"general.back"
+					)}</span>
                 </div>
 			</div>`;
-		document.getElementById('backBtn')!
-			.addEventListener('click', () => {
-			history.pushState(null, '', '/mode');
-			window.dispatchEvent(new PopStateEvent('popstate'));
-			});
+		document.getElementById("backBtn")!.addEventListener("click", () => {
+			history.pushState(null, "", "/mode");
+			window.dispatchEvent(new PopStateEvent("popstate"));
+		});
 	}
 
 	async function checkGameExists(id: string): Promise<boolean> {
 		const baseUrl = window.location.origin;
-		const res = await fetch(`${baseUrl}/game/${id}/status`)
-		if (!res.ok) 
-			return false
-		else
-			return true;
+		const res = await fetch(`${baseUrl}/game/${id}/status`);
+		if (!res.ok) return false;
+		else return true;
 	}
 
-    let gameStarted = false;
+	let gameStarted = false;
 	let canvas: HTMLCanvasElement | null;
 	let ctx: CanvasRenderingContext2D | null;
 	let countdownInterval: number | null = null;
 
-	const savedThemeString = localStorage.getItem('selectedGamePalette');
-  	let gamePalette: gamePalette;
+	const savedThemeString = localStorage.getItem("selectedGamePalette");
+	let gamePalette: gamePalette;
 
 	if (savedThemeString) {
 		try {
 			gamePalette = JSON.parse(savedThemeString);
 		} catch (e) {
-			console.error("Could not parse saved game palette, falling back to default:", e);
+			console.error(
+				"Could not parse saved game palette, falling back to default:",
+				e
+			);
 			gamePalette = {
 				background: "#DDDDDD",
 				paddle1: "#4F46E5",
 				paddle2: "#DC2626",
 				ball: "black",
 				line: "rgba(0, 0, 0, 0.2)",
-				score: "rgba(200, 200, 200, 0.7)"
+				score: "rgba(200, 200, 200, 0.7)",
 			};
 		}
 	} else {
@@ -101,160 +130,202 @@ export default async function game() {
 			paddle2: "#DC2626",
 			ball: "black",
 			line: "rgba(0, 0, 0, 0.2)",
-			score: "rgba(200, 200, 200, 0.7)"
+			score: "rgba(200, 200, 200, 0.7)",
 		};
 	}
 
-
-    function keydownHandler(e: KeyboardEvent) {
+	function keydownHandler(e: KeyboardEvent) {
 		if (["ArrowUp", "ArrowDown"].includes(e.key)) {
 			e.preventDefault();
 		}
-        if (socket && socket.readyState === WebSocket.OPEN && gameStarted) {
-            let key = '';
-            if (e.key === 'ArrowUp' || e.key === 'w') {
-                key = 'ArrowUp';
-            } else if (e.key === 'ArrowDown' || e.key === 's') {
-                key = 'ArrowDown';
-            }
-            if (key) {
-                socket.send(JSON.stringify({ type: 'input', key: key, state: 'keydown' }));
-            }
-        }
-    }
-
-    function keyupHandler(e: KeyboardEvent) {
-        if (socket && socket.readyState === WebSocket.OPEN && gameStarted) {
-            let key = '';
-            if (e.key === 'ArrowUp' || e.key === 'w') {
-                key = 'ArrowUp';
-            } else if (e.key === 'ArrowDown' || e.key === 's') {
-                key = 'ArrowDown';
-            }
-            if (key) {
-                socket.send(JSON.stringify({ type: 'input', key: key, state: 'keyup' }));
-            }
-        }
-    }
-
-    function cleanup() {
-		if (countdownInterval) clearInterval(countdownInterval);
-        document.removeEventListener('keydown', keydownHandler);
-        document.removeEventListener('keyup', keyupHandler);
-		document.removeEventListener('click', doForfeit);
-    }
-
-	function doForfeit() {                                       
-		if (socket.readyState === WebSocket.OPEN) {
-			socket.send(JSON.stringify({ type: 'FORFEIT' }));        
-			socket.close(1000, 'player quit');                       
+		if (socket && socket.readyState === WebSocket.OPEN && gameStarted) {
+			let key = "";
+			if (e.key === "ArrowUp" || e.key === "w") {
+				key = "ArrowUp";
+			} else if (e.key === "ArrowDown" || e.key === "s") {
+				key = "ArrowDown";
+			}
+			if (key) {
+				socket.send(
+					JSON.stringify({
+						type: "input",
+						key: key,
+						state: "keydown",
+					})
+				);
+			}
 		}
-  		makeBackButton(); 
+	}
+
+	function keyupHandler(e: KeyboardEvent) {
+		if (socket && socket.readyState === WebSocket.OPEN && gameStarted) {
+			let key = "";
+			if (e.key === "ArrowUp" || e.key === "w") {
+				key = "ArrowUp";
+			} else if (e.key === "ArrowDown" || e.key === "s") {
+				key = "ArrowDown";
+			}
+			if (key) {
+				socket.send(
+					JSON.stringify({ type: "input", key: key, state: "keyup" })
+				);
+			}
+		}
+	}
+
+	function cleanup() {
+		if (countdownInterval) clearInterval(countdownInterval);
+		document.removeEventListener("keydown", keydownHandler);
+		document.removeEventListener("keyup", keyupHandler);
+		document.removeEventListener("click", doForfeit);
+	}
+
+	function doForfeit() {
+		if (socket.readyState === WebSocket.OPEN) {
+			socket.send(JSON.stringify({ type: "FORFEIT" }));
+			socket.close(1000, "player quit");
+		}
+		makeBackButton();
 	}
 
 	function updateMatchType(type: string) {
-        const matchType = document.getElementById('match-type');
-        if (matchType) {
-            matchType.textContent = type;
-			matchType.classList.add('select-none');
-        }
-    }
+		const matchType = document.getElementById("match-type");
+		if (matchType) {
+			matchType.textContent = type;
+			matchType.classList.add("select-none");
+		}
+	}
 
 	async function fetchMatchType(matchId: string): Promise<string> {
 		try {
 			if (!matchId) {
-			console.warn("Impossible de récupérer le type de match: matchId manquant");
-			return i18n.t('gameMode.1v1Online');
+				console.warn(
+					"Impossible de récupérer le type de match: matchId manquant"
+				);
+				return i18n.t("gameMode.1v1Online");
 			}
 
 			const baseUrl = window.location.origin;
-			const response = await fetch(`${baseUrl}/matchmaking/matches/${matchId}/type`, {
-				method: 'GET',
-				credentials: 'include'
-			});
-			
+			const response = await fetch(
+				`${baseUrl}/matchmaking/matches/${matchId}/type`,
+				{
+					method: "GET",
+					credentials: "include",
+				}
+			);
+
 			if (!response.ok) {
-			console.warn(`Erreur lors de la récupération du type de match: ${response.status} ${response.statusText}`);
-			return i18n.t('gameMode.1v1Online');
+				console.warn(
+					`Erreur lors de la récupération du type de match: ${response.status} ${response.statusText}`
+				);
+				return i18n.t("gameMode.1v1Online");
 			}
-			
+
 			const data = await response.json();
 			console.log("Type de match récupéré:", data.matchType);
-			
+
 			const matchTypeKey = mapMatchTypeToI18nKey(data.matchType);
 			return i18n.t(matchTypeKey);
 		} catch (error) {
-			console.error('Erreur lors de la récupération du type de match:', error);
-			return i18n.t('gameMode.1v1Online');
+			console.error(
+				"Erreur lors de la récupération du type de match:",
+				error
+			);
+			return i18n.t("gameMode.1v1Online");
 		}
 	}
 
-	function updatePlayerAvatarsName(player1Id: string, player2Id: string, player1Name: string, player2Name: string) {
-		const player1Avatar = document.getElementById('player1-avatar') as HTMLImageElement;
-		const player2Avatar = document.getElementById('player2-avatar') as HTMLImageElement;
-		const player1N = document.getElementById('player1-name') as HTMLDivElement;
-		const player2N = document.getElementById('player2-name') as HTMLDivElement;
-		
+	function updatePlayerAvatarsName(
+		player1Id: string,
+		player2Id: string,
+		player1Name: string,
+		player2Name: string
+	) {
+		const player1Avatar = document.getElementById(
+			"player1-avatar"
+		) as HTMLImageElement;
+		const player2Avatar = document.getElementById(
+			"player2-avatar"
+		) as HTMLImageElement;
+		const player1N = document.getElementById(
+			"player1-name"
+		) as HTMLDivElement;
+		const player2N = document.getElementById(
+			"player2-name"
+		) as HTMLDivElement;
+
 		if (player1Avatar && player1Id) {
 			player1Avatar.src = getAvatarUrl(player1Id);
-			player1N.textContent = player1Name || 'player 1';
+			player1N.textContent = player1Name || "player 1";
 		}
-		
+
 		if (player2Avatar && player2Id) {
 			player2Avatar.src = getAvatarUrl(player2Id);
-			player2N.textContent = player2Name || 'player 2';
+			player2N.textContent = player2Name || "player 2";
 		}
-	}                                                            
-
-	function initGameUI() {
-		canvas   = document.getElementById('game-canvas') as HTMLCanvasElement;
-		ctx      = canvas?.getContext('2d') ?? null;
-
-		const quitBtn = document.getElementById('quit-btn')!;
-		quitBtn.addEventListener('click', doForfeit);
 	}
 
-    let wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:${window.location.port}/game/ws`;
-    console.log(`wsUrl :`, wsUrl);
-    const socket = new WebSocket(wsUrl);
-    
-    socket.onopen = () => {
-        console.log("WebSocket connecté au serveur de jeu");
-    };
+	function initGameUI() {
+		canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
+		ctx = canvas?.getContext("2d") ?? null;
 
-    const app = document.getElementById('app');
-    if (!app) {
-        console.error("Error retrieving app");
-        return;
-    }
+		const quitBtn = document.getElementById("quit-btn")!;
+		quitBtn.addEventListener("click", doForfeit);
+	}
 
-    app.innerHTML = /*html*/`
+	let wsUrl = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${
+		window.location.hostname
+	}:${window.location.port}/game/ws`;
+	console.log(`wsUrl :`, wsUrl);
+	const socket = new WebSocket(wsUrl);
+
+	socket.onopen = () => {
+		console.log("WebSocket connecté au serveur de jeu");
+	};
+
+	const app = document.getElementById("app");
+	if (!app) {
+		console.error("Error retrieving app");
+		return;
+	}
+
+	app.innerHTML = /*html*/ `
 		<div class="flex justify-center items-center mb-2">
 			<div class="flex flex-col items-center justify-center mr-20">
 				<div class="w-30 h-30 bg-pink-500 rounded-md text-white">
-				<img id="player1-avatar" src="/avatars/default.png" alt="${i18n.t('game.player1')}"
+				<img id="player1-avatar" src="/avatars/default.png" alt="${i18n.t(
+					"game.player1"
+				)}"
 					class="w-full h-full object-cover rounded-md"
 					onerror="this.src='/avatars/default.png'">
 				</div>
-				<div id="player1-name" class="mt-2 text-center font-medium text-gray-600 font-jaro">${i18n.t('general.loading')}</div>
+				<div id="player1-name" class="mt-2 text-center font-medium text-gray-600 font-jaro">${i18n.t(
+					"general.loading"
+				)}</div>
 			</div>
 			
-			<div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">${i18n.t('general.pongGame')}</div>
+			<div class="text-black font-jaro text-9xl mt-16 mb-20 select-none">${i18n.t(
+				"general.pongGame"
+			)}</div>
 
 			<div class="flex flex-col items-center justify-center ml-20">
 				<div class="w-30 h-30 bg-yellow-500 rounded-md text-white">
-				<img id="player2-avatar" src="/avatars/default.png" alt="${i18n.t('game.player2')}"
+				<img id="player2-avatar" src="/avatars/default.png" alt="${i18n.t(
+					"game.player2"
+				)}"
 					class="w-full h-full object-cover rounded-md"
 					onerror="this.src='/avatars/default.png'">
 				</div>
-				<div id="player2-name" class="mt-2 text-center font-medium text-gray-600 font-jaro">${i18n.t('general.loading')}</div>
+				<div id="player2-name" class="mt-2 text-center font-medium text-gray-600 font-jaro">${i18n.t(
+					"general.loading"
+				)}</div>
 			</div>
 		</div>
 		
 		<div id="game-wrapper" class="inline-block">
 			<div id="match-type"
 				class="text-left text-gray-600 text-2xl mb-2 ml-3 font-jaro">
-				${i18n.t('general.loading')}
+				${i18n.t("general.loading")}
 			</div>
 
 			<div id="canvas-box"
@@ -275,7 +346,7 @@ export default async function game() {
 			<div id="game-status"
 				class="absolute top-2 right-4 px-2 py-0.5
 						bg-black/70 text-white text-xs rounded hidden">
-				${i18n.t('game.statusWaiting')}
+				${i18n.t("game.statusWaiting")}
 			</div>
 		</div>
 
@@ -285,62 +356,73 @@ export default async function game() {
 				hover:border-b-[0px]
 				transition-all duration-150 [box-shadow:0_10px_0_0_#A31F1F,0_15px_0_0_#A31F1F41]
 				border-b-[1px] border-red-400">
-				<span class="flex flex-col justify-center items-center h-full text-white font-jaro text-xl">${i18n.t('game.quit')}</span>
+				<span class="flex flex-col justify-center items-center h-full text-white font-jaro text-xl">${i18n.t(
+					"game.quit"
+				)}</span>
 			</div>
 		</div>
 		`;
 	initGameUI();
 
-	let countdown = Number(import.meta.env.VITE_GAME_LAUNCH_DELAY ?? '5');
+	let countdown = Number(import.meta.env.VITE_GAME_LAUNCH_DELAY ?? "5");
 	if (Number.isNaN(countdown) || countdown <= 0) countdown = 5;
 
 	console.log("countdown", countdown);
 
-	showOverlay(i18n.t('game.countdownBegin'), String(countdown), 'text-blue-700');
+	showOverlay(
+		i18n.t("game.countdownBegin"),
+		String(countdown),
+		"text-blue-700"
+	);
 
 	countdownInterval = window.setInterval(() => {
 		countdown--;
 		if (countdown > 0) {
-			showOverlay(i18n.t('game.countdownBegin'), String(countdown), 'text-blue-700');
+			showOverlay(
+				i18n.t("game.countdownBegin"),
+				String(countdown),
+				"text-blue-700"
+			);
 		} else {
 			clearInterval(countdownInterval!);
 			hideOverlay();
 			if (socket.readyState === WebSocket.OPEN) {
-				socket.send(JSON.stringify({ type: 'ready_to_start' }));
+				socket.send(JSON.stringify({ type: "ready_to_start" }));
 			}
 		}
 	}, 1000);
 
-	function showOverlay(title: string, subtitle = '', color = 'text-black') {
-		const overlay = document.getElementById('result-overlay');
-		const titleEl = document.getElementById('overlay-title');
-		const subtitleEl = document.getElementById('overlay-subtitle');
-		
+	function showOverlay(title: string, subtitle = "", color = "text-black") {
+		const overlay = document.getElementById("result-overlay");
+		const titleEl = document.getElementById("overlay-title");
+		const subtitleEl = document.getElementById("overlay-subtitle");
+
 		if (!overlay || !titleEl || !subtitleEl) return;
-		
+
 		titleEl.textContent = title;
 		titleEl.className = `text-5xl font-bold mb-3 font-jaro ${color}`;
-		
+
 		subtitleEl.textContent = subtitle;
-		subtitleEl.className = subtitle ? 'text-xl font-medium font-jaro text-gray-800' : 'hidden';
-		
-		overlay.classList.remove('hidden');
-		overlay.classList.add('flex');
+		subtitleEl.className = subtitle
+			? "text-xl font-medium font-jaro text-gray-800"
+			: "hidden";
+
+		overlay.classList.remove("hidden");
+		overlay.classList.add("flex");
 	}
 
 	function hideOverlay() {
-		const overlay = document.getElementById('result-overlay');
+		const overlay = document.getElementById("result-overlay");
 		if (!overlay) return;
-		
-		overlay.classList.add('hidden');
-		overlay.classList.remove('flex');
+
+		overlay.classList.add("hidden");
+		overlay.classList.remove("flex");
 	}
 
-    
 	let config = false;
 	socket.onmessage = async (event) => {
 		const data = JSON.parse(event.data);
-		if (!config && data.type != 'game_start') {
+		if (!config && data.type != "game_start") {
 			console.log("Ajout des AVATAR");
 			const player1Id = data.game_state.player1_id;
 			const player2Id = data.game_state.player2_id;
@@ -348,43 +430,60 @@ export default async function game() {
 			const matchId = data.game_state?.matchId || data.matchId;
 			if (matchId) {
 				try {
-				const matchType = await fetchMatchType(matchId);
-				updateMatchType(matchType);
+					const matchType = await fetchMatchType(matchId);
+					updateMatchType(matchType);
 				} catch (error) {
-				console.warn("Impossible de récupérer le type de match:", error);
-				updateMatchType(i18n.t('gameMode.1v1Online'));
+					console.warn(
+						"Impossible de récupérer le type de match:",
+						error
+					);
+					updateMatchType(i18n.t("gameMode.1v1Online"));
 				}
 			} else {
-				updateMatchType(i18n.t('gameMode.1v1Online'));
+				updateMatchType(i18n.t("gameMode.1v1Online"));
 			}
 			try {
 				const baseUrl = window.location.origin;
 				const response1 = await fetch(`${baseUrl}/user/${player1Id}`);
 				const response2 = await fetch(`${baseUrl}/user/${player2Id}`);
-				
+
 				const player1Data = await response1.json();
 				const player2Data = await response2.json();
-				
+
 				const player1Name = player1Data.userName;
 				const player2Name = player2Data.userName;
-				
-				updatePlayerAvatarsName(player1Id, player2Id, player1Name, player2Name);
+
+				updatePlayerAvatarsName(
+					player1Id,
+					player2Id,
+					player1Name,
+					player2Name
+				);
 			} catch (error) {
-				console.error("Erreur lors de la récupération des noms:", error);
-				updatePlayerAvatarsName(player1Id, player2Id, i18n.t('player1'), i18n.t('player2'));
+				console.error(
+					"Erreur lors de la récupération des noms:",
+					error
+				);
+				updatePlayerAvatarsName(
+					player1Id,
+					player2Id,
+					i18n.t("player1"),
+					i18n.t("player2")
+				);
 			}
 			config = true;
 		}
 		switch (data.type) {
-			case 'game_start':
+			case "game_start":
 				gameStarted = true;
 				break;
-			case 'game_update':
+			case "game_update":
 				renderGame(data.game_state as Game);
-				if (data.game_state.status === 'finished') {
-					socket.close(); cleanup();
+				if (data.game_state.status === "finished") {
+					socket.close();
+					cleanup();
 				}
-			break;
+				break;
 		}
 	};
 
@@ -396,15 +495,15 @@ export default async function game() {
 		console.error("Erreur WebSocket:", error);
 	};
 
-	document.addEventListener('keydown', keydownHandler);
-	document.addEventListener('keyup', keyupHandler);
-            
+	document.addEventListener("keydown", keydownHandler);
+	document.addEventListener("keyup", keyupHandler);
+
 	function renderGame(state: Game) {
 		if (!ctx || !canvas || !gameStarted) return;
-		
+
 		ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 		ctx.fillStyle = gamePalette.background;
-    	ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
 		ctx.beginPath();
 		ctx.setLineDash([5, 5]);
 		ctx.moveTo(canvasWidth / 2, 0);
@@ -413,20 +512,33 @@ export default async function game() {
 		ctx.lineWidth = 1;
 		ctx.stroke();
 		ctx.setLineDash([]);
-		
+
 		ctx.fillStyle = gamePalette.paddle1;
 		ctx.fillRect(0, state.leftPaddle.y, paddleWidth, paddleHeight);
-		
+
 		ctx.fillStyle = gamePalette.paddle2;
-		ctx.fillRect(canvasWidth - paddleWidth, state.rightPaddle.y, paddleWidth, paddleHeight);
-		
-		ctx.font = 'bold 120px Arial';
+		ctx.fillRect(
+			canvasWidth - paddleWidth,
+			state.rightPaddle.y,
+			paddleWidth,
+			paddleHeight
+		);
+
+		ctx.font = "bold 120px Arial";
 		ctx.fillStyle = gamePalette.score;
-		ctx.textAlign = 'center';
-		
-		ctx.fillText(state.score1.toString(), canvasWidth / 4, canvasHeight / 2 + 40);
-		
-		ctx.fillText(state.score2.toString(), (canvasWidth / 4) * 3, canvasHeight / 2 + 40);
+		ctx.textAlign = "center";
+
+		ctx.fillText(
+			state.score1.toString(),
+			canvasWidth / 4,
+			canvasHeight / 2 + 40
+		);
+
+		ctx.fillText(
+			state.score2.toString(),
+			(canvasWidth / 4) * 3,
+			canvasHeight / 2 + 40
+		);
 
 		ctx.beginPath();
 		ctx.arc(state.ball.x, state.ball.y, ballRadius, 0, Math.PI * 2);
@@ -437,38 +549,41 @@ export default async function game() {
 
 	function handleMessageGame(event: MessageEvent) {
 		try {
-		const msg = JSON.parse(event.data);
-		console.log("Message reçu:", msg);
+			const msg = JSON.parse(event.data);
+			console.log("Message reçu:", msg);
 
-		switch (msg.type) {
-			case 'PLAYER_STATE_UPDATE':
-				showResultOverlay(msg.payload.state)
-				break;
-			case 'MATCH_PREP':
-				const gameSessionId = msg.payload.gameSessionId;
-				history.pushState(null, '', `/game?gameSessionId=${gameSessionId}`);
-				window.dispatchEvent(new PopStateEvent('popstate'));
-				break;
-		}    
+			switch (msg.type) {
+				case "PLAYER_STATE_UPDATE":
+					showResultOverlay(msg.payload.state);
+					break;
+				case "MATCH_PREP":
+					const gameSessionId = msg.payload.gameSessionId;
+					history.pushState(
+						null,
+						"",
+						`/game?gameSessionId=${gameSessionId}`
+					);
+					window.dispatchEvent(new PopStateEvent("popstate"));
+					break;
+			}
 		} catch (error) {
-		console.error("Erreur lors du traitement du message:", error);
+			console.error("Erreur lors du traitement du message:", error);
 		}
- 	}
+	}
 
 	function cleanupMatchmaking() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
 			console.log("Cleanup matchmaking game");
-			ws.removeEventListener('message', handleMessageGame);
+			ws.removeEventListener("message", handleMessageGame);
 		}
 	}
-	
+
 	const handlePageUnload = () => {
 		doForfeit();
 		cleanupMatchmaking();
 	};
 
-	
-	window.addEventListener('beforeunload', handlePageUnload);
+	window.addEventListener("beforeunload", handlePageUnload);
 
 	const ws = getMatchmakingSocket();
 
@@ -476,14 +591,14 @@ export default async function game() {
 		console.error("Pas de connexion WebSocket disponible");
 		return;
 	}
-	ws.removeEventListener('message', handleMessageGame);
+	ws.removeEventListener("message", handleMessageGame);
 
-	window.addEventListener('beforeunload', handlePageUnload);
+	window.addEventListener("beforeunload", handlePageUnload);
 
 	ws.onmessage = handleMessageGame;
 
 	function makeBackButton() {
-		const quitBtn = document.getElementById('quit-btn');
+		const quitBtn = document.getElementById("quit-btn");
 		if (!quitBtn) return;
 
 		const btnContainer = quitBtn.parentNode;
@@ -495,55 +610,58 @@ export default async function game() {
 				hover:border-b-[0px]
 				transition-all duration-150 [box-shadow:0_10px_0_0_#193cb8,0_15px_0_0_#1b70f841]
 				border-b-[1px] border-blue-400">
-				<span class="flex flex-col justify-center items-center h-full text-white font-jaro text-xl">${i18n.t('general.back')}</span>
+				<span class="flex flex-col justify-center items-center h-full text-white font-jaro text-xl">${i18n.t(
+					"general.back"
+				)}</span>
 			</div>
 		`;
 
-		document.getElementById('back-btn')?.addEventListener('click', () => {
-			history.pushState(null, '', '/mode');
-			window.dispatchEvent(new PopStateEvent('popstate'));
+		document.getElementById("back-btn")?.addEventListener("click", () => {
+			history.pushState(null, "", "/mode");
+			window.dispatchEvent(new PopStateEvent("popstate"));
 		});
 	}
 
+	function showResultOverlay(
+		state: "eliminated" | "waiting_next_round" | "waiting_final" | "winner"
+	) {
+		let title = "";
+		let subtitle = "";
+		let color = "";
+		cleanup();
+		switch (state) {
+			case "waiting_next_round":
+				title = i18n.t("game.resultWin");
+				subtitle = i18n.t("game.waitingOpponent");
+				color = "text-green-600";
+				const quitBtn = document.getElementById("quit-btn");
+				if (quitBtn) quitBtn.classList.add("hidden");
+				break;
+			case "eliminated":
+				title = i18n.t("game.resultLose");
+				subtitle = i18n.t("game.nextTime");
+				color = "text-red-600";
+				makeBackButton();
+				break;
+			case "waiting_final":
+				title = i18n.t("game.resultWin");
+				subtitle = i18n.t("game.finalPreparation");
+				color = "text-green-600";
+				const quitBtnFinal = document.getElementById("quit-btn");
+				if (quitBtnFinal) quitBtnFinal.classList.add("hidden");
+				break;
+			case "winner":
+				title = i18n.t("game.resultWin");
+				subtitle = i18n.t("game.congratulations");
+				color = "text-green-600";
+				makeBackButton();
+				break;
+		}
 
-	function showResultOverlay(state: 'eliminated'|'waiting_next_round'|'waiting_final'|'winner') {
-	let title = '';
-	let subtitle = '';
-	let color = '';
-	cleanup();
-	switch (state) {
-		case 'waiting_next_round':
-		title = i18n.t('game.resultWin');
-		subtitle = i18n.t('game.waitingOpponent');
-		color = 'text-green-600';
-		const quitBtn = document.getElementById('quit-btn');
-		if (quitBtn) quitBtn.classList.add('hidden');
-		break;
-		case 'eliminated':
-		title = i18n.t('game.resultLose');
-		subtitle = i18n.t('game.nextTime');
-		color = 'text-red-600';
-		makeBackButton();
-		break;
-		case 'waiting_final':
-		title = i18n.t('game.resultWin');
-		subtitle = i18n.t('game.finalPreparation');
-		color = 'text-green-600';
-		const quitBtnFinal = document.getElementById('quit-btn');
-		if (quitBtnFinal) quitBtnFinal.classList.add('hidden');
-		break;
-		case 'winner':
-		title = i18n.t('game.resultWin');
-		subtitle = i18n.t('game.congratulations');
-		color = 'text-green-600';
-		makeBackButton();
-		break;
-	}
+		showOverlay(title, subtitle, color);
 
-	showOverlay(title, subtitle, color);
-	
-	if (state === 'eliminated' || state === 'winner') {
-		makeBackButton();
-	}
+		if (state === "eliminated" || state === "winner") {
+			makeBackButton();
+		}
 	}
 }
